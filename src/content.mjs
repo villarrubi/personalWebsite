@@ -10,7 +10,7 @@ export const profile = {
 export const copy = {
   es: {
     lang: 'Español', other: 'EN', otherLabel: 'Read in English', title: 'Alejandro Villarrubia — Ingeniero informático',
-    description: 'El cuaderno de Alejandro Villarrubia. Software, inteligencia artificial local, hardware y una buena dosis de ajedrez.',
+    description: 'Proyectos de Alejandro Villarrubia. Software, inteligencia artificial local, hardware y una buena dosis de ajedrez.',
     skip: 'Saltar al contenido', nav: ['Proyectos', 'Sobre mí', 'Contacto'], menu: 'Abrir navegación', closeMenu: 'Cerrar navegación',
     eyebrow: 'INGENIERO INFORMÁTICO · PALENCIA, ES', heroA: 'Ideas que', heroB: 'se convierten', heroC: 'en sistemas.',
     intro: 'Soy Alejandro. Construyo software, exploro la inteligencia artificial y conecto el código con el mundo físico. A veces, todo empieza con una partida de ajedrez.',
@@ -19,7 +19,7 @@ export const copy = {
     selected: '01 / UNA SELECCIÓN', selectedTitle: 'De la idea a algo que funciona.', selectedText: 'Tres proyectos que cuentan bastante bien cómo me gusta construir.',
     viewProject: 'Explorar proyecto', allProjects: 'Ver el archivo completo', inProgress: 'En desarrollo', built: 'Realizado',
     chessNote: 'Pensar varias jugadas por delante.', pipaNote: 'Del código al mundo físico.', mapNote: 'Un pequeño mundo por construir.',
-    archive: '02 / EL ARCHIVO', archiveTitle: 'Todo empieza por probar.', archiveText: 'Proyectos realizados, herramientas que sigo afinando e ideas que ya están tomando forma.',
+    archive: '02 / EL ARCHIVO', archiveTitle: 'El archivo completo.', archiveText: 'Proyectos realizados, herramientas que sigo afinando e ideas que ya están tomando forma.',
     filters: ['Todos', 'Realizados', 'En desarrollo'], search: 'Buscar por nombre o tecnología', searchPlaceholder: 'Buscar un proyecto…', result: 'proyectos', empty: 'No hay proyectos con esta combinación. Cambia los filtros o la búsqueda.', reset: 'Restablecer filtros y búsqueda',
     projectColumn: 'PROYECTO', areaColumn: 'EXPLORACIÓN', stateColumn: 'ESTADO / CÓDIGO',
     statusFilter: 'Estado', visibilityFilter: 'Código', visibilityFilters: ['Todos', 'Públicos', 'Privados'], publicCode: 'Código público', privateNote: 'El repositorio no es público.', localCodeNote: 'Proyecto local. El código todavía no está publicado.',
@@ -34,7 +34,7 @@ export const copy = {
   },
   en: {
     lang: 'English', other: 'ES', otherLabel: 'Leer en español', title: 'Alejandro Villarrubia — Software Engineer',
-    description: 'Alejandro Villarrubia’s notebook. Software, local AI, hardware, and a fair amount of chess.',
+    description: 'Projects by Alejandro Villarrubia. Software, local AI, hardware, and a fair amount of chess.',
     skip: 'Skip to content', nav: ['Projects', 'About', 'Contact'], menu: 'Open navigation', closeMenu: 'Close navigation',
     eyebrow: 'SOFTWARE ENGINEER · PALENCIA, ES', heroA: 'Ideas that', heroB: 'turn into', heroC: 'systems.',
     intro: 'I’m Alejandro. I build software, explore artificial intelligence, and connect code to the physical world. Sometimes, it all starts with a game of chess.',
@@ -43,7 +43,7 @@ export const copy = {
     selected: '01 / SELECTED WORK', selectedTitle: 'From an idea to something that works.', selectedText: 'Three projects that say quite a bit about how I like to build.',
     viewProject: 'Explore project', allProjects: 'Browse the full archive', inProgress: 'In development', built: 'Built',
     chessNote: 'Thinking a few moves ahead.', pipaNote: 'From code to the physical world.', mapNote: 'A small world in the making.',
-    archive: '02 / THE ARCHIVE', archiveTitle: 'It starts with trying.', archiveText: 'Finished projects, tools I’m still refining, and ideas that are already taking shape.',
+    archive: '02 / THE ARCHIVE', archiveTitle: 'The complete archive.', archiveText: 'Finished projects, tools I’m still refining, and ideas that are already taking shape.',
     filters: ['All', 'Built', 'In development'], search: 'Search by name or technology', searchPlaceholder: 'Find a project…', result: 'projects', empty: 'No projects match this combination. Try different filters or search terms.', reset: 'Reset filters and search',
     projectColumn: 'PROJECT', areaColumn: 'EXPLORATION', stateColumn: 'STATUS / SOURCE',
     statusFilter: 'Status', visibilityFilter: 'Source', visibilityFilters: ['All', 'Public', 'Private'], publicCode: 'Public source', privateNote: 'The repository is not public.', localCodeNote: 'A local project. The source has not been published yet.',
