@@ -22,3 +22,25 @@
 @media(min-width:601px) and (max-width:800px){.hero-pipa{right:0}}
 
 @media(prefers-reduced-motion:no-preference){.transition-fallback .detail-heading{animation:detail-arrive .3s ease-out both}@keyframes detail-arrive{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:none}}}
+
+/* Repository visibility is independent of the project's development stage. */
+.project-state{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.visibility{font:10px/1.4 var(--mono);color:var(--muted);border:1px solid var(--line);padding:3px 6px;white-space:nowrap}
+.project-card-meta{flex-direction:column;align-items:flex-start;gap:9px}
+.archive-row .project-state{flex-direction:column;align-items:flex-start;gap:7px}
+.archive-controls{align-items:flex-end}
+.archive-filter-groups{display:flex;flex-direction:column;gap:10px}
+.archive-filter-group{display:flex;align-items:center;gap:12px}
+.filter-label{font:10px var(--mono);color:var(--muted);width:48px;flex-shrink:0}
+.detail-heading>.project-state{flex-shrink:0;flex-direction:column;align-items:flex-start;gap:10px}
+.detail-heading .status{margin-top:0}
+.private-label{line-height:1.7}
+@media(max-width:800px){.archive-controls{align-items:stretch}}
+@media(max-width:600px){
+ .hero-handwritten{max-width:50%;white-space:normal}
+ .archive-filter-group{flex-direction:column;align-items:flex-start;gap:5px}
+ .archive-filter-groups{width:100%;gap:16px}
+ .filter-label{width:auto}
+ .visibility{font-size:9px}
+ .detail-heading>.project-state{flex-direction:row;align-items:center;margin-top:20px}
+}

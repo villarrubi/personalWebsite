@@ -19,5 +19,11 @@ for(const path of pages){
  }
 }
 assert.equal(new Set(projects.map(p=>p.id)).size,projects.length);
-for(const p of projects){for(const lang of ['es','en'])assert(p.summary[lang]&&p.idea[lang]&&p.built[lang].length&&p.stage[lang]);}
+for(const p of projects){
+ assert(['public','private'].includes(p.visibility),`Explicit source visibility: ${p.id}`);
+ if(p.visibility==='public')assert.match(p.repo||'',/^https:\/\/github\.com\/villarrubi\/[^/]+$/,`Public repository: ${p.id}`);
+ else assert(!p.repo,`Private project must not expose a source link: ${p.id}`);
+ if(p.localOnly)assert.equal(p.visibility,'private',`Local project visibility: ${p.id}`);
+ for(const lang of ['es','en'])assert(p.summary[lang]&&p.idea[lang]&&p.built[lang].length&&p.stage[lang]);
+}
 console.log(`PASS: ${pages.length} HTML pages, ${links} local assets/links, ${projects.length} bilingual projects.`);

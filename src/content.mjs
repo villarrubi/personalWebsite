@@ -20,8 +20,9 @@ export const copy = {
     viewProject: 'Explorar proyecto', allProjects: 'Ver el archivo completo', inProgress: 'En desarrollo', built: 'Realizado',
     chessNote: 'Pensar varias jugadas por delante.', pipaNote: 'Del código al mundo físico.', mapNote: 'Un pequeño mundo por construir.',
     archive: '02 / EL ARCHIVO', archiveTitle: 'Todo empieza por probar.', archiveText: 'Proyectos realizados, herramientas que sigo afinando e ideas que ya están tomando forma.',
-    filters: ['Todos', 'Realizados', 'En desarrollo'], search: 'Buscar por nombre o tecnología', searchPlaceholder: 'Buscar un proyecto…', result: 'proyectos', empty: 'No hay proyectos con esa búsqueda. Prueba otra palabra.', reset: 'Limpiar búsqueda',
-    projectColumn: 'PROYECTO', areaColumn: 'EXPLORACIÓN', stateColumn: 'ESTADO',
+    filters: ['Todos', 'Realizados', 'En desarrollo'], search: 'Buscar por nombre o tecnología', searchPlaceholder: 'Buscar un proyecto…', result: 'proyectos', empty: 'No hay proyectos con esta combinación. Cambia los filtros o la búsqueda.', reset: 'Restablecer filtros y búsqueda',
+    projectColumn: 'PROYECTO', areaColumn: 'EXPLORACIÓN', stateColumn: 'ESTADO / CÓDIGO',
+    statusFilter: 'Estado', visibilityFilter: 'Código', visibilityFilters: ['Todos', 'Públicos', 'Privados'], publicCode: 'Código público', privateNote: 'El repositorio no es público.', localCodeNote: 'Proyecto local. El código todavía no está publicado.',
     aboutNumber: '03 / AL OTRO LADO DEL TECLADO', aboutTitle: 'Curiosidad como punto de partida.',
     aboutP1: 'Soy ingeniero informático y me gusta entender los sistemas de principio a fin: investigar un problema, construir una solución y convertirla en algo que se pueda usar.',
     aboutP2: 'Mi recorrido pasa por el desarrollo backend en NTT DATA, la integración de sensores LiDAR en REDALSA y mi trabajo actual como Technical Sales Engineer en ALTEN para MAHLE.',
@@ -43,8 +44,9 @@ export const copy = {
     viewProject: 'Explore project', allProjects: 'Browse the full archive', inProgress: 'In development', built: 'Built',
     chessNote: 'Thinking a few moves ahead.', pipaNote: 'From code to the physical world.', mapNote: 'A small world in the making.',
     archive: '02 / THE ARCHIVE', archiveTitle: 'It starts with trying.', archiveText: 'Finished projects, tools I’m still refining, and ideas that are already taking shape.',
-    filters: ['All', 'Built', 'In development'], search: 'Search by name or technology', searchPlaceholder: 'Find a project…', result: 'projects', empty: 'No projects match this search. Try another word.', reset: 'Clear search',
-    projectColumn: 'PROJECT', areaColumn: 'EXPLORATION', stateColumn: 'STATUS',
+    filters: ['All', 'Built', 'In development'], search: 'Search by name or technology', searchPlaceholder: 'Find a project…', result: 'projects', empty: 'No projects match this combination. Try different filters or search terms.', reset: 'Reset filters and search',
+    projectColumn: 'PROJECT', areaColumn: 'EXPLORATION', stateColumn: 'STATUS / SOURCE',
+    statusFilter: 'Status', visibilityFilter: 'Source', visibilityFilters: ['All', 'Public', 'Private'], publicCode: 'Public source', privateNote: 'The repository is not public.', localCodeNote: 'A local project. The source has not been published yet.',
     aboutNumber: '03 / BEYOND THE KEYBOARD', aboutTitle: 'Curiosity is the starting point.',
     aboutP1: 'I’m a software engineer who likes understanding systems end to end: investigating a problem, building a solution, and turning it into something people can use.',
     aboutP2: 'My experience spans backend development at NTT DATA, LiDAR sensor integration at REDALSA, and my current role as a Technical Sales Engineer at ALTEN for MAHLE.',
@@ -59,7 +61,7 @@ export const copy = {
 const bilingual = (es, en) => ({ es, en });
 export const projects = [
   {
-    id: 'chessbot', name: 'ChessBot', year: '2026', status: 'development', featured: true, visual: 'chess', repo: 'https://github.com/villarrubi/ChessBot',
+    id: 'chessbot', visibility: 'public', name: 'ChessBot', year: '2026', status: 'development', featured: true, visual: 'chess', repo: 'https://github.com/villarrubi/ChessBot',
     tags: ['C++20', 'Python', 'C#', 'UCI', 'Ollama'], category: bilingual('Algoritmos / IA local', 'Algorithms / Local AI'),
     summary: bilingual('Un motor de ajedrez propio. De las reglas y la búsqueda a una aplicación para jugar, analizar y experimentar.', 'A chess engine built from scratch. From rules and search to an application for playing, analysing, and experimenting.'),
     idea: bilingual('Entender cómo toma decisiones un motor de ajedrez construyendo uno desde sus fundamentos. Un proyecto donde se encuentran mi afición al ajedrez, los algoritmos y la inteligencia artificial.', 'Understanding how a chess engine makes decisions by building one from the ground up. A meeting point for my interest in chess, algorithms, and artificial intelligence.'),
@@ -68,7 +70,7 @@ export const projects = [
     capture: '/assets/images/chessbot-training.png',
   },
   {
-    id: 'pipa', name: 'Pipα', year: '2026', status: 'development', featured: true, visual: 'pipa', repo: 'https://github.com/villarrubi/Pipa-Personal-Assistant',
+    id: 'pipa', visibility: 'public', name: 'Pipα', year: '2026', status: 'development', featured: true, visual: 'pipa', repo: 'https://github.com/villarrubi/Pipa-Personal-Assistant',
     tags: ['Python', 'ESP32-S3', 'C++', 'Swift'], category: bilingual('Hardware / Asistente local', 'Hardware / Local assistant'),
     summary: bilingual('Un asistente local que une voz, software y un dispositivo físico para controlar el ordenador.', 'A local assistant connecting voice, software, and a physical device to control a computer.'),
     idea: bilingual('Dar una forma física a un asistente personal: pedir una acción, saber qué va a ocurrir y conservar el control. El núcleo vive en el ordenador y se comunica con una interfaz ESP32-S3.', 'Giving a personal assistant a physical form: ask for an action, understand what will happen, and stay in control. The core runs on the computer and communicates with an ESP32-S3 interface.'),
@@ -76,7 +78,7 @@ export const projects = [
     stage: bilingual('El agente local es funcional. El firmware, la voz, el cliente iOS y otros componentes experimentales tienen validaciones específicas pendientes.', 'The local agent is functional. Firmware, voice, the iOS client, and other experimental components still require their specific validation.'),
   },
   {
-    id: 'mapforge', name: 'MapForge', year: '2026', status: 'development', featured: true, visual: 'map',
+    id: 'mapforge', visibility: 'private', name: 'MapForge', year: '2026', status: 'development', featured: true, visual: 'map',
     tags: ['TypeScript', 'Canvas 2D', 'Electron'], category: bilingual('Herramientas / Mundos 2D', 'Tools / 2D worlds'),
     summary: bilingual('Un editor de mundos 2D: dibujar terreno, dar forma al paisaje y preparar escenarios para Deriva.', 'A 2D world editor: paint terrain, shape a landscape, and prepare environments for Deriva.'),
     idea: bilingual('Construir mundos que se puedan editar, guardar y reutilizar. MapForge es la herramienta de creación; Deriva es la exploración de simulación que podrá utilizar esos escenarios.', 'Building worlds that can be edited, saved, and reused. MapForge is the creation tool; Deriva is the simulation exploration that can use those environments.'),
@@ -85,7 +87,7 @@ export const projects = [
     capture: '/assets/images/mapforge.png',
   },
   {
-    id: 'phishing', name: 'Detector de phishing', enName: 'Phishing detector', year: '2026', status: 'built', visual: 'security', repo: 'https://github.com/villarrubi/TFG',
+    id: 'phishing', visibility: 'public', name: 'Detector de phishing', enName: 'Phishing detector', year: '2026', status: 'built', visual: 'security', repo: 'https://github.com/villarrubi/TFG',
     tags: ['Python', 'scikit-learn', 'Streamlit', 'MLP'], category: bilingual('Ciberseguridad / TFG', 'Cybersecurity / Thesis'),
     summary: bilingual('Análisis de correo con reglas explicables y modelos de aprendizaje automático en español e inglés.', 'Email analysis with explainable rules and machine learning models in Spanish and English.'),
     idea: bilingual('Combinar indicios comprensibles con clasificación neuronal para estudiar la detección de phishing en correo electrónico. Desarrollado como Trabajo de Fin de Grado.', 'Combining understandable signals with neural classification to study email phishing detection. Developed as my bachelor’s thesis.'),
@@ -93,7 +95,7 @@ export const projects = [
     stage: bilingual('Proyecto de TFG realizado. Los resultados del clasificador deben interpretarse dentro de sus datasets y evaluación, como apoyo al análisis.', 'Completed thesis project. Classifier results should be interpreted within their datasets and evaluation, as an aid to analysis.'),
   },
   {
-    id: 'aquilae', name: 'AQUILAE', year: '2025', status: 'built', visual: 'map', repo: 'https://github.com/villarrubi/TFM_Juan',
+    id: 'aquilae', visibility: 'public', name: 'AQUILAE', year: '2025', status: 'built', visual: 'map', repo: 'https://github.com/villarrubi/TFM_Juan',
     tags: ['Java 17', 'Swing', 'Java2D', 'Maven'], category: bilingual('Simulación / Historia', 'Simulation / History'),
     summary: bilingual('Un simulador de estrategia ambientado en el Imperio romano, con un mapa vectorial de 28 provincias.', 'A strategy simulator set in the Roman Empire, featuring a vector map of 28 provinces.'),
     idea: bilingual('Convertir un planteamiento académico en una herramienta interactiva. Desarrollo técnico de apoyo a un Trabajo de Fin de Máster de la Universidad de Valladolid.', 'Turning an academic concept into an interactive tool. Technical development supporting a master’s thesis at the University of Valladolid.'),
@@ -101,7 +103,7 @@ export const projects = [
     stage: bilingual('Simulador realizado como colaboración técnica para el TFM.', 'Completed simulator developed as a technical contribution to the thesis.'),
   },
   {
-    id: 'chessprep', name: 'ChessPrep', year: '2026', status: 'development', visual: 'chess', repo: 'https://github.com/villarrubi/ChessPrep',
+    id: 'chessprep', visibility: 'public', name: 'ChessPrep', year: '2026', status: 'development', visual: 'chess', repo: 'https://github.com/villarrubi/ChessPrep',
     tags: ['Python', 'FastAPI', 'JavaScript', 'Stockfish'], category: bilingual('Ajedrez / Análisis de datos', 'Chess / Data analysis'),
     summary: bilingual('Preparación de torneos a partir de partidas, repertorios y estadísticas trazables.', 'Tournament preparation through games, opening repertoires, and traceable statistics.'),
     idea: bilingual('Reunir información ajedrecística útil para preparar una partida, manteniendo el vínculo entre cada conclusión y las partidas que la sustentan.', 'Bringing together useful chess information for game preparation, keeping every conclusion connected to the games behind it.'),
@@ -109,7 +111,7 @@ export const projects = [
     stage: bilingual('MVP funcional en evolución, con análisis progresivo y trazabilidad de la información.', 'A functional, evolving MVP with progressive analysis and traceable information.'),
   },
   {
-    id: 'acuadros', name: 'aCuadros', year: '2026', status: 'built', visual: 'planning', repo: 'https://github.com/villarrubi/aCuadros',
+    id: 'acuadros', visibility: 'public', name: 'aCuadros', year: '2026', status: 'built', visual: 'planning', repo: 'https://github.com/villarrubi/aCuadros',
     tags: ['TypeScript', 'PWA', 'Offline'], category: bilingual('Producto / Organización', 'Product / Organisation'),
     summary: bilingual('Un calendario instalable para reunir estudios, tareas, hábitos y comidas, también sin conexión.', 'An installable calendar bringing together study, tasks, habits, and meals, including offline use.'),
     idea: bilingual('Organizar distintas partes del día en una herramienta personal cómoda para iPad.', 'Organising different parts of the day in a personal tool designed for comfortable iPad use.'),
@@ -117,7 +119,7 @@ export const projects = [
     stage: bilingual('Aplicación funcional, con mejoras de uso y mantenimiento.', 'A functional application with ongoing usability improvements and maintenance.'),
   },
   {
-    id: 'club-palentino', name: 'Club Palentino de Ajedrez', year: '2026', status: 'built', visual: 'chess', repo: 'https://github.com/villarrubi/clubPalentino', demo: 'https://clubpalentinoajedrez.es/',
+    id: 'club-palentino', visibility: 'public', name: 'Club Palentino de Ajedrez', year: '2026', status: 'built', visual: 'chess', repo: 'https://github.com/villarrubi/clubPalentino', demo: 'https://clubpalentinoajedrez.es/',
     tags: ['React', 'TypeScript', 'Node.js', 'SQLite'], category: bilingual('Web / Comunidad', 'Web / Community'),
     summary: bilingual('La web del club, su escuela y una biblioteca de materiales para aprender ajedrez.', 'The club website, its school, and a library of chess learning materials.'),
     idea: bilingual('Dar al club un espacio para informar, organizar actividades y compartir materiales de sus clases.', 'Giving the club a space to share information, organise activities, and distribute class materials.'),
@@ -125,7 +127,7 @@ export const projects = [
     stage: bilingual('Web publicada y operativa.', 'Published and operational website.'),
   },
   {
-    id: 'atlas-celular', name: 'Atlas celular', enName: 'Cell atlas', year: '2026', status: 'built', visual: 'science',
+    id: 'atlas-celular', visibility: 'private', name: 'Atlas celular', enName: 'Cell atlas', year: '2026', status: 'built', visual: 'science',
     tags: ['TypeScript', 'WebGL', '3D'], category: bilingual('Educación / Visualización', 'Education / Visualisation'),
     summary: bilingual('Un atlas educativo con tres modelos celulares 3D desmontables para explorar en clase.', 'An educational atlas with three explorable, disassemblable 3D cell models for the classroom.'),
     idea: bilingual('Hacer visible la estructura de las células con una herramienta interactiva que se pueda usar en clase sin conexión.', 'Making cell structures visible through an interactive tool usable offline in a classroom.'),
@@ -133,7 +135,7 @@ export const projects = [
     stage: bilingual('Aplicación local realizada, con modelos originales y distribución portátil.', 'Completed local application with original models and a portable distribution.'),
   },
   {
-    id: 'deriva', name: 'Deriva', year: '2026', status: 'development', visual: 'map',
+    id: 'deriva', visibility: 'private', localOnly: true, name: 'Deriva', year: '2026', status: 'development', visual: 'map',
     tags: ['JavaScript', 'JSON', 'Simulación'], category: bilingual('Experimento / Ecosistemas', 'Experiment / Ecosystems'),
     summary: bilingual('Un laboratorio en desarrollo para explorar ecosistemas, evolución y memoria individual.', 'A laboratory in development for exploring ecosystems, evolution, and individual memory.'),
     idea: bilingual('Explorar comportamientos y poblaciones en mundos 2D preparados con MapForge.', 'Exploring behaviours and populations in 2D worlds prepared with MapForge.'),
@@ -141,7 +143,7 @@ export const projects = [
     stage: bilingual('Fase de diseño y fundamentos. La simulación de criaturas, evolución y poblaciones todavía no está implementada.', 'Design and foundations stage. Creature, evolution, and population simulation is not yet implemented.'),
   },
   {
-    id: 'mapviewer', name: 'MapViewer', year: '2026', status: 'development', visual: 'map',
+    id: 'mapviewer', visibility: 'private', name: 'MapViewer', year: '2026', status: 'development', visual: 'map',
     tags: ['Cartografía', 'APIs', 'Desktop'], category: bilingual('Visualización / Datos abiertos', 'Visualisation / Open data'),
     summary: bilingual('Un panel de escritorio para explorar el planeta mediante mapas, capas y eventos.', 'A desktop dashboard for exploring the planet through maps, layers, and events.'),
     idea: bilingual('Reunir fenómenos geográficos en una interfaz visual, con origen y momento de actualización de los datos.', 'Bringing geographic phenomena into a visual interface with data provenance and update times.'),
@@ -149,7 +151,7 @@ export const projects = [
     stage: bilingual('Prototipo ejecutable en desarrollo. La disponibilidad de cada capa depende de la cobertura de sus fuentes.', 'Runnable prototype under development. Layer availability depends on source coverage.'),
   },
   {
-    id: 'trader', name: 'Trader', year: '2026', status: 'development', visual: 'data',
+    id: 'trader', visibility: 'private', name: 'Trader', year: '2026', status: 'development', visual: 'data',
     tags: ['Python', 'Ollama', 'APIs'], category: bilingual('IA local / Análisis', 'Local AI / Analysis'),
     summary: bilingual('Un laboratorio de análisis con modelos locales, fuentes consultables y simulación de decisiones.', 'An analysis laboratory with local models, inspectable sources, and simulated decisions.'),
     idea: bilingual('Experimentar con varios roles de IA que contrastan información y explican sus propuestas en un entorno local.', 'Experimenting with multiple AI roles that compare information and explain proposals in a local environment.'),
@@ -157,7 +159,7 @@ export const projects = [
     stage: bilingual('Proyecto experimental en desarrollo; el foco de esta presentación es su arquitectura y visualización.', 'Experimental project under development; this presentation focuses on its architecture and visualisation.'),
   },
   {
-    id: 'chatbot', name: 'Agente conversacional', enName: 'Conversational agent', year: '2026', status: 'development', visual: 'pipa',
+    id: 'chatbot', visibility: 'private', name: 'Agente conversacional', enName: 'Conversational agent', year: '2026', status: 'development', visual: 'pipa',
     tags: ['Python', 'FastAPI', 'SQLite'], category: bilingual('Asistentes / Automatización', 'Assistants / Automation'),
     summary: bilingual('Una base local para gestionar conversaciones con borradores y acciones supervisadas.', 'A local foundation for managing conversations with drafts and supervised actions.'),
     idea: bilingual('Explorar un asistente que tenga en cuenta el contexto de las conversaciones y mantenga la decisión final en manos del usuario.', 'Exploring an assistant that considers conversational context while leaving the final decision with the user.'),
@@ -165,7 +167,7 @@ export const projects = [
     stage: bilingual('Fundamentos implementados. El despliegue y las integraciones de uso real siguen pendientes; el envío autónomo está desactivado.', 'Foundations implemented. Deployment and live integrations remain pending; autonomous sending is disabled.'),
   },
   {
-    id: 'lidar', name: 'Sistema LiDAR', enName: 'LiDAR system', year: '2025', status: 'built', visual: 'data',
+    id: 'lidar', visibility: 'private', name: 'Sistema LiDAR', enName: 'LiDAR system', year: '2025', status: 'built', visual: 'data',
     tags: ['Python', 'C', 'LiDAR'], category: bilingual('Sensores / Integración', 'Sensors / Integration'),
     summary: bilingual('Adquisición, procesamiento y visualización de datos para detección de objetos en vía.', 'Data acquisition, processing, and visualisation for railway object detection.'),
     idea: bilingual('Integrar hardware y software para interpretar medidas de un sensor LiDAR. Trabajo realizado durante mis prácticas en REDALSA.', 'Integrating hardware and software to interpret LiDAR sensor measurements. Work completed during my internship at REDALSA.'),
@@ -173,7 +175,7 @@ export const projects = [
     stage: bilingual('Trabajo de prácticas realizado. Se presenta una descripción general de la experiencia de integración.', 'Completed internship work. Presented as a general account of the integration experience.'),
   },
   {
-    id: 'practica-web', name: 'Desarrollo Web II', enName: 'Web Development II', year: '2026', status: 'built', visual: 'planning',
+    id: 'practica-web', visibility: 'private', name: 'Desarrollo Web II', enName: 'Web Development II', year: '2026', status: 'built', visual: 'planning',
     tags: ['Web', 'Universidad'], category: bilingual('Aprendizaje / Desarrollo web', 'Learning / Web development'),
     summary: bilingual('Práctica académica de desarrollo web, como parte de mi formación en informática.', 'An academic web development assignment from my computer engineering studies.'),
     idea: bilingual('Aplicar los contenidos de la asignatura de Desarrollo Web II a una práctica académica.', 'Applying Web Development II coursework in an academic assignment.'),
