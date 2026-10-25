@@ -1,0 +1,93 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage[margin=14mm,top=13mm,bottom=16mm]{geometry}
+\usepackage{xcolor,enumitem,titlesec,tabularx,fancyhdr,lastpage}
+\usepackage[hidelinks,unicode]{hyperref}
+\definecolor{navy}{HTML}{1D405C}
+\definecolor{muted}{HTML}{515B64}
+\definecolor{rulecolor}{HTML}{D6DEE4}
+\renewcommand{\familydefault}{\sfdefault}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\setlist[itemize]{leftmargin=12pt,itemsep=2pt,topsep=3pt,parsep=0pt}
+\titleformat{\section}{\color{navy}\small\bfseries}{}{0em}{}[\color{rulecolor}\titlerule]
+\titlespacing*{\section}{0pt}{11pt}{5pt}
+\newcommand{\entry}[3]{\noindent\begin{tabularx}{\linewidth}{@{}Xr@{}}\textbf{#1}&{\small\color{muted}#2}\end{tabularx}\par{\small\color{muted}#3}\par}
+\pagestyle{fancy}\fancyhf{}\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\scriptsize\color{muted}Alejandro Villarrubia · Technical Sales Engineer}
+\fancyfoot[R]{\scriptsize\color{muted}\thepage\,/\,\pageref{LastPage}}
+\hypersetup{pdftitle={Alejandro Villarrubia -- CV},pdfauthor={Alejandro Villarrubia}}
+\begin{document}
+{\fontsize{23}{26}\selectfont\bfseries\color{navy} ALEJANDRO VILLARRUBIA}\par
+{\large Technical Sales Engineer · Software Engineer}\par
+{\small\color{muted}+34 633 58 60 60 · \href{mailto:avillarrubia2@gmail.com}{avillarrubia2@gmail.com} · Palencia, Spain}\par
+{\small\href{https://github.com/villarrubi}{github.com/villarrubi} · \href{https://www.linkedin.com/in/alejandro-villarrubia-garc\%C3\%ADa-3078892b9/}{LinkedIn}}\par
+\section*{PROFESSIONAL PROFILE}
+Computer Engineer with experience in software development, hardware/software integration, and coordination across engineering, sales, and customers. Currently a Technical Sales Engineer at ALTEN Spain for MAHLE, specialising in e-bike propulsion systems. Previous backend experience with Java, MongoDB, and SQL. Particularly interested in building systems from scratch, artificial intelligence, algorithms, and personal technical projects.
+\section*{PROFESSIONAL EXPERIENCE}
+\entry{Technical Sales Engineer}{Jul. 2026 -- Present}{ALTEN Spain · Client: MAHLE | Palencia, Spain}
+\begin{itemize}
+\item Coordinate the planning and monitoring of e-bike propulsion system fleets with Program and Product Management, managing resources, deliverables, and technical documentation.
+\item Validate the technical compatibility of customer bicycle frames (Customer Frame Analysis) with MAHLE systems before production.
+\item Participate in test rides and motor map configuration (power and torque), working with Battery and Control Systems to evaluate motors and batteries.
+\item Act as the link between sales, engineering, and customers, preparing technical reports and managing samples and associated documentation.
+\end{itemize}
+\entry{Software Engineer}{Oct. 2025 -- Jul. 2026}{NTT DATA · Spain (national distributed team)}
+\begin{itemize}
+\item Independently developed a new product feature from scratch based on an existing solution, participating in the full delivery cycle in an Agile/Scrum environment.
+\item Refactored code, fixed defects, and resolved production incidents to improve maintainability and reduce technical debt within a team of more than 20 engineers.
+\item Participated in solution design, implementation, testing, debugging, code review, and deployment.
+\end{itemize}
+{\small\color{muted} Java · SQL · MongoDB · Git · Agile/Scrum}\par\vspace{4pt}
+\entry{Software Development Intern}{Apr. 2025 -- Jul. 2025}{REDALSA, S.A.}
+\begin{itemize}
+\item Designed and implemented a LiDAR-based railway object detection system from scratch, including distance measurement, mapping, and real-time collision and trajectory calculations.
+\item Independently integrated hardware and software, from signal acquisition and processing to data visualisation and interpretation.
+\end{itemize}
+{\small\color{muted} Python · C · LiDAR · Embedded Systems · Data Acquisition}\par\vspace{4pt}
+\entry{Active Committee Member}{Apr. 2024 -- Oct. 2025}{RITSI · Spanish national association of Computer Engineering students}
+\begin{itemize}
+\item Participated in four national committees involving more than 30 universities, including the organisation of national conferences and maintenance of technology tools.
+\end{itemize}
+\section*{EDUCATION}
+\entry{B.Sc. in Computer Engineering}{2021 -- 2026}{Universidad Europea Miguel de Cervantes (UEMC)}\vspace{3pt}
+\entry{Master’s Program in Artificial Intelligence and Innovation}{2025}{Microsoft · Founderz | Postgraduate training}\vspace{3pt}
+\entry{Science Baccalaureate}{2015 -- 2021}{IES Jorge Manrique}\vspace{3pt}
+\newpage
+\section*{SELECTED PROJECTS}
+\entry{ChessBot -- Chess Engine}{2026 -- Present}{Personal project · C++20 · UCI · Local AI}
+\begin{itemize}
+\item Custom engine for playing and analysing positions, with search and evaluation systems and UCI communication with interfaces and other engines.
+\item Training infrastructure using self-play, matches against other engines, and experiments with positional evaluation and NNUE networks.
+\item Windows application and optional local LLM integration to explain engine calculations. Training and evaluation are ongoing; no certified Elo rating.
+\end{itemize}
+\entry{Pip$\alpha$ -- Local Assistant and Hardware Controller}{2026 -- Present}{Personal project · Python · ESP32-S3 · Windows · Swift}
+\begin{itemize}
+\item Local agent for automating applications, audio, system status, and control actions from an external device, with confirmable commands.
+\item Hardware/software integration: touchscreen, local voice, encrypted USB communication, and Wake-on-LAN. Experimental iOS client.
+\end{itemize}
+\entry{Email Phishing Detection System}{2026}{Bachelor’s thesis · Python · scikit-learn · Streamlit}
+\begin{itemize}
+\item Heuristic analysis of 28 signals (headers, URLs, HTML, and SPF/DKIM/DMARC) and an MLP neural classifier trained on real-world datasets.
+\item TF-IDF + MLP pipeline, web interfaces, Gmail extension, tests, and model persistence; analysis in Spanish and English.
+\end{itemize}
+\entry{AQUILAE -- Roman Empire Risk Simulator}{2025}{Master’s thesis collaboration · Java · Swing · Maven}
+\begin{itemize}
+\item Designed and implemented the complete simulator with a historical vector map of 28 provinces and a Java Swing interface, supporting a master’s thesis at the University of Valladolid.
+\end{itemize}
+\section*{TECHNICAL SKILLS}
+\textbf{Languages:} Java, Python, C, C++, C\#, JavaScript, HTML, PHP, SQL.\par
+\textbf{Data and tools:} SQL, MongoDB, Git, Agile/Scrum, Office 365.\par
+\textbf{Specialisms:} Search algorithms, UCI, AI/ML, hardware/software integration, LiDAR, embedded systems.\par
+\section*{CERTIFICATIONS AND LANGUAGES}
+B2 First -- Cambridge University · Digital Skills Certificate (tuCertiCyL) · Regional Chess Coach · Regional Chess Arbiter.\par
+Spanish: Native · English: B2 (Cambridge First) · German: Basic.
+\section*{LEADERSHIP AND COMMUNITY}
+\entry{University Student Representative · School, Degree and Class}{Oct. 2021 -- Oct. 2025}{UEMC · Institutional representation and liaison with academic leadership and the dean’s office.}\vspace{4pt}
+\entry{UEMC Representative at RITSI}{Oct. 2023 -- Nov. 2025}{Official delegate to Spain’s national Computer Engineering student association; committees and conferences.}\vspace{4pt}
+\entry{Secretary · Club Palentino de Ajedrez}{Mar. 2026 -- Present}{Management and organisation of activities for a club with over 40 years of history.}\vspace{4pt}
+\entry{Founder and Coordinator}{Jun. 2024 -- Present}{UEMC Book Club · UEMC Chess School.}\vspace{4pt}
+\end{document}
