@@ -74,7 +74,7 @@ async function playIntro(trigger){
   overlay.classList.add('is-ready');started=true;
   function frame(now){
     if(finished||document.hidden)return;
-    if(last)elapsed+=Math.min(now-last,80);last=now;
+    if(last)elapsed+=Math.min(now-last,250);last=now;
     const pose=still?{pitch:.88,yaw:0,dock:0,appearance:1-Math.min(1,elapsed/650),dissolve:0,curtain:1-Math.min(1,elapsed/650),caption:0,controls:0,progress:1}:introPose(elapsed);
     curtain.style.opacity=pose.curtain;meta.style.opacity=pose.caption;caption.style.opacity=pose.caption;
     progress.style.transform=`scaleX(${pose.progress})`;

@@ -55,9 +55,9 @@ export function createChessCode(T,renderer){
     #include <colorspace_fragment>
    }`});
  const glyphs=new T.Mesh(new T.InstancedBufferGeometry(),glyphMaterial);glyphs.frustumCulled=false;glyphs.renderOrder=2;scene.add(glyphs);
- let width=0,height=0;
+ let width=0,height=0,sourcePose='';
  function resize(w,h){
-  if(w===width&&h===height)return;width=w;height=h;
+  if(w===width&&h===height)return;width=w;height=h;sourcePose='';
   const ratio=renderer.getPixelRatio();target.setSize(Math.round(w*ratio),Math.round(h*ratio));
   const columns=Math.ceil(w/(w<700?13:16)),rows=Math.ceil(h/20);uniforms.grid.value.set(columns,rows);
   const quad=new T.PlaneGeometry(1,1),geometry=new T.InstancedBufferGeometry();
@@ -71,7 +71,9 @@ export function createChessCode(T,renderer){
  return {
   render(boardScene,boardCamera,pose,w,h){
    resize(w,h);uniforms.progress.value=pose.dissolve||0;uniforms.appearance.value=pose.appearance??1;
-   renderer.setRenderTarget(target);renderer.render(boardScene,boardCamera);
+   const currentPose=`${pose.pitch}/${pose.yaw}`;
+   // Once the camera settles, the board image is fixed. Only animate the code.
+   if(currentPose!==sourcePose){renderer.setRenderTarget(target);renderer.render(boardScene,boardCamera);sourcePose=currentPose;}
    renderer.setRenderTarget(null);renderer.render(scene,camera);
   },
   dispose(){target.dispose();atlas.dispose();plane.geometry.dispose();boardMaterial.dispose();glyphs.geometry.dispose();glyphMaterial.dispose();}
