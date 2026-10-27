@@ -1,0 +1,6 @@
+Star field texture: Solar System Scope / INOVE.
+Source: https://www.solarsystemscope.com/textures/
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+Changes: converted to WebP for local delivery.
+The project's abstract geometries and studio lighting are original code, not astronomical bodies.

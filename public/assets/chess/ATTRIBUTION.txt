@@ -1,0 +1,11 @@
+STAUNTON CHESS PIECES
+Original geometry: clarkerubber, Staunton-Pieces, copyright 2014.
+Source: https://github.com/clarkerubber/Staunton-Pieces
+Source revision: cef2c79445380c5bffec461a80c7c91caf89b3b2
+Files: Source/Staunton/{Pawn,Rook,Knight,Bishop,Queen,King}/*.STL
+License: MIT; full notice in STAUNTON-LICENSE.txt in this directory.
+
+Adaptations for this website: centred and scaled the six meshes, welded shared
+vertices, computed smooth normals, packed an indexed binary asset, and placed
+32 instances in the starting position. Board, wood shaders, lighting, animation,
+and poster rendering are authored for this website.

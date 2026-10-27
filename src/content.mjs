@@ -10,7 +10,7 @@ export const profile = {
 export const copy = {
   es: {
     lang: 'Español', other: 'EN', otherLabel: 'Read in English', title: 'Alejandro Villarrubia — Ingeniero informático',
-    description: 'Proyectos de Alejandro Villarrubia. Software, inteligencia artificial local, hardware y una buena dosis de ajedrez.',
+    description: 'Proyectos de Alejandro Villarrubia. Desarrollo de software, inteligencia artificial local, herramientas y sistemas físicos.',
     skip: 'Saltar al contenido', nav: ['Proyectos', 'Sobre mí', 'Contacto'], menu: 'Abrir navegación', closeMenu: 'Cerrar navegación',
     eyebrow: 'INGENIERO INFORMÁTICO · PALENCIA, ES', heroA: 'Ideas que', heroB: 'se convierten', heroC: 'en sistemas.',
     intro: 'Soy Alejandro. Construyo software, exploro la inteligencia artificial y conecto el código con el mundo físico. A veces, todo empieza con una partida de ajedrez.',
@@ -34,7 +34,7 @@ export const copy = {
   },
   en: {
     lang: 'English', other: 'ES', otherLabel: 'Leer en español', title: 'Alejandro Villarrubia — Software Engineer',
-    description: 'Projects by Alejandro Villarrubia. Software, local AI, hardware, and a fair amount of chess.',
+    description: 'Projects by Alejandro Villarrubia. Software development, local AI, tools, and physical systems.',
     skip: 'Skip to content', nav: ['Projects', 'About', 'Contact'], menu: 'Open navigation', closeMenu: 'Close navigation',
     eyebrow: 'SOFTWARE ENGINEER · PALENCIA, ES', heroA: 'Ideas that', heroB: 'turn into', heroC: 'systems.',
     intro: 'I’m Alejandro. I build software, explore artificial intelligence, and connect code to the physical world. Sometimes, it all starts with a game of chess.',
@@ -185,3 +185,4 @@ export const projects = [
 ];
 
 export const getName = (project, lang) => lang === 'en' && project.enName ? project.enName : project.name;
+export const getTagName = (tag, lang) => lang === 'en' ? ({'Simulación':'Simulation','Cartografía':'Cartography','Universidad':'University'}[tag] || tag) : tag;

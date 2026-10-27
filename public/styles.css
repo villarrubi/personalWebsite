@@ -1,3 +1,5 @@
+@import url('/intro.css');
+@import url('/project-map.css');
 @font-face{font-family:DM Sans;src:url('/assets/fonts/dmsans.ttf') format('truetype');font-weight:100 1000;font-display:swap}
 @font-face{font-family:Instrument Serif;src:url('/assets/fonts/instrument-serif.ttf') format('truetype');font-weight:400;font-display:swap}
 :root{--paper:#fafaf8;--white:#fff;--ink:#163ac5;--blue:#163ac5;--muted:#5f6679;--line:#d9dce5;--serif:'Instrument Serif',Georgia,serif;--sans:'DM Sans',Arial,sans-serif;--mono:'DM Sans',Arial,sans-serif;--max:1600px;scroll-behavior:smooth;scroll-padding-top:110px;color-scheme:light}
@@ -25,4 +27,4 @@ h2{font:400 clamp(44px,5.6vw,86px)/.98 var(--serif);letter-spacing:-.035em}.sele
  @keyframes slide-arrive{from{opacity:.3;transform:translateY(8px)}to{opacity:1;transform:none}}
  ::view-transition-old(root){animation-duration:.2s}::view-transition-new(root){animation-duration:.35s}
 }
-@media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}.reveal-ready{opacity:1;transform:none}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+@media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*:not(.chess-intro[data-preview]):not(.chess-intro[data-preview] *),*:before,*:after{animation:none!important;transition:none!important}.reveal-ready{opacity:1;transform:none}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
