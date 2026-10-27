@@ -19,9 +19,13 @@ for(const side of ['white','black']){
   assert.equal(queen.row,side==='white'?7:0);
 }
 assert.equal(introPose(0).pitch,introPose(600).pitch,'Hold the lateral view before moving');
-assert.equal(introPose(2900).pitch,Math.PI/2,'Reach overhead before revealing the page');
+assert(Math.abs(introPose(2200).pitch-.88)<1e-12,'Settle the camera before the code disperses');
 assert.equal(introPose(2900).curtain,1);
-assert.equal(introPose(INTRO_DURATION).dock,1);
+assert.equal(introPose(0).appearance,0,'The board fades in without a first-frame flash');
+assert.equal(introPose(2000).dissolve,0,'Show the complete board before dissolving');
+assert(introPose(3500).dissolve>0&&introPose(3500).curtain<1,'Code and page share the transition');
+assert.equal(introPose(INTRO_DURATION).dissolve,1,'All code has vanished before removing the overlay');
+assert.equal(introPose(INTRO_DURATION).dock,0,'Do not shrink the board into the page');
 assert.equal(introPose(INTRO_DURATION).curtain,0);
 // A returning visitor must not get another blocking entrance, even in a new
 // session. Keep deep links and OS motion preferences working independently.
@@ -69,7 +73,7 @@ for(const aspect of [320/844,390/844,768/1024,1440/900,2560/1080]){
   let previous=introPose(0);
   for(let time=0;time<=INTRO_DURATION;time+=16){
     const pose=introPose(time),frame=cameraFrame(pose.pitch,pose.yaw,aspect);
-    assert(pose.pitch>=previous.pitch&&pose.dock>=previous.dock,'Camera and docking progress never reverse');
+    assert(pose.pitch>=previous.pitch&&pose.dissolve>=previous.dissolve,'Camera and dissolve progress never reverse');
     assert(Math.abs(pose.pitch-previous.pitch)<.02,'No jumps between frames');
     camera.position.set(...frame.position);camera.up.set(...frame.up);camera.lookAt(...frame.target);camera.updateMatrixWorld();
     for(const x of [-4.45,4.45])for(const y of [-.14,1.85])for(const z of [-4.45,4.45]){

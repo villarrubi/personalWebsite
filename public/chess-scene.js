@@ -1,13 +1,14 @@
 import * as T from './assets/vendor/three.module.js';
 import {createChessModel} from './chess-model.js';
 import {cameraFrame} from './chess-timeline.js';
+import {createChessCode} from './chess-code.js';
 
 export async function createChessScene(mount) {
   const mobile = matchMedia('(max-width:700px)').matches;
   const model = await createChessModel(T,{mobile});
   const canvas = document.createElement('canvas'); canvas.setAttribute('aria-hidden','true');
   const renderer = new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'default'});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1.5:1.75));
+  renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1.25:1.5));
   renderer.setClearColor(0x061327,0); renderer.outputColorSpace=T.SRGBColorSpace;
   renderer.toneMapping=T.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
   renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
@@ -32,7 +33,7 @@ export async function createChessScene(mount) {
   scene.add(key,new T.HemisphereLight(0xc5d8f6,0x121b27,.8));
   const rim=new T.DirectionalLight(0xdce7ff,1.4);rim.position.set(5,5,-6);scene.add(rim);
   const fill=new T.DirectionalLight(0xffffff,.7);fill.position.set(1,3,8);scene.add(fill);
-  let width=0,height=0,disposed=false,lost=false;
+  let width=0,height=0,disposed=false,lost=false,code;
   let pose=document.documentElement.classList.contains('intro-playing')?{pitch:.19,yaw:.28,dock:0}:{pitch:Math.PI/2,yaw:0,dock:1};
   function render(next=pose,w=mount.clientWidth,h=mount.clientHeight) {
     if(disposed||lost||!w||!h)return;
@@ -41,7 +42,9 @@ export async function createChessScene(mount) {
     if(w!==width||h!==height){width=w;height=h;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
     const framing=cameraFrame(pose.pitch,pose.yaw,camera.aspect);
     camera.position.set(...framing.position);camera.up.set(...framing.up);camera.lookAt(...framing.target);
-    renderer.render(scene,camera);
+    if(next.dissolve!==undefined){
+      code??=createChessCode(T,renderer);code.render(scene,camera,pose,w,h);
+    }else{code?.dispose();code=null;renderer.render(scene,camera);}
     renderer.shadowMap.autoUpdate=false;
   }
   const onLost=event=>{event.preventDefault();lost=true;mount.dispatchEvent(new Event('chess:lost'));};
@@ -52,7 +55,7 @@ export async function createChessScene(mount) {
   } catch(error) {dispose();throw error;}
   function dispose(){
     if(disposed)return;disposed=true;canvas.removeEventListener('webglcontextlost',onLost);
-    model.dispose();environment.dispose();key.shadow.dispose();renderer.dispose();canvas.remove();
+    code?.dispose();model.dispose();environment.dispose();key.shadow.dispose();renderer.dispose();canvas.remove();
   }
   return {render,dispose,canvas};
 }

@@ -32,7 +32,7 @@ async function playIntro(trigger){
   const still=!trigger&&!forced&&(reduced.matches||sceneMotion.matches);
   const overlay=document.createElement('div');overlay.className='chess-intro';
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
-  overlay.setAttribute('aria-label',es?'Animación de entrada. Tablero de ajedrez.':'Entrance animation. Chessboard.');
+  overlay.setAttribute('aria-label',es?'Del ajedrez al código. Animación de entrada.':'From chess to code. Entrance animation.');
   overlay.innerHTML=`<div class="intro-curtain"></div><div class="intro-meta"><span>av.</span><span>SOFTWARE / ${es?'IA LOCAL':'LOCAL AI'} / HARDWARE</span></div><div class="intro-caption"><span>ALEJANDRO VILLARRUBIA</span><p>${es?'Curiosidad para construir.':'Curiosity to build.'}</p></div><div class="intro-progress" aria-hidden="true"><i></i></div><button class="intro-skip" type="button">${es?'Saltar intro':'Skip intro'} <span aria-hidden="true">↗</span></button>`;
   const mount=host.querySelector('.chess-canvas');
   const previousFocus=document.activeElement,previousOverflow=document.body.style.overflow;
@@ -41,11 +41,12 @@ async function playIntro(trigger){
   const inertStates=underlying.map(el=>el.inert);
   document.body.style.overflow='hidden';
   document.documentElement.classList.add('intro-playing');
-  // One canvas moves into the modal, then returns to its exact hero rectangle.
+  // Keep a fixed stage throughout the dissolve; the page is revealed underneath.
   document.body.append(overlay);overlay.append(mount);
   underlying.forEach(el=>el.inert=true);
-  Object.assign(mount.style,{position:'fixed',left:'0px',top:'0px',width:'100vw',height:'100dvh'});
+  Object.assign(mount.style,{position:'fixed',left:'0px',top:'0px',width:'100vw',height:'100dvh',opacity:'0'});
   const skip=overlay.querySelector('.intro-skip');
+  const curtain=overlay.querySelector('.intro-curtain'),meta=overlay.querySelector('.intro-meta'),caption=overlay.querySelector('.intro-caption'),progress=overlay.querySelector('.intro-progress i');
   let raf=0,watchdog,elapsed=0,last=0,started=false,finished=false;
   const finish=()=>{
     if(finished)return;finished=true;
@@ -74,19 +75,12 @@ async function playIntro(trigger){
   function frame(now){
     if(finished||document.hidden)return;
     if(last)elapsed+=Math.min(now-last,80);last=now;
-    const pose=still?{pitch:Math.PI/2,yaw:0,dock:1,curtain:1-Math.min(1,elapsed/650),progress:1}:introPose(elapsed);
-    const target=host.getBoundingClientRect();
-    // On short or narrow screens the destination may be below the fold. Fade
-    // overhead there instead of sending the board flying out of the viewport.
-    const inView=target.top>=0&&target.bottom<=innerHeight;
-    const d=inView?pose.dock:0,w=innerWidth+(target.width-innerWidth)*d,h=innerHeight+(target.height-innerHeight)*d;
-    Object.assign(mount.style,{left:`${target.left*d}px`,top:`${target.top*d}px`,width:`${w}px`,height:`${h}px`});
-    mount.style.opacity=inView?'1':String(pose.curtain);
-    overlay.querySelector('.intro-curtain').style.opacity=pose.curtain;
-    overlay.querySelector('.intro-meta').style.opacity=pose.curtain;
-    overlay.querySelector('.intro-caption').style.opacity=pose.curtain;
-    overlay.querySelector('.intro-progress i').style.transform=`scaleX(${pose.progress})`;
-    renderScene.render(pose,w,h);
+    const pose=still?{pitch:.88,yaw:0,dock:0,appearance:1-Math.min(1,elapsed/650),dissolve:0,curtain:1-Math.min(1,elapsed/650),caption:0,controls:0,progress:1}:introPose(elapsed);
+    curtain.style.opacity=pose.curtain;meta.style.opacity=pose.caption;caption.style.opacity=pose.caption;
+    progress.style.transform=`scaleX(${pose.progress})`;
+    progress.parentElement.style.opacity=pose.controls;skip.style.opacity=pose.controls;
+    renderScene.render(pose,innerWidth,innerHeight);mount.style.opacity='1';
+    overlay.dataset.phase=pose.dissolve===0?'board':pose.curtain>.5?'code':'reveal';
     if(elapsed>=(still?650:INTRO_DURATION))finish();else raf=requestAnimationFrame(frame);
   }
   raf=requestAnimationFrame(frame);

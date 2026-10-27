@@ -1,10 +1,11 @@
-export const INTRO_DURATION = 4800;
+export const INTRO_DURATION = 5500;
 export const smooth = value => { const t = Math.max(0, Math.min(1, value)); return t*t*t*(t*(t*6-15)+10); };
 export function introPose(elapsed) {
-  const turn = smooth((elapsed - 650) / 2250);
-  const dock = smooth((elapsed - 3000) / 1800);
-  return {pitch:.19+(Math.PI/2-.19)*turn, yaw:.28*(1-turn), dock,
-    curtain:1-smooth((elapsed-3100)/1600), progress:Math.min(1,Math.max(0,elapsed/INTRO_DURATION))};
+  const turn = smooth((elapsed - 650) / 1550);
+  return {pitch:.19+(.88-.19)*turn, yaw:.28*(1-turn), dock:0,
+    appearance:smooth(elapsed/700),dissolve:smooth((elapsed-2000)/3100),
+    curtain:1-smooth((elapsed-2900)/2300),caption:1-smooth((elapsed-1900)/1000),controls:1-smooth((elapsed-4400)/800),
+    progress:Math.min(1,Math.max(0,elapsed/INTRO_DURATION))};
 }
 
 // Fit the entire set, not just the board centre, through every camera angle.
