@@ -25,14 +25,18 @@ assert.equal(introPose(0).appearance,0,'The board fades in without a first-frame
 assert.equal(introPose(1800).dissolve,0,'Show the complete board before converting it');
 assert.equal(introPose(3500).dissolve,1,'Hold the fully reconstructed code chessboard');
 assert.equal(introPose(3500).matrix,0,'The background waits until the code board is readable');
+assert.equal(introPose(3500).assemble,0,'Keep the white code chessboard readable first');
 assert.equal(introPose(3500).curtain,1,'Keep the page covered during the board transformation');
 assert.equal(introPose(5600).matrix,1,'The whole background becomes code');
-assert.equal(introPose(5600).reveal,0,'Hold the full Matrix field before clearing it');
-assert(introPose(7000).reveal>0,'Only the last phase uncovers the page');
+assert(introPose(5600).assemble>0,'The background and the page-shaped code overlap');
+assert.equal(introPose(5600).reveal,0,'Form the page in code before exposing the HTML');
+assert.equal(introPose(6500).reveal,0,'No separate wipe or early scene switch');
+assert.equal(introPose(7000).assemble,1,'The destination is recognisable before cells resolve');
+assert(introPose(7000).reveal>0,'The last phase turns the characters into the live page');
 assert.equal(introPose(INTRO_DURATION).dissolve,1,'All code has vanished before removing the overlay');
 assert.equal(introPose(INTRO_DURATION).dock,0,'Do not shrink the board into the page');
 assert.equal(introPose(INTRO_DURATION).curtain,0);
-assert.equal(introPose(INTRO_DURATION).reveal,1,'Finish every column before removing the overlay');
+assert.equal(introPose(INTRO_DURATION).reveal,1,'Resolve every cell before removing the overlay');
 // A returning visitor must not get another blocking entrance, even in a new
 // session. Keep deep links and OS motion preferences working independently.
 const boot=await readFile(new URL('../public/intro-boot.js',import.meta.url),'utf8');
@@ -79,7 +83,7 @@ for(const aspect of [320/844,390/844,768/1024,1440/900,2560/1080]){
   let previous=introPose(0);
   for(let time=0;time<=INTRO_DURATION;time+=16){
     const pose=introPose(time),frame=cameraFrame(pose.pitch,pose.yaw,aspect);
-    assert(pose.pitch>=previous.pitch&&pose.dissolve>=previous.dissolve,'Camera and dissolve progress never reverse');
+    assert(pose.pitch>=previous.pitch&&pose.dissolve>=previous.dissolve&&pose.assemble>=previous.assemble&&pose.reveal>=previous.reveal,'Camera and transformation progress never reverse');
     assert(Math.abs(pose.pitch-previous.pitch)<.02,'No jumps between frames');
     camera.position.set(...frame.position);camera.up.set(...frame.up);camera.lookAt(...frame.target);camera.updateMatrixWorld();
     for(const x of [-4.45,4.45])for(const y of [-.14,1.85])for(const z of [-4.45,4.45]){

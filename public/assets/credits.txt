@@ -11,5 +11,7 @@ Star texture: Solar System Scope / INOVE, CC BY 4.0.
 Full attribution: /assets/space/ATTRIBUTION.txt
 
 Three.js 0.180.0: MIT, /assets/vendor/THREE-LICENSE.txt
+html2canvas 1.4.1: MIT, /assets/vendor/HTML2CANVAS-LICENSE.txt
+https://github.com/niklasvh/html2canvas
 DM Sans: OFL, /assets/fonts/OFL.txt
 Instrument Serif: OFL, /assets/fonts/InstrumentSerif-OFL.txt

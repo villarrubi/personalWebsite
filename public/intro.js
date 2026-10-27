@@ -1,5 +1,6 @@
 import {introPose, INTRO_DURATION} from './chess-timeline.js';
 import {sceneMotion} from './scene-motion.js';
+import {captureIntroPage} from './intro-page.js';
 
 const host=document.querySelector('[data-chess-stage]');
 const es=document.documentElement.lang==='es';
@@ -41,16 +42,17 @@ async function playIntro(trigger){
   const inertStates=underlying.map(el=>el.inert);
   document.body.style.overflow='hidden';
   document.documentElement.classList.add('intro-playing');
-  // Keep a fixed stage throughout the dissolve; the page is revealed underneath.
+  // The code is rebuilt into the layout below before handing it back to HTML.
   document.body.append(overlay);overlay.append(mount);
   underlying.forEach(el=>el.inert=true);
   Object.assign(mount.style,{position:'fixed',left:'0px',top:'0px',width:'100vw',height:'100dvh',opacity:'0'});
   const skip=overlay.querySelector('.intro-skip');
   const curtain=overlay.querySelector('.intro-curtain'),meta=overlay.querySelector('.intro-meta'),caption=overlay.querySelector('.intro-caption'),progress=overlay.querySelector('.intro-progress i');
   let raf=0,watchdog,elapsed=0,last=0,started=false,finished=false;
+  const captureController=new AbortController();
   const finish=()=>{
     if(finished)return;finished=true;
-    cancelAnimationFrame(raf);clearTimeout(watchdog);
+    cancelAnimationFrame(raf);clearTimeout(watchdog);captureController.abort();
     document.removeEventListener('keydown',key);document.removeEventListener('visibilitychange',visibility);
     host.prepend(mount);mount.removeAttribute('style');overlay.remove();
     document.body.style.overflow=previousOverflow;
@@ -67,10 +69,18 @@ async function playIntro(trigger){
   active={finish};watchdog=setTimeout(finish,14000);
   skip.addEventListener('click',finish);document.addEventListener('keydown',key);document.addEventListener('visibilitychange',visibility);
   skip.focus({preventScroll:true});clearPending();
-  const renderScene=await getScene();
+  if(trigger&&previousScroll>20)window.scrollTo({top:0,left:0,behavior:'instant'});
+  // Prepare the guide before animation starts, avoiding a capture stutter halfway.
+  let captureTimer;
+  const guidePromise=Promise.race([
+    captureIntroPage(captureController.signal),
+    new Promise(resolve=>{captureTimer=setTimeout(()=>{captureController.abort();resolve(null);},3500);}),
+  ]).finally(()=>clearTimeout(captureTimer));
+  const [renderScene,pageGuide]=await Promise.all([getScene(),guidePromise]);
   if(finished)return;
   if(!renderScene){finish();return;}
-  if(trigger&&previousScroll>20)window.scrollTo({top:0,left:0,behavior:'instant'});
+  renderScene.setPageGuide(pageGuide);
+  overlay.dataset.pageGuide=pageGuide?'ready':'fallback';
   overlay.classList.add('is-ready');started=true;
   clearTimeout(watchdog);watchdog=setTimeout(finish,INTRO_DURATION+5000);
   function frame(now){
@@ -81,7 +91,7 @@ async function playIntro(trigger){
     progress.style.transform=`scaleX(${pose.progress})`;
     progress.parentElement.style.opacity=pose.controls;skip.style.opacity=pose.controls;
     renderScene.render(pose,innerWidth,innerHeight);mount.style.opacity='1';curtain.style.opacity='0';
-    overlay.dataset.phase=pose.reveal>0?'reveal':pose.matrix>0?'matrix':pose.dissolve>0?'board-code':'board';
+    overlay.dataset.phase=pose.reveal>0?'reveal':pose.assemble>0?'assemble':pose.matrix>0?'matrix':pose.dissolve>0?'board-code':'board';
     if(elapsed>=(still?650:INTRO_DURATION))finish();else raf=requestAnimationFrame(frame);
   }
   raf=requestAnimationFrame(frame);
