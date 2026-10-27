@@ -14,7 +14,7 @@ if(controls){
  clearTimeout(window.projectViewWatchdog);
  // Both languages share the visitor's view choice. Cards remain usable without JS.
  let saved;try{saved=sessionStorage.getItem('project-view');}catch{}
- select(location.hash==='#archive'?'cards':saved==='orbits'||location.hash==='#complementary'?'orbits':'cards');
+ select(location.hash==='#archive'?'cards':saved!=='cards'||location.hash==='#complementary'?'orbits':'cards');
  buttons.forEach(button=>button.addEventListener('click',()=>select(button.dataset.projectView,true)));
  window.addEventListener('hashchange',()=>{
   if(location.hash==='#complementary'||location.hash==='#archive'){

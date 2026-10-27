@@ -7,6 +7,7 @@ const es=document.documentElement.lang==='es';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const requested=new URLSearchParams(location.search).get('intro');
 const forced=['cinematic','squares','knight'].includes(requested);
+const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
 const controls=[...document.querySelectorAll('[data-intro]')];
 let scene,loading,active,disposed=false;
 
@@ -25,9 +26,6 @@ async function getScene(){
   });
   return loading;
 }
-function seen(){try{if(localStorage.getItem('chess-opening-seen')==='1')return true;}catch{}try{return sessionStorage.getItem('chess-opening-seen')==='1';}catch{return false;}}
-function remember(){try{localStorage.setItem('chess-opening-seen','1');}catch{}try{sessionStorage.setItem('chess-opening-seen','1');}catch{}}
-
 async function playIntro(trigger){
   if(active||!host||disposed)return;
   const still=!trigger&&!forced&&(reduced.matches||sceneMotion.matches);
@@ -59,7 +57,7 @@ async function playIntro(trigger){
     underlying.forEach((el,i)=>el.inert=inertStates[i]);
     document.documentElement.classList.remove('intro-playing');clearPending();
     scene?.render({pitch:Math.PI/2,yaw:0,dock:1});
-    active=null;remember();
+    active=null;
     if(trigger)previousFocus?.focus({preventScroll:true});
     else if(document.activeElement===document.body)document.querySelector('.hero-actions .primary')?.focus({preventScroll:true});
     document.dispatchEvent(new Event('chess:intro-end'));
@@ -72,8 +70,12 @@ async function playIntro(trigger){
   if(trigger&&previousScroll>20)window.scrollTo({top:0,left:0,behavior:'instant'});
   // Prepare the guide before animation starts, avoiding a capture stutter halfway.
   let captureTimer;
+  // On refresh, wait for restored scroll/hash positioning before sampling HTML.
+  const pageReady=reloading&&document.readyState!=='complete'
+    ?new Promise(resolve=>window.addEventListener('load',()=>setTimeout(resolve,0),{once:true}))
+    :Promise.resolve();
   const guidePromise=Promise.race([
-    captureIntroPage(captureController.signal),
+    pageReady.then(()=>captureIntroPage(captureController.signal)),
     new Promise(resolve=>{captureTimer=setTimeout(()=>{captureController.abort();resolve(null);},3500);}),
   ]).finally(()=>clearTimeout(captureTimer));
   const [renderScene,pageGuide]=await Promise.all([getScene(),guidePromise]);
@@ -103,8 +105,8 @@ if(host){
   const observer=new ResizeObserver(()=>{if(!active)scene?.render();});observer.observe(host);
   const motionChanged=()=>{if(reduced.matches||sceneMotion.matches)active?.finish();};
   reduced.addEventListener('change',motionChanged);sceneMotion.addEventListener('change',motionChanged);
-  if(forced||(!seen()&&!location.hash&&!reduced.matches&&!sceneMotion.matches))playIntro();
-  else {if(seen())remember();clearPending();getScene();}
+  if(forced||((!location.hash||reloading)&&!reduced.matches&&!sceneMotion.matches))playIntro();
+  else {clearPending();getScene();}
   window.addEventListener('pagehide',event=>{
     active?.finish();
     if(!event.persisted){disposed=true;observer.disconnect();scene?.dispose();}

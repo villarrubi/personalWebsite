@@ -18,32 +18,34 @@ for(const side of ['white','black']){
   assert.equal(queen.file,3);assert.equal(king.file,4);
   assert.equal(queen.row,side==='white'?7:0);
 }
-assert.equal(introPose(0).pitch,introPose(600).pitch,'Hold the lateral view before moving');
+assert.equal(INTRO_DURATION,7500);
+assert.equal(introPose(0).pitch,introPose(400).pitch,'Hold the lateral view before moving');
 assert(Math.abs(introPose(2200).pitch-.88)<1e-12,'Settle the camera before the code disperses');
 assert.equal(introPose(2900).curtain,1);
 assert.equal(introPose(0).appearance,0,'The board fades in without a first-frame flash');
-assert.equal(introPose(1800).dissolve,0,'Show the complete board before converting it');
-assert.equal(introPose(3500).dissolve,1,'Hold the fully reconstructed code chessboard');
-assert.equal(introPose(3500).matrix,0,'The background waits until the code board is readable');
-assert.equal(introPose(3500).assemble,0,'Keep the white code chessboard readable first');
-assert.equal(introPose(3500).curtain,1,'Keep the page covered during the board transformation');
-assert.equal(introPose(5600).matrix,1,'The whole background becomes code');
-assert(introPose(5600).assemble>0,'The background and the page-shaped code overlap');
-assert.equal(introPose(5600).reveal,0,'Form the page in code before exposing the HTML');
-assert.equal(introPose(6500).reveal,0,'No separate wipe or early scene switch');
-assert.equal(introPose(7000).assemble,1,'The destination is recognisable before cells resolve');
-assert(introPose(7000).reveal>0,'The last phase turns the characters into the live page');
+assert.equal(introPose(1400).dissolve,0,'Show the complete board before converting it');
+assert.equal(introPose(2700).dissolve,1,'Hold the fully reconstructed code chessboard');
+assert.equal(introPose(2700).matrix,0,'The background waits until the code board is readable');
+assert.equal(introPose(2700).assemble,0,'Keep the white code chessboard readable first');
+assert.equal(introPose(2700).curtain,1,'Keep the page covered during the board transformation');
+assert.equal(introPose(4400).matrix,1,'The whole background becomes code');
+assert(introPose(4400).assemble>0,'The background and the page-shaped code overlap');
+assert.equal(introPose(4400).reveal,0,'Form the page in code before exposing the HTML');
+assert.equal(introPose(5000).reveal,0,'No separate wipe or early scene switch');
+assert.equal(introPose(5500).assemble,1,'The destination is recognisable before cells resolve');
+assert(introPose(5500).reveal>0,'The last phase turns the characters into the live page');
 assert.equal(introPose(INTRO_DURATION).dissolve,1,'All code has vanished before removing the overlay');
 assert.equal(introPose(INTRO_DURATION).dock,0,'Do not shrink the board into the page');
 assert.equal(introPose(INTRO_DURATION).curtain,0);
 assert.equal(introPose(INTRO_DURATION).reveal,1,'Resolve every cell before removing the overlay');
-// A returning visitor must not get another blocking entrance, even in a new
-// session. Keep deep links and OS motion preferences working independently.
+// Every homepage visit and refresh can play the entrance, including browsers
+// with the old seen flag. Direct section links and motion preferences still work.
 const boot=await readFile(new URL('../public/intro-boot.js',import.meta.url),'utf8');
-function entrancePending({persisted=false,session=false,hash='',search='',reduced=false,paused=false,storageBlocked=false}={}){
+function entrancePending({persisted=false,session=false,hash='',search='',reduced=false,paused=false,storageBlocked=false,reload=false}={}){
   const classes=new Set();
   runInNewContext(boot,{
     location:{pathname:'/es/',hash,search},URLSearchParams,
+    performance:{getEntriesByType:()=>[{type:reload?'reload':'navigate'}]},
     localStorage:{getItem:()=>{if(storageBlocked)throw new Error('Unavailable');return persisted?'1':null;}},
     sessionStorage:{getItem:key=>key==='chess-opening-seen'?(session?'1':null):paused?'off':null},
     matchMedia:()=>({matches:reduced}),document:{documentElement:{classList:{add:name=>classes.add(name)}}},
@@ -52,9 +54,10 @@ function entrancePending({persisted=false,session=false,hash='',search='',reduce
   return classes.has('intro-pending');
 }
 assert(entrancePending(),'A first visit can show the entrance');
-assert(!entrancePending({persisted:true}),'A new session retains the first-visit preference');
-assert(!entrancePending({session:true}),'Existing visitors keep their session preference');
-assert(!entrancePending({session:true,storageBlocked:true}),'Blocked persistent storage falls back to the session');
+assert(entrancePending({persisted:true}),'An old persistent seen flag does not suppress the entrance');
+assert(entrancePending({session:true,reload:true}),'Refreshing replays the entrance despite a session seen flag');
+assert(entrancePending({session:true,storageBlocked:true}),'The entrance does not depend on persistent storage');
+assert(entrancePending({hash:'#projects',reload:true}),'Refreshing a section URL also replays the entrance');
 assert(!entrancePending({hash:'#projects'}),'Direct project navigation skips the entrance');
 assert(!entrancePending({reduced:true}),'Automatic motion respects the OS');
 assert(!entrancePending({paused:true}),'A paused scene skips automatic motion');
@@ -84,7 +87,7 @@ for(const aspect of [320/844,390/844,768/1024,1440/900,2560/1080]){
   for(let time=0;time<=INTRO_DURATION;time+=16){
     const pose=introPose(time),frame=cameraFrame(pose.pitch,pose.yaw,aspect);
     assert(pose.pitch>=previous.pitch&&pose.dissolve>=previous.dissolve&&pose.assemble>=previous.assemble&&pose.reveal>=previous.reveal,'Camera and transformation progress never reverse');
-    assert(Math.abs(pose.pitch-previous.pitch)<.02,'No jumps between frames');
+    assert(Math.abs(pose.pitch-previous.pitch)<.025,'No jumps between frames');
     camera.position.set(...frame.position);camera.up.set(...frame.up);camera.lookAt(...frame.target);camera.updateMatrixWorld();
     for(const x of [-4.45,4.45])for(const y of [-.14,1.85])for(const z of [-4.45,4.45]){
       const p=new Vector3(x,y,z).project(camera);

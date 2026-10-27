@@ -1,11 +1,13 @@
-export const INTRO_DURATION = 9600;
+export const INTRO_DURATION = 7500;
 export const smooth = value => { const t = Math.max(0, Math.min(1, value)); return t*t*t*(t*(t*6-15)+10); };
 export function introPose(elapsed) {
-  const turn = smooth((elapsed - 650) / 1250),reveal=smooth((elapsed-6500)/2850);
+  // Preserve the approved choreography, playing it about 28% faster.
+  const time=elapsed*9600/INTRO_DURATION;
+  const turn = smooth((time - 650) / 1250),reveal=smooth((time-6500)/2850);
   return {pitch:.19+(.88-.19)*turn, yaw:.28*(1-turn), dock:0,
-    appearance:smooth(elapsed/700),dissolve:smooth((elapsed-1800)/1200),
-    matrix:smooth((elapsed-3650)/1550),assemble:smooth((elapsed-4400)/2550),reveal,time:elapsed/1000,
-    curtain:1-reveal,caption:1-smooth((elapsed-1750)/1000),controls:1-smooth((elapsed-8300)/700),
+    appearance:smooth(time/700),dissolve:smooth((time-1800)/1200),
+    matrix:smooth((time-3650)/1550),assemble:smooth((time-4400)/2550),reveal,time:time/1000,
+    curtain:1-reveal,caption:1-smooth((time-1750)/1000),controls:1-smooth((time-8300)/700),
     progress:Math.min(1,Math.max(0,elapsed/INTRO_DURATION))};
 }
 
