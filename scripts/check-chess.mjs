@@ -101,8 +101,9 @@ for(const [name,geometry] of Object.entries(geometries)){
 for(const lang of ['es','en']){
   const built=await readFile(new URL(`../dist/${lang}/index.html`,import.meta.url),'utf8');
   const html=basePath?built.replaceAll(`/${basePath}/`,'/'):built;
-  assert.match(html,/<img class="chess-poster"[^>]+staunton-poster.webp/,'Loading uses the rendered board');
-  assert.match(html,/<link rel="preload" as="image" href="\/assets\/chess\/staunton-poster.webp"/);
+  assert(!html.includes('personal-opening')&&!html.includes('data-chess-stage'),'The small biography chess block is removed');
+  assert(!html.includes('staunton-poster.webp'),'The removed biography image is not loaded');
+  assert.match(html,/data-intro="cinematic"/,'The hero keeps an explicit intro replay control');
   assert(!html.includes('chess-fallback'),'Never flash Unicode pieces during navigation');
 }
 for(const aspect of [320/844,390/844,768/1024,1440/900,2560/1080]){
@@ -120,4 +121,4 @@ for(const aspect of [320/844,390/844,768/1024,1440/900,2560/1080]){
     previous=pose;
   }
 }
-console.log('PASS: 32 pieces, six valid Staunton meshes, correct starting position, continuous camera at five aspect ratios, and identical board posters preloaded in both languages.');
+console.log('PASS: 32 pieces, six valid Staunton meshes, correct starting position, continuous camera at five aspect ratios, and intro controls without the biography chess block in both languages.');

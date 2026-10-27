@@ -1,7 +1,7 @@
 import {introPose, INTRO_DURATION} from './chess-timeline.js';
 import {captureIntroPage} from './intro-page.js';
 
-const host=document.querySelector('[data-chess-stage]');
+const home=document.querySelector('.experience-hero');
 const es=document.documentElement.lang==='es';
 const query=new URLSearchParams(location.search);
 const requested=query.get('intro');
@@ -9,30 +9,26 @@ const forced=['cinematic','squares','knight'].includes(requested);
 const disabled=requested==='off'||query.get('motion')==='off';
 const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
 const controls=[...document.querySelectorAll('[data-intro]')];
-let scene,loading,active,disposed=false;
+let scene,active,disposed=false;
 
 function clearPending(){document.documentElement.classList.remove('intro-pending');clearTimeout(window.chessIntroWatchdog);}
-async function getScene(){
-  if(scene)return scene;
-  if(!loading)loading=import('./chess-scene.js').then(module=>module.createChessScene(document.querySelector('.chess-canvas'))).then(result=>{
-    if(disposed){result.dispose();return null;}
-    scene=result;host.classList.add('chess-ready');
-    if(!active)scene.render({pitch:Math.PI/2,yaw:0,dock:1});
+async function getScene(mount,isFinished){
+  return import('./chess-scene.js').then(module=>module.createChessScene(mount)).then(result=>{
+    if(disposed||isFinished()){result.dispose();return null;}
+    scene=result;
     return scene;
   }).catch(error=>{
-    host.dataset.render='fallback';
-    console.warn('Chess scene unavailable; static board retained.',error);
+    console.warn('Chess intro unavailable; showing the page.',error);
     return null;
   });
-  return loading;
 }
 async function playIntro(trigger){
-  if(active||!host||disposed)return;
+  if(active||!home||disposed)return;
   const overlay=document.createElement('div');overlay.className='chess-intro';
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label',es?'Del ajedrez al código. Animación de entrada.':'From chess to code. Entrance animation.');
   overlay.innerHTML=`<div class="intro-curtain"></div><div class="intro-meta"><span>av.</span><span>SOFTWARE / ${es?'IA LOCAL':'LOCAL AI'} / HARDWARE</span></div><div class="intro-caption"><span>ALEJANDRO VILLARRUBIA</span><p>${es?'Curiosidad para construir.':'Curiosity to build.'}</p></div><div class="intro-progress" aria-hidden="true"><i></i></div><button class="intro-skip" type="button">${es?'Saltar intro':'Skip intro'} <span aria-hidden="true">↗</span></button>`;
-  const mount=host.querySelector('.chess-canvas');
+  const mount=document.createElement('div');mount.className='chess-canvas';
   const previousFocus=document.activeElement,previousOverflow=document.body.style.overflow;
   const previousScroll=scrollY;
   const underlying=[...document.body.children].filter(el=>el.tagName!=='SCRIPT');
@@ -51,11 +47,10 @@ async function playIntro(trigger){
     if(finished)return;finished=true;
     cancelAnimationFrame(raf);clearTimeout(watchdog);captureController.abort();
     document.removeEventListener('keydown',key);document.removeEventListener('visibilitychange',visibility);
-    host.prepend(mount);mount.removeAttribute('style');overlay.remove();
+    scene?.dispose();scene=null;overlay.remove();
     document.body.style.overflow=previousOverflow;
     underlying.forEach((el,i)=>el.inert=inertStates[i]);
     document.documentElement.classList.remove('intro-playing');clearPending();
-    scene?.render({pitch:Math.PI/2,yaw:0,dock:1});
     active=null;
     if(trigger)previousFocus?.focus({preventScroll:true});
     else if(document.activeElement===document.body)document.querySelector('.hero-actions .primary')?.focus({preventScroll:true});
@@ -64,6 +59,7 @@ async function playIntro(trigger){
   const key=event=>{if(event.key==='Escape')finish();if(event.key==='Tab'){event.preventDefault();skip.focus({preventScroll:true});}};
   const visibility=()=>{last=0;if(document.hidden){cancelAnimationFrame(raf);}else if(started&&!finished){raf=requestAnimationFrame(frame);}};
   active={finish};watchdog=setTimeout(finish,14000);
+  mount.addEventListener('chess:lost',finish,{once:true});
   skip.addEventListener('click',finish);document.addEventListener('keydown',key);document.addEventListener('visibilitychange',visibility);
   skip.focus({preventScroll:true});clearPending();
   if(trigger&&previousScroll>20)window.scrollTo({top:0,left:0,behavior:'instant'});
@@ -77,7 +73,7 @@ async function playIntro(trigger){
     pageReady.then(()=>captureIntroPage(captureController.signal)),
     new Promise(resolve=>{captureTimer=setTimeout(()=>{captureController.abort();resolve(null);},3500);}),
   ]).finally(()=>clearTimeout(captureTimer));
-  const [renderScene,pageGuide]=await Promise.all([getScene(),guidePromise]);
+  const [renderScene,pageGuide]=await Promise.all([getScene(mount,()=>finished),guidePromise]);
   if(finished)return;
   if(!renderScene){finish();return;}
   renderScene.setPageGuide(pageGuide);
@@ -98,15 +94,12 @@ async function playIntro(trigger){
   raf=requestAnimationFrame(frame);
 }
 
-if(host){
+if(home){
   controls.forEach(button=>button.addEventListener('click',()=>playIntro(button)));
-  host.querySelector('.chess-canvas').addEventListener('chess:lost',()=>{active?.finish();host.classList.remove('chess-ready');scene?.dispose();scene=null;loading=null;});
-  const observer=new ResizeObserver(()=>{if(!active)scene?.render();});observer.observe(host);
   if(forced||((['','#top','#home'].includes(location.hash)||reloading)&&!disabled))playIntro();
-  else {clearPending();getScene();}
+  else clearPending();
   window.addEventListener('pagehide',event=>{
     active?.finish();
-    if(!event.persisted){disposed=true;observer.disconnect();scene?.dispose();}
+    if(!event.persisted)disposed=true;
   });
-  window.addEventListener('pageshow',event=>{if(event.persisted&&!active)scene?.render();});
 }else clearPending();

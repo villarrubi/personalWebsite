@@ -27,4 +27,4 @@ h2{font:400 clamp(44px,5.6vw,86px)/.98 var(--serif);letter-spacing:-.035em}.sele
  @keyframes slide-arrive{from{opacity:.3;transform:translateY(8px)}to{opacity:1;transform:none}}
  ::view-transition-old(root){animation-duration:.2s}::view-transition-new(root){animation-duration:.35s}
 }
-@media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*:not(.chess-intro[data-preview]):not(.chess-intro[data-preview] *),*:before,*:after{animation:none!important;transition:none!important}.reveal-ready{opacity:1;transform:none}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+@media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*:not(.chess-intro[data-preview]):not(.chess-intro[data-preview] *):not(.solar-system):not(.solar-system *),*:not(.solar-system *):before,*:not(.solar-system *):after{animation:none!important;transition:none!important}.reveal-ready{opacity:1;transform:none}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
