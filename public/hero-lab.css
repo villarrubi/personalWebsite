@@ -1,6 +1,8 @@
 /* A typographic opening against the same midnight sky. */
 .experience-hero{position:relative;isolation:isolate;overflow:hidden;padding:0;background:#061327}
 .experience-atmosphere{position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 75% 43%,#1f535f3b,transparent 47%),radial-gradient(ellipse at 98% 5%,#b8926320,transparent 36%),radial-gradient(ellipse at 0% 95%,#24396130,transparent 45%)}
+/* Fade the decorative light into the shared background before the section seam. */
+.experience-atmosphere{mask-image:linear-gradient(to bottom,#000 calc(100% - clamp(140px,22svh,240px)),transparent 100%)}
 .experience-atmosphere:after{content:'';position:absolute;inset:0;opacity:.35;background-image:radial-gradient(circle,#a4c9df 1px,transparent 1.5px),radial-gradient(circle,#a4c9df 1px,transparent 1.5px);background-size:193px 177px,347px 269px;background-position:81px 43px,23px 131px;mask-image:linear-gradient(transparent,#0009 20%,#000 70%,transparent)}
 .experience-layout{position:relative;min-height:clamp(720px,calc(100svh - 84px),960px);display:flex;align-items:center;padding-block:70px 130px}
 .experience-copy{position:relative;z-index:3;width:100%;pointer-events:none}
