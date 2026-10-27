@@ -6,8 +6,8 @@ import { layoutPlanets } from '../public/solar-layout.js';
 import { createOrbitPaths, orbitPoint } from '../public/solar-motion.js';
 import {basePath} from './deploy-paths.mjs';
 const root=resolve(import.meta.dirname,'../dist');
-const pages=[];
-async function walk(dir){for(const file of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,file.name);if(file.isDirectory())await walk(path);else if(path.endsWith('.html'))pages.push(path);}}
+const pages=[],assets=[];
+async function walk(dir){for(const file of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,file.name);if(file.isDirectory()){if(file.name!=='vendor')await walk(path);}else if(path.endsWith('.html'))pages.push(path);else if(/\.(js|css)$/.test(path))assets.push(path);}}
 await walk(root);
 assert.equal(pages.length,4+publishedProjects.length*2,'Only published project pages are generated');
 const hiddenProjects=projects.filter(p=>p.published!==true);
@@ -25,11 +25,27 @@ for(const path of pages){
  for(const [,href] of html.matchAll(/(?:href|src)="([^"#]+)(?:#[^"]*)?"/g)){
   if(/^(https?:|mailto:|data:)/.test(href))continue;
   if(basePath&&href.startsWith('/'))assert(href.startsWith(`/${basePath}/`),`URL must include deployment prefix: ${href}`);
-  const local=basePath&&href.startsWith(`/${basePath}/`)?href.slice(basePath.length+1):href;
+  const pathname=href.split('?')[0];
+  const local=basePath&&pathname.startsWith(`/${basePath}/`)?pathname.slice(basePath.length+1):pathname;
   const target=local.startsWith('/')?resolve(root,'.'+local):resolve(dirname(path),local);
   try{await stat(target);links++;}catch{throw new Error(`Broken local link: ${href} in ${path}`);}
  }
 }
+// Every first-party entry point and dependency must use the same cache version,
+// including dynamic JS imports and stylesheets imported from other stylesheets.
+const assetVersions=new Set();
+for(const path of [...pages,...assets]){
+ const source=await readFile(path,'utf8');
+ for(const [,href,version] of source.matchAll(/["'(]((?:\.{1,2}\/|\/)[^"'()\s?#]+\.(?:js|css))(?:\?v=([a-f\d]{12}))?(?=["')])/g)){
+  if(href.includes('/assets/vendor/'))continue;
+  assert(version,`Unversioned dependency: ${href} in ${path}`);
+  assetVersions.add(version);
+  const local=basePath&&href.startsWith(`/${basePath}/`)?href.slice(basePath.length+1):href;
+  const target=local.startsWith('/')?resolve(root,'.'+local):resolve(dirname(path),local);
+  await stat(target);
+ }
+}
+assert.equal(assetVersions.size,1,'All first-party JS and CSS belong to the same build');
 assert.equal(new Set(projects.map(p=>p.id)).size,projects.length);
 for(const p of projects){
  assert(p.published===undefined||typeof p.published==='boolean',`Publication flag must be a boolean: ${p.id}`);

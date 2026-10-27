@@ -10,7 +10,7 @@ Doble clic en **Abrir web.cmd**. La vista previa abre la portada. La entrada com
 npm run dev
 ```
 
-Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, con español disponible desde el selector ES. La carpeta `dist/` se puede servir en cualquier alojamiento estático. Publicación en GitHub Pages: https://villarrubi.github.io/personalWebsite/ . El workflow `.github/workflows/pages.yml` construye y valida la web antes de publicar cada cambio de `main`. `SITE_BASE_PATH` adapta los enlaces, estilos y recursos a la subcarpeta de Pages; sin esa variable la vista local sigue usando la raíz.
+Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, con español disponible desde el selector ES. La carpeta `dist/` se puede servir en cualquier alojamiento estático. Publicación en GitHub Pages: https://villarrubi.github.io/personalWebsite/ . El workflow `.github/workflows/pages.yml` construye y valida la web antes de publicar cada cambio de `main`. `SITE_BASE_PATH` adapta los enlaces, estilos y recursos a la subcarpeta de Pages; sin esa variable la vista local sigue usando la raíz. Cada build añade una versión basada en el contenido a los scripts, estilos y sus importaciones, para que el navegador cargue los cambios publicados sin reutilizar JavaScript antiguo de la caché.
 
 ## Editar
 
