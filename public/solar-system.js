@@ -16,7 +16,7 @@ if(root){
  let active=location.hash==='#complementary'?'side':'featured';
  let capacity=10,pageCount=1,visible=false,timer,arrivalTimer;
  const world=()=>worlds.find(item=>item.dataset.mapWorld===active);
- const groupName=()=>active==='featured'?(es?'Destacados':'Featured'):(es?'Complementarios':'Side projects');
+ const groupName=()=>active==='featured'?(es?'Realizados':'Completed'):(es?'En desarrollo':'In development');
 
  function schedule(){
   clearTimeout(timer);

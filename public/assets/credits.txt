@@ -15,3 +15,8 @@ html2canvas 1.4.1: MIT, /assets/vendor/HTML2CANVAS-LICENSE.txt
 https://github.com/niklasvh/html2canvas
 DM Sans: OFL, /assets/fonts/OFL.txt
 Instrument Serif: OFL, /assets/fonts/InstrumentSerif-OFL.txt
+
+Atlas celular: original procedural geometry by Alejandro Villarrubia, adapted as a simplified interior preview. Attribution: /assets/atlas/ATTRIBUTION.txt
+Atlas preview image rendered from these models.
+Phishing screenshot: original thesis project, latex_figures/figura_6_1.png.
+Club Palentino screenshot: https://clubpalentinoajedrez.es/, captured 27 October 2026.

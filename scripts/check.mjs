@@ -2,6 +2,8 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 import { projects } from '../src/content.mjs';
+import { selectedWork } from '../src/selected-work.mjs';
+import { majorProjectIds } from '../src/project-map.mjs';
 import { layoutPlanets } from '../public/solar-layout.js';
 import { createOrbitPaths, orbitPoint } from '../public/solar-motion.js';
 import {basePath} from './deploy-paths.mjs';
@@ -24,6 +26,19 @@ for(const path of pages){
  }
 }
 assert.equal(new Set(projects.map(p=>p.id)).size,projects.length);
+assert(selectedWork.every(id=>projects.some(p=>p.id===id&&p.status==='built')),'Selected work is completed');
+assert.deepEqual(majorProjectIds,projects.filter(p=>p.status==='built').map(p=>p.id),'The first orbital group contains completed work');
+for(const lang of ['es','en']){
+ const html=await readFile(resolve(root,lang,'index.html'),'utf8');
+ const sectionIds=['home','projects','about','universe','contact'];
+ const positions=sectionIds.map(id=>html.indexOf(`id="${id}"`));
+ assert(positions.every((position,i)=>position>=0&&(i===0||position>positions[i-1])),'Home prioritises selected work and keeps experiments after experience');
+ assert.equal((html.match(/id="projects"/g)||[]).length,1,'Project navigation has one target');
+ const selected=html.slice(positions[1],positions[2]);
+ for(const id of selectedWork)assert(selected.includes(`/projects/${id}/`),'Every selected case is linked');
+ assert.match(html,/<div class="atlas-controls" hidden>/,'Unavailable 3D controls stay hidden without JavaScript');
+ assert.match(html,/<img class="atlas-poster"[^>]+fetchpriority="high"/,'The first view has an eager image fallback');
+}
 for(const p of projects){
  assert(['public','private'].includes(p.visibility),`Explicit source visibility: ${p.id}`);
  if(p.visibility==='public')assert.match(p.repo||'',/^https:\/\/github\.com\/villarrubi\/[^/]+$/,`Public repository: ${p.id}`);
