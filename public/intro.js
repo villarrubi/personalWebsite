@@ -72,15 +72,16 @@ async function playIntro(trigger){
   if(!renderScene){finish();return;}
   if(trigger&&previousScroll>20)window.scrollTo({top:0,left:0,behavior:'instant'});
   overlay.classList.add('is-ready');started=true;
+  clearTimeout(watchdog);watchdog=setTimeout(finish,INTRO_DURATION+5000);
   function frame(now){
     if(finished||document.hidden)return;
     if(last)elapsed+=Math.min(now-last,250);last=now;
-    const pose=still?{pitch:.88,yaw:0,dock:0,appearance:1-Math.min(1,elapsed/650),dissolve:0,curtain:1-Math.min(1,elapsed/650),caption:0,controls:0,progress:1}:introPose(elapsed);
-    curtain.style.opacity=pose.curtain;meta.style.opacity=pose.caption;caption.style.opacity=pose.caption;
+    const pose=still?{pitch:.88,yaw:0,dock:0,appearance:1-Math.min(1,elapsed/650),dissolve:0,reveal:Math.min(1,elapsed/650),caption:0,controls:0,progress:1}:introPose(elapsed);
+    meta.style.opacity=pose.caption;caption.style.opacity=pose.caption;
     progress.style.transform=`scaleX(${pose.progress})`;
     progress.parentElement.style.opacity=pose.controls;skip.style.opacity=pose.controls;
-    renderScene.render(pose,innerWidth,innerHeight);mount.style.opacity='1';
-    overlay.dataset.phase=pose.dissolve===0?'board':pose.curtain>.5?'code':'reveal';
+    renderScene.render(pose,innerWidth,innerHeight);mount.style.opacity='1';curtain.style.opacity='0';
+    overlay.dataset.phase=pose.reveal>0?'reveal':pose.matrix>0?'matrix':pose.dissolve>0?'board-code':'board';
     if(elapsed>=(still?650:INTRO_DURATION))finish();else raf=requestAnimationFrame(frame);
   }
   raf=requestAnimationFrame(frame);

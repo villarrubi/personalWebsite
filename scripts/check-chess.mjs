@@ -22,11 +22,17 @@ assert.equal(introPose(0).pitch,introPose(600).pitch,'Hold the lateral view befo
 assert(Math.abs(introPose(2200).pitch-.88)<1e-12,'Settle the camera before the code disperses');
 assert.equal(introPose(2900).curtain,1);
 assert.equal(introPose(0).appearance,0,'The board fades in without a first-frame flash');
-assert.equal(introPose(2000).dissolve,0,'Show the complete board before dissolving');
-assert(introPose(3500).dissolve>0&&introPose(3500).curtain<1,'Code and page share the transition');
+assert.equal(introPose(1800).dissolve,0,'Show the complete board before converting it');
+assert.equal(introPose(3500).dissolve,1,'Hold the fully reconstructed code chessboard');
+assert.equal(introPose(3500).matrix,0,'The background waits until the code board is readable');
+assert.equal(introPose(3500).curtain,1,'Keep the page covered during the board transformation');
+assert.equal(introPose(5600).matrix,1,'The whole background becomes code');
+assert.equal(introPose(5600).reveal,0,'Hold the full Matrix field before clearing it');
+assert(introPose(7000).reveal>0,'Only the last phase uncovers the page');
 assert.equal(introPose(INTRO_DURATION).dissolve,1,'All code has vanished before removing the overlay');
 assert.equal(introPose(INTRO_DURATION).dock,0,'Do not shrink the board into the page');
 assert.equal(introPose(INTRO_DURATION).curtain,0);
+assert.equal(introPose(INTRO_DURATION).reveal,1,'Finish every column before removing the overlay');
 // A returning visitor must not get another blocking entrance, even in a new
 // session. Keep deep links and OS motion preferences working independently.
 const boot=await readFile(new URL('../public/intro-boot.js',import.meta.url),'utf8');

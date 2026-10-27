@@ -14,7 +14,7 @@ html{scrollbar-gutter:stable}
 .chess-caption p{font:24px/1.12 var(--serif);letter-spacing:-.01em}.chess-caption>a{font-size:10px;color:var(--muted)}
 .hero-project-links{display:flex;gap:22px;margin-top:18px;font-size:10px;color:var(--muted)}.hero-project-links a:hover{color:var(--ink)}.hero-project-links span{font-size:8px;margin-right:6px;color:#7087a7}
 .intro-pending:after{content:'';position:fixed;inset:0;background:#061327;z-index:200;animation:pending-release 0s 12s forwards}
-.chess-intro{position:fixed;inset:0;z-index:200;color:#eee9dd;overflow:hidden;isolation:isolate}
+.chess-intro{position:fixed;inset:0;width:100vw;z-index:200;color:#eee9dd;overflow:hidden;isolation:isolate}
 .intro-curtain{position:absolute;inset:0;background:#061327}
 .chess-intro .chess-canvas{inset:auto;z-index:1}
 .intro-meta{position:absolute;top:32px;left:4%;right:4%;display:flex;justify-content:space-between;align-items:center;z-index:3;pointer-events:none}
