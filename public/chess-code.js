@@ -18,11 +18,23 @@ export function createChessCode(T,renderer){
   uniform sampler2D boardDepth;uniform mat4 sourceInverse;uniform mat4 sourceWorld;
   uniform float progress;uniform float appearance;uniform float background;uniform float assemble;uniform float pageReady;uniform float reveal;uniform float time;uniform vec2 grid;
   float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-  float heightAt(vec2 source){vec4 view=sourceInverse*vec4(source*2.-1.,texture2D(boardDepth,source).x*2.-1.,1.);return (sourceWorld*(view/view.w)).y;}
+  vec3 worldAt(vec2 source){vec4 view=sourceInverse*vec4(source*2.-1.,texture2D(boardDepth,source).x*2.-1.,1.);return (sourceWorld*(view/view.w)).xyz;}
+  float heightAt(vec2 source){return worldAt(source).y;}
   float conversion(vec2 cell){
    vec2 source=(cell+.5)/grid;
-   float start=.08+source.x*.38+(1.-source.y)*.22+hash(cell)*.12;
-   return smoothstep(start-.13,start+.13,progress*1.3-.15);
+   // Anchor five origins to the physical board, so they stay on its surface on
+   // narrow screens too. The fronts grow outward, overlap, and never retreat.
+   vec2 point=worldAt(source).xz;
+   float arrival=length(point-vec2(-2.8,-2.3))/3.25;
+   arrival=min(arrival,length(point-vec2(2.4,-1.7))/3.25+.025);
+   arrival=min(arrival,length(point-vec2(-2.1,2.5))/3.25+.045);
+   arrival=min(arrival,length(point-vec2(2.5,2.7))/3.25+.015);
+   arrival=min(arrival,length(point-vec2(.15,.2))/3.25+.07);
+   arrival+=hash(cell)*.035;
+   float fronts=smoothstep(arrival-.075,arrival+.075,progress*1.3-.08);
+   // Silhouette cells may sample the empty depth just outside a piece. Finish
+   // those edge pixels gently too, leaving the same fully white code sculpture.
+   return mix(fronts,1.,smoothstep(.88,1.,progress));
   }
   float assembly(vec2 cell){float seed=hash(cell+31.);return smoothstep(.02+seed*.12,.83+seed*.12,assemble)*pageReady;}
   float resolved(vec2 cell){
