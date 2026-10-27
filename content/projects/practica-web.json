@@ -1,0 +1,42 @@
+{
+  "id": "practica-web",
+  "published": false,
+  "visibility": "private",
+  "name": "Desarrollo Web II",
+  "enName": "Web Development II",
+  "year": "2026",
+  "status": "built",
+  "visual": "planning",
+  "tags": [
+    "Web",
+    "Universidad"
+  ],
+  "category": {
+    "es": "Aprendizaje / Desarrollo web",
+    "en": "Learning / Web development"
+  },
+  "summary": {
+    "es": "Práctica académica de desarrollo web, como parte de mi formación en informática.",
+    "en": "An academic web development assignment from my computer engineering studies."
+  },
+  "idea": {
+    "es": "Aplicar los contenidos de la asignatura de Desarrollo Web II a una práctica académica.",
+    "en": "Applying Web Development II coursework in an academic assignment."
+  },
+  "built": {
+    "es": [
+      "Proyecto académico basado en el enunciado de la asignatura.",
+      "Conservado en el archivo como parte del recorrido de aprendizaje."
+    ],
+    "en": [
+      "Academic project based on the course assignment.",
+      "Kept in the archive as part of my learning journey."
+    ]
+  },
+  "stage": {
+    "es": "Práctica realizada. El repositorio es privado.",
+    "en": "Completed assignment. The repository is private."
+  },
+  "featured": false,
+  "order": 150
+}

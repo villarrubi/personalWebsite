@@ -1,0 +1,46 @@
+{
+  "id": "aquilae",
+  "published": true,
+  "visibility": "public",
+  "name": "AQUILAE",
+  "year": "2025",
+  "status": "built",
+  "visual": "map",
+  "repo": "https://github.com/villarrubi/TFM_Juan",
+  "tags": [
+    "Java 17",
+    "Swing",
+    "Java2D",
+    "Maven"
+  ],
+  "category": {
+    "es": "Simulación / Historia",
+    "en": "Simulation / History"
+  },
+  "summary": {
+    "es": "Un simulador de estrategia ambientado en el Imperio romano, con un mapa vectorial de 28 provincias.",
+    "en": "A strategy simulator set in the Roman Empire, featuring a vector map of 28 provinces."
+  },
+  "idea": {
+    "es": "Convertir un planteamiento académico en una herramienta interactiva. Desarrollo técnico de apoyo a un Trabajo de Fin de Máster de la Universidad de Valladolid.",
+    "en": "Turning an academic concept into an interactive tool. Technical development supporting a master’s thesis at the University of Valladolid."
+  },
+  "built": {
+    "es": [
+      "Simulador de estrategia inspirado en Risk.",
+      "Mapa histórico vectorial con 28 provincias.",
+      "Interfaz de escritorio con Java Swing y Java2D."
+    ],
+    "en": [
+      "Risk-inspired strategy simulator.",
+      "Historical vector map with 28 provinces.",
+      "Desktop interface built with Java Swing and Java2D."
+    ]
+  },
+  "stage": {
+    "es": "Simulador realizado como colaboración técnica para el TFM.",
+    "en": "Completed simulator developed as a technical contribution to the thesis."
+  },
+  "featured": false,
+  "order": 50
+}

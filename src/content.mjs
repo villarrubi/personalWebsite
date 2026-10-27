@@ -1,3 +1,5 @@
+import { loadProjectCatalog } from './project-catalog.mjs';
+
 export const profile = {
   name: 'Alejandro Villarrubia',
   email: 'avillarrubia2@gmail.com',
@@ -58,131 +60,7 @@ export const copy = {
   },
 };
 
-const bilingual = (es, en) => ({ es, en });
-export const projects = [
-  {
-    id: 'chessbot', published: true, visibility: 'public', name: 'ChessBot', year: '2026', status: 'development', featured: true, visual: 'chess', repo: 'https://github.com/villarrubi/ChessBot',
-    tags: ['C++20', 'Python', 'C#', 'UCI', 'Ollama'], category: bilingual('Algoritmos / IA local', 'Algorithms / Local AI'),
-    summary: bilingual('Un motor de ajedrez propio. De las reglas y la búsqueda a una aplicación para jugar, analizar y experimentar.', 'A chess engine built from scratch. From rules and search to an application for playing, analysing, and experimenting.'),
-    idea: bilingual('Entender cómo toma decisiones un motor de ajedrez construyendo uno desde sus fundamentos. Un proyecto donde se encuentran mi afición al ajedrez, los algoritmos y la inteligencia artificial.', 'Understanding how a chess engine makes decisions by building one from the ground up. A meeting point for my interest in chess, algorithms, and artificial intelligence.'),
-    built: bilingual(['Motor propio en C++20 con reglas, búsqueda, evaluación y protocolo UCI.', 'Aplicación Windows para jugar y analizar PGN, FEN, variantes y alternativas.', 'Herramientas de autojuego y experimentación con evaluadores NNUE; explicaciones opcionales mediante Ollama local.'], ['Custom C++20 engine with rules, search, evaluation, and UCI support.', 'Windows application for playing and analysing PGN, FEN, variations, and alternatives.', 'Self-play tools and NNUE evaluation experiments; optional explanations through local Ollama models.']),
-    stage: bilingual('Motor y aplicación funcionales, con entrenamiento y evaluación en desarrollo. La fuerza de juego no tiene una certificación Elo; los experimentos se contrastan antes de promover cambios.', 'Working engine and application, with training and evaluation under development. Playing strength has no certified Elo rating; experiments are compared before changes are promoted.'),
-    capture: '/assets/images/chessbot-training.png',
-  },
-  {
-    id: 'pipa', published: true, visibility: 'public', name: 'Pipα', year: '2026', status: 'development', featured: true, visual: 'pipa', repo: 'https://github.com/villarrubi/Pipa-Personal-Assistant',
-    tags: ['Python', 'ESP32-S3', 'C++', 'Swift'], category: bilingual('Hardware / Asistente local', 'Hardware / Local assistant'),
-    summary: bilingual('Un asistente local que une voz, software y un dispositivo físico para controlar el ordenador.', 'A local assistant connecting voice, software, and a physical device to control a computer.'),
-    idea: bilingual('Dar una forma física a un asistente personal: pedir una acción, saber qué va a ocurrir y conservar el control. El núcleo vive en el ordenador y se comunica con una interfaz ESP32-S3.', 'Giving a personal assistant a physical form: ask for an action, understand what will happen, and stay in control. The core runs on the computer and communicates with an ESP32-S3 interface.'),
-    built: bilingual(['Agente Windows con panel de procesos, comandos configurables y confirmaciones.', 'Control de aplicaciones, multimedia y temporizadores, con integraciones opcionales.', 'Firmware ESP32-S3, transporte cifrado por USB y trabajo experimental en voz local y cliente iOS.'], ['Windows agent with a process panel, configurable commands, and confirmations.', 'Application, media, and timer control, with optional integrations.', 'ESP32-S3 firmware, encrypted USB transport, and experimental work on local voice and an iOS client.']),
-    stage: bilingual('El agente local es funcional. El firmware, la voz, el cliente iOS y otros componentes experimentales tienen validaciones específicas pendientes.', 'The local agent is functional. Firmware, voice, the iOS client, and other experimental components still require their specific validation.'),
-  },
-  {
-    id: 'mapforge', published: true, visibility: 'private', name: 'MapForge', year: '2026', status: 'development', featured: true, visual: 'map',
-    tags: ['TypeScript', 'Canvas 2D', 'Electron'], category: bilingual('Herramientas / Mundos 2D', 'Tools / 2D worlds'),
-    summary: bilingual('Un editor de mundos 2D: dibujar terreno, dar forma al paisaje y preparar escenarios para Deriva.', 'A 2D world editor: paint terrain, shape a landscape, and prepare environments for Deriva.'),
-    idea: bilingual('Construir mundos que se puedan editar, guardar y reutilizar. MapForge es la herramienta de creación; Deriva es la exploración de simulación que podrá utilizar esos escenarios.', 'Building worlds that can be edited, saved, and reused. MapForge is the creation tool; Deriva is the simulation exploration that can use those environments.'),
-    built: bilingual(['Editor de escritorio con pinceles, capas, objetos, historial y minimapa.', 'Generación de islas, valles y archipiélagos mediante semillas reproducibles.', 'Edición de elevación, temperatura, agua y recursos; exportación de mundos a JSON versionado.'], ['Desktop editor with brushes, layers, objects, history, and a minimap.', 'Island, valley, and archipelago generation with reproducible seeds.', 'Elevation, temperature, water, and resource editing; versioned JSON world exports.']),
-    stage: bilingual('Existe una aplicación funcional de Windows. El editor sigue evolucionando; la simulación de poblaciones pertenece al trabajo pendiente de Deriva.', 'A functional Windows application is available. The editor is evolving; population simulation remains future work in Deriva.'),
-    capture: '/assets/images/mapforge.png',
-  },
-  {
-    id: 'phishing', published: true, visibility: 'public', name: 'Detector de phishing', enName: 'Phishing detector', year: '2026', status: 'built', visual: 'security', repo: 'https://github.com/villarrubi/TFG',
-    tags: ['Python', 'scikit-learn', 'Streamlit', 'MLP'], category: bilingual('Ciberseguridad / TFG', 'Cybersecurity / Thesis'),
-    summary: bilingual('Análisis de correo con reglas explicables y modelos de aprendizaje automático en español e inglés.', 'Email analysis with explainable rules and machine learning models in Spanish and English.'),
-    idea: bilingual('Combinar indicios comprensibles con clasificación neuronal para estudiar la detección de phishing en correo electrónico. Desarrollado como Trabajo de Fin de Grado.', 'Combining understandable signals with neural classification to study email phishing detection. Developed as my bachelor’s thesis.'),
-    built: bilingual(['Modos heurístico, neuronal y combinado sobre un backend común.', 'Pipeline TF-IDF + MLP y análisis de cabeceras, enlaces y contenido.', 'Interfaz web, extensión de Gmail y monitor opcional con alertas.'], ['Heuristic, neural, and combined modes on a shared backend.', 'TF-IDF + MLP pipeline and header, link, and content analysis.', 'Web interface, Gmail extension, and optional alert monitor.']),
-    stage: bilingual('Proyecto de TFG realizado. Los resultados del clasificador deben interpretarse dentro de sus datasets y evaluación, como apoyo al análisis.', 'Completed thesis project. Classifier results should be interpreted within their datasets and evaluation, as an aid to analysis.'),
-  },
-  {
-    id: 'aquilae', published: true, visibility: 'public', name: 'AQUILAE', year: '2025', status: 'built', visual: 'map', repo: 'https://github.com/villarrubi/TFM_Juan',
-    tags: ['Java 17', 'Swing', 'Java2D', 'Maven'], category: bilingual('Simulación / Historia', 'Simulation / History'),
-    summary: bilingual('Un simulador de estrategia ambientado en el Imperio romano, con un mapa vectorial de 28 provincias.', 'A strategy simulator set in the Roman Empire, featuring a vector map of 28 provinces.'),
-    idea: bilingual('Convertir un planteamiento académico en una herramienta interactiva. Desarrollo técnico de apoyo a un Trabajo de Fin de Máster de la Universidad de Valladolid.', 'Turning an academic concept into an interactive tool. Technical development supporting a master’s thesis at the University of Valladolid.'),
-    built: bilingual(['Simulador de estrategia inspirado en Risk.', 'Mapa histórico vectorial con 28 provincias.', 'Interfaz de escritorio con Java Swing y Java2D.'], ['Risk-inspired strategy simulator.', 'Historical vector map with 28 provinces.', 'Desktop interface built with Java Swing and Java2D.']),
-    stage: bilingual('Simulador realizado como colaboración técnica para el TFM.', 'Completed simulator developed as a technical contribution to the thesis.'),
-  },
-  {
-    id: 'chessprep', published: true, visibility: 'public', name: 'ChessPrep', year: '2026', status: 'development', visual: 'chess', repo: 'https://github.com/villarrubi/ChessPrep',
-    tags: ['Python', 'FastAPI', 'JavaScript', 'Stockfish'], category: bilingual('Ajedrez / Análisis de datos', 'Chess / Data analysis'),
-    summary: bilingual('Preparación de torneos a partir de partidas, repertorios y estadísticas trazables.', 'Tournament preparation through games, opening repertoires, and traceable statistics.'),
-    idea: bilingual('Reunir información ajedrecística útil para preparar una partida, manteniendo el vínculo entre cada conclusión y las partidas que la sustentan.', 'Bringing together useful chess information for game preparation, keeping every conclusion connected to the games behind it.'),
-    built: bilingual(['Dossiers con partidas de Lichess, Chess.com y archivos PGN.', 'Repertorios navegables, estadísticas y visor de partidas.', 'Stockfish en el navegador, búsqueda OTB y calculadora Elo.'], ['Player dossiers using Lichess, Chess.com, and PGN games.', 'Navigable repertoires, statistics, and a game viewer.', 'Browser-based Stockfish, over-the-board searches, and an Elo calculator.']),
-    stage: bilingual('MVP funcional en evolución, con análisis progresivo y trazabilidad de la información.', 'A functional, evolving MVP with progressive analysis and traceable information.'),
-  },
-  {
-    id: 'acuadros', published: true, visibility: 'public', name: 'aCuadros', year: '2026', status: 'built', visual: 'planning', repo: 'https://github.com/villarrubi/aCuadros',
-    tags: ['TypeScript', 'PWA', 'Offline'], category: bilingual('Producto / Organización', 'Product / Organisation'),
-    summary: bilingual('Un calendario instalable para reunir estudios, tareas, hábitos y comidas, también sin conexión.', 'An installable calendar bringing together study, tasks, habits, and meals, including offline use.'),
-    idea: bilingual('Organizar distintas partes del día en una herramienta personal cómoda para iPad.', 'Organising different parts of the day in a personal tool designed for comfortable iPad use.'),
-    built: bilingual(['Calendario con vistas de mes, semana y agenda.', 'Planificación de estudios, hábitos, rutinas, tareas y comidas.', 'Instalación como PWA, uso sin conexión y copias exportables.'], ['Month, week, and agenda calendar views.', 'Study, habit, routine, task, and meal planning.', 'PWA installation, offline use, and exportable backups.']),
-    stage: bilingual('Aplicación funcional, con mejoras de uso y mantenimiento.', 'A functional application with ongoing usability improvements and maintenance.'),
-  },
-  {
-    id: 'club-palentino', published: true, visibility: 'public', name: 'Club Palentino de Ajedrez', year: '2026', status: 'built', visual: 'chess', repo: 'https://github.com/villarrubi/clubPalentino', demo: 'https://clubpalentinoajedrez.es/',
-    tags: ['React', 'TypeScript', 'Node.js', 'SQLite'], category: bilingual('Web / Comunidad', 'Web / Community'),
-    summary: bilingual('La web del club, su escuela y una biblioteca de materiales para aprender ajedrez.', 'The club website, its school, and a library of chess learning materials.'),
-    idea: bilingual('Dar al club un espacio para informar, organizar actividades y compartir materiales de sus clases.', 'Giving the club a space to share information, organise activities, and distribute class materials.'),
-    built: bilingual(['Web pública con escuela, noticias, torneos y contacto.', 'Biblioteca de materiales con búsqueda y descarga.', 'Gestión de contenidos con perfiles de profesor y administrador.'], ['Public website with school information, news, tournaments, and contact.', 'Searchable, downloadable learning library.', 'Content management with teacher and administrator roles.']),
-    stage: bilingual('Web publicada y operativa.', 'Published and operational website.'),
-  },
-  {
-    id: 'atlas-celular', published: true, visibility: 'private', name: 'Atlas celular', enName: 'Cell atlas', year: '2026', status: 'built', visual: 'science',
-    tags: ['TypeScript', 'WebGL', '3D'], category: bilingual('Educación / Visualización', 'Education / Visualisation'),
-    summary: bilingual('Un atlas educativo con tres modelos celulares 3D desmontables para explorar en clase.', 'An educational atlas with three explorable, disassemblable 3D cell models for the classroom.'),
-    idea: bilingual('Hacer visible la estructura de las células con una herramienta interactiva que se pueda usar en clase sin conexión.', 'Making cell structures visible through an interactive tool usable offline in a classroom.'),
-    built: bilingual(['Modelos de célula animal, vegetal y bacteriana.', 'Exploración de estructuras mediante una interfaz 3D.', 'Versión portátil de Windows para uso local sin cuentas.'], ['Animal, plant, and bacterial cell models.', 'Structure exploration through a 3D interface.', 'Portable Windows version for local use without accounts.']),
-    stage: bilingual('Aplicación local realizada, con modelos originales y distribución portátil.', 'Completed local application with original models and a portable distribution.'),
-  },
-  {
-    id: 'deriva', published: true, visibility: 'private', localOnly: true, name: 'Deriva', year: '2026', status: 'development', visual: 'map',
-    tags: ['JavaScript', 'JSON', 'Simulación'], category: bilingual('Experimento / Ecosistemas', 'Experiment / Ecosystems'),
-    summary: bilingual('Un laboratorio en desarrollo para explorar ecosistemas, evolución y memoria individual.', 'A laboratory in development for exploring ecosystems, evolution, and individual memory.'),
-    idea: bilingual('Explorar comportamientos y poblaciones en mundos 2D preparados con MapForge.', 'Exploring behaviours and populations in 2D worlds prepared with MapForge.'),
-    built: bilingual(['Importador y validador de mundos MapForge v1 y v2.', 'Consultas de celdas, recursos y agua cercana.', 'Contrato de intercambio y pruebas del lector.'], ['MapForge v1 and v2 world importer and validator.', 'Cell, resource, and nearby water queries.', 'Interchange contract and reader tests.']),
-    stage: bilingual('Fase de diseño y fundamentos. La simulación de criaturas, evolución y poblaciones todavía no está implementada.', 'Design and foundations stage. Creature, evolution, and population simulation is not yet implemented.'),
-  },
-  {
-    id: 'mapviewer', published: true, visibility: 'private', name: 'MapViewer', year: '2026', status: 'development', visual: 'map',
-    tags: ['Cartografía', 'APIs', 'Desktop'], category: bilingual('Visualización / Datos abiertos', 'Visualisation / Open data'),
-    summary: bilingual('Un panel de escritorio para explorar el planeta mediante mapas, capas y eventos.', 'A desktop dashboard for exploring the planet through maps, layers, and events.'),
-    idea: bilingual('Reunir fenómenos geográficos en una interfaz visual, con origen y momento de actualización de los datos.', 'Bringing geographic phenomena into a visual interface with data provenance and update times.'),
-    built: bilingual(['Prototipo Windows con globo y mapa plano.', 'Panel de capas y selección de periodos temporales.', 'Consultas de eventos según las fuentes disponibles.'], ['Windows prototype with globe and flat map views.', 'Layer panel and time-period selection.', 'Event queries depending on available sources.']),
-    stage: bilingual('Prototipo ejecutable en desarrollo. La disponibilidad de cada capa depende de la cobertura de sus fuentes.', 'Runnable prototype under development. Layer availability depends on source coverage.'),
-  },
-  {
-    id: 'trader', published: true, visibility: 'private', name: 'Trader', year: '2026', status: 'development', visual: 'data',
-    tags: ['Python', 'Ollama', 'APIs'], category: bilingual('IA local / Análisis', 'Local AI / Analysis'),
-    summary: bilingual('Un laboratorio de análisis con modelos locales, fuentes consultables y simulación de decisiones.', 'An analysis laboratory with local models, inspectable sources, and simulated decisions.'),
-    idea: bilingual('Experimentar con varios roles de IA que contrastan información y explican sus propuestas en un entorno local.', 'Experimenting with multiple AI roles that compare information and explain proposals in a local environment.'),
-    built: bilingual(['Panel de seguimiento y conversación con un comité de IA.', 'Búsqueda de noticias, fuentes y actas consultables.', 'Herramientas de simulación y evaluación histórica.'], ['Monitoring dashboard and conversations with an AI committee.', 'News search, sources, and inspectable decision records.', 'Simulation and historical evaluation tools.']),
-    stage: bilingual('Proyecto experimental en desarrollo; el foco de esta presentación es su arquitectura y visualización.', 'Experimental project under development; this presentation focuses on its architecture and visualisation.'),
-  },
-  {
-    id: 'chatbot', published: true, visibility: 'private', name: 'Agente conversacional', enName: 'Conversational agent', year: '2026', status: 'development', visual: 'pipa',
-    tags: ['Python', 'FastAPI', 'SQLite'], category: bilingual('Asistentes / Automatización', 'Assistants / Automation'),
-    summary: bilingual('Una base local para gestionar conversaciones con borradores y acciones supervisadas.', 'A local foundation for managing conversations with drafts and supervised actions.'),
-    idea: bilingual('Explorar un asistente que tenga en cuenta el contexto de las conversaciones y mantenga la decisión final en manos del usuario.', 'Exploring an assistant that considers conversational context while leaving the final decision with the user.'),
-    built: bilingual(['Backend y modelos de conversaciones, contactos y permisos.', 'Flujos de aprobación y procesamiento de eventos.', 'Pruebas de arquitectura, persistencia e integración.'], ['Backend and conversation, contact, and permission models.', 'Approval workflows and event processing.', 'Architecture, persistence, and integration tests.']),
-    stage: bilingual('Fundamentos implementados. El despliegue y las integraciones de uso real siguen pendientes; el envío autónomo está desactivado.', 'Foundations implemented. Deployment and live integrations remain pending; autonomous sending is disabled.'),
-  },
-  {
-    id: 'lidar', published: false, visibility: 'private', name: 'Sistema LiDAR', enName: 'LiDAR system', year: '2025', status: 'built', visual: 'data',
-    tags: ['Python', 'C', 'LiDAR'], category: bilingual('Sensores / Integración', 'Sensors / Integration'),
-    summary: bilingual('Adquisición, procesamiento y visualización de datos para detección de objetos en vía.', 'Data acquisition, processing, and visualisation for railway object detection.'),
-    idea: bilingual('Integrar hardware y software para interpretar medidas de un sensor LiDAR. Trabajo realizado durante mis prácticas en REDALSA.', 'Integrating hardware and software to interpret LiDAR sensor measurements. Work completed during my internship at REDALSA.'),
-    built: bilingual(['Captura y procesamiento de señales.', 'Medición de distancias y representación de objetos.', 'Cálculos de trayectorias y posibles colisiones en tiempo real.'], ['Signal acquisition and processing.', 'Distance measurement and object representation.', 'Real-time trajectory and potential collision calculations.']),
-    stage: bilingual('Trabajo de prácticas realizado. Se presenta una descripción general de la experiencia de integración.', 'Completed internship work. Presented as a general account of the integration experience.'),
-  },
-  {
-    id: 'practica-web', published: false, visibility: 'private', name: 'Desarrollo Web II', enName: 'Web Development II', year: '2026', status: 'built', visual: 'planning',
-    tags: ['Web', 'Universidad'], category: bilingual('Aprendizaje / Desarrollo web', 'Learning / Web development'),
-    summary: bilingual('Práctica académica de desarrollo web, como parte de mi formación en informática.', 'An academic web development assignment from my computer engineering studies.'),
-    idea: bilingual('Aplicar los contenidos de la asignatura de Desarrollo Web II a una práctica académica.', 'Applying Web Development II coursework in an academic assignment.'),
-    built: bilingual(['Proyecto académico basado en el enunciado de la asignatura.', 'Conservado en el archivo como parte del recorrido de aprendizaje.'], ['Academic project based on the course assignment.', 'Kept in the archive as part of my learning journey.']),
-    stage: bilingual('Práctica realizada. El repositorio es privado.', 'Completed assignment. The repository is private.'),
-  },
-];
+export const projects = await loadProjectCatalog();
 
 // Publication is an explicit editorial choice, independent of status and source visibility.
 // Missing published flags default to hidden, including newly added projects.

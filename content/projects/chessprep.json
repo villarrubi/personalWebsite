@@ -1,0 +1,46 @@
+{
+  "id": "chessprep",
+  "published": true,
+  "visibility": "public",
+  "name": "ChessPrep",
+  "year": "2026",
+  "status": "development",
+  "visual": "chess",
+  "repo": "https://github.com/villarrubi/ChessPrep",
+  "tags": [
+    "Python",
+    "FastAPI",
+    "JavaScript",
+    "Stockfish"
+  ],
+  "category": {
+    "es": "Ajedrez / Análisis de datos",
+    "en": "Chess / Data analysis"
+  },
+  "summary": {
+    "es": "Preparación de torneos a partir de partidas, repertorios y estadísticas trazables.",
+    "en": "Tournament preparation through games, opening repertoires, and traceable statistics."
+  },
+  "idea": {
+    "es": "Reunir información ajedrecística útil para preparar una partida, manteniendo el vínculo entre cada conclusión y las partidas que la sustentan.",
+    "en": "Bringing together useful chess information for game preparation, keeping every conclusion connected to the games behind it."
+  },
+  "built": {
+    "es": [
+      "Dossiers con partidas de Lichess, Chess.com y archivos PGN.",
+      "Repertorios navegables, estadísticas y visor de partidas.",
+      "Stockfish en el navegador, búsqueda OTB y calculadora Elo."
+    ],
+    "en": [
+      "Player dossiers using Lichess, Chess.com, and PGN games.",
+      "Navigable repertoires, statistics, and a game viewer.",
+      "Browser-based Stockfish, over-the-board searches, and an Elo calculator."
+    ]
+  },
+  "stage": {
+    "es": "MVP funcional en evolución, con análisis progresivo y trazabilidad de la información.",
+    "en": "A functional, evolving MVP with progressive analysis and traceable information."
+  },
+  "featured": true,
+  "order": 60
+}

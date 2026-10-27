@@ -15,7 +15,7 @@ export async function prepareDeployment(directory){
    const source=await readFile(path,'utf8');
    // Local HTML URLs, CSS imports, runtime asset loads and entrance route checks.
    // Relative module imports and external URLs remain intact.
-   const adjusted=basePath?source.replace(/(["'`(])\/(?=assets\/|en\/|es\/|index\.html|[\w-]+\.(?:css|js)(?:["'`)?#]|$)|["'`])/g,`$1/${basePath}/`):source;
+   const adjusted=basePath?source.replace(/(["'`(])\/(?=assets\/|admin\/|en\/|es\/|index\.html|[\w-]+\.(?:css|js)(?:["'`)?#]|$)|["'`])/g,`$1/${basePath}/`):source;
    files.push({path,source,adjusted});
   }
  }

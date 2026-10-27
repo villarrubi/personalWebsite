@@ -1,0 +1,414 @@
+{
+  "media": [
+    {
+      "name": "images",
+      "label": "Imágenes de proyectos",
+      "input": "public/assets/images",
+      "output": "/assets/images",
+      "extensions": [
+        "png",
+        "jpg",
+        "jpeg",
+        "webp",
+        "avif"
+      ],
+      "rename": "random"
+    }
+  ],
+  "content": [
+    {
+      "name": "projects",
+      "label": "Proyectos",
+      "type": "collection",
+      "path": "content/projects",
+      "format": "json",
+      "subfolders": false,
+      "description": "Gestiona los proyectos de tu portfolio. Al guardar se actualiza la web. Desactiva Publicado para retirar un proyecto sin borrarlo.",
+      "filename": {
+        "template": "{fields.id}.json",
+        "field": false
+      },
+      "operations": {
+        "create": true,
+        "rename": false,
+        "delete": true
+      },
+      "view": {
+        "primary": "name",
+        "fields": [
+          "name",
+          "published",
+          "featured",
+          "status",
+          "order"
+        ],
+        "search": [
+          "name",
+          "enName",
+          "tags"
+        ],
+        "sort": [
+          "order",
+          "name",
+          "year"
+        ],
+        "default": {
+          "sort": "order",
+          "order": "asc"
+        }
+      },
+      "fields": [
+        {
+          "name": "name",
+          "label": "Nombre del proyecto",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "enName",
+          "label": "Nombre en inglés (si cambia)",
+          "type": "string"
+        },
+        {
+          "name": "shortName",
+          "label": "Nombre corto en órbita (opcional)",
+          "type": "string",
+          "description": "Para nombres largos. La ficha conserva el nombre completo."
+        },
+        {
+          "name": "id",
+          "label": "Identificador de la dirección",
+          "type": "string",
+          "required": true,
+          "pattern": {
+            "regex": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "message": "Usa minúsculas, números y guiones: mi-proyecto."
+          },
+          "description": "Se usa en la dirección del proyecto. Elígelo al crear la ficha y consérvalo al editarla."
+        },
+        {
+          "name": "published",
+          "label": "Publicado en la web",
+          "type": "boolean",
+          "default": false,
+          "description": "Actívalo cuando hayas completado los textos en español e inglés. Desactívalo para ocultar la ficha conservando su contenido. Los borradores no aparecen en el portfolio; el repositorio es público."
+        },
+        {
+          "name": "featured",
+          "label": "Mostrar en Destacados",
+          "type": "boolean",
+          "default": false,
+          "description": "Si está desactivado, aparece en Complementarios."
+        },
+        {
+          "name": "order",
+          "label": "Orden",
+          "type": "number",
+          "default": 1000,
+          "options": {
+            "min": 0,
+            "max": 100000,
+            "step": 1
+          },
+          "description": "Los números más bajos aparecen antes dentro de su grupo."
+        },
+        {
+          "name": "year",
+          "label": "Año",
+          "type": "string",
+          "default": "2026"
+        },
+        {
+          "name": "status",
+          "label": "Estado del proyecto",
+          "type": "select",
+          "required": true,
+          "default": "development",
+          "options": {
+            "values": [
+              {
+                "name": "development",
+                "label": "En desarrollo"
+              },
+              {
+                "name": "built",
+                "label": "Realizado"
+              }
+            ]
+          }
+        },
+        {
+          "name": "visibility",
+          "label": "Visibilidad del código",
+          "type": "select",
+          "required": true,
+          "default": "private",
+          "options": {
+            "values": [
+              {
+                "name": "private",
+                "label": "Código privado"
+              },
+              {
+                "name": "public",
+                "label": "Código público"
+              }
+            ]
+          }
+        },
+        {
+          "name": "localOnly",
+          "label": "Proyecto local, sin repositorio publicado",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "name": "repo",
+          "label": "Repositorio público de GitHub",
+          "type": "string",
+          "pattern": {
+            "regex": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$",
+            "message": "Usa la dirección HTTPS del repositorio."
+          },
+          "description": "Solo se muestra si el código es público."
+        },
+        {
+          "name": "demo",
+          "label": "Web o demostración",
+          "type": "string",
+          "pattern": "^https://[^\\s<>\"\\\\]+$"
+        },
+        {
+          "name": "tags",
+          "label": "Herramientas y tecnologías",
+          "type": "string",
+          "list": true
+        },
+        {
+          "name": "cover",
+          "label": "Imagen principal",
+          "type": "image",
+          "options": {
+            "media": "images"
+          },
+          "description": "Aparece en la ficha y en la cabecera de la página del proyecto."
+        },
+        {
+          "name": "capture",
+          "label": "Captura adicional",
+          "type": "image",
+          "options": {
+            "media": "images"
+          }
+        },
+        {
+          "name": "visual",
+          "label": "Ilustración cuando no hay imagen",
+          "type": "select",
+          "required": true,
+          "default": "data",
+          "options": {
+            "values": [
+              {
+                "name": "data",
+                "label": "Software y datos"
+              },
+              {
+                "name": "chess",
+                "label": "Ajedrez"
+              },
+              {
+                "name": "pipa",
+                "label": "Asistente"
+              },
+              {
+                "name": "map",
+                "label": "Mapas"
+              },
+              {
+                "name": "planning",
+                "label": "Organización"
+              },
+              {
+                "name": "science",
+                "label": "Ciencia"
+              },
+              {
+                "name": "security",
+                "label": "Seguridad"
+              }
+            ]
+          }
+        },
+        {
+          "name": "category",
+          "label": "Área",
+          "type": "object",
+          "fields": [
+            {
+              "name": "es",
+              "label": "Español",
+              "type": "string"
+            },
+            {
+              "name": "en",
+              "label": "English",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "summary",
+          "label": "Descripción breve",
+          "type": "object",
+          "fields": [
+            {
+              "name": "es",
+              "label": "Español",
+              "type": "text"
+            },
+            {
+              "name": "en",
+              "label": "English",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "name": "idea",
+          "label": "La idea",
+          "type": "object",
+          "fields": [
+            {
+              "name": "es",
+              "label": "Español",
+              "type": "text"
+            },
+            {
+              "name": "en",
+              "label": "English",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "name": "built",
+          "label": "Qué he construido",
+          "type": "object",
+          "fields": [
+            {
+              "name": "es",
+              "label": "Español",
+              "type": "text",
+              "list": true
+            },
+            {
+              "name": "en",
+              "label": "English",
+              "type": "text",
+              "list": true
+            }
+          ]
+        },
+        {
+          "name": "stage",
+          "label": "Dónde está ahora",
+          "type": "object",
+          "fields": [
+            {
+              "name": "es",
+              "label": "Español",
+              "type": "text"
+            },
+            {
+              "name": "en",
+              "label": "English",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "name": "caseStudy",
+          "label": "Caso de estudio (opcional)",
+          "type": "object",
+          "fields": [
+            {
+              "name": "es",
+              "label": "Español",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "problem",
+                  "label": "El reto",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "contribution",
+                  "label": "Mi aportación",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "flow",
+                  "label": "Componentes del sistema",
+                  "type": "string",
+                  "list": true,
+                  "required": true
+                },
+                {
+                  "name": "focus",
+                  "label": "Enfoque",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "name": "en",
+              "label": "English",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "problem",
+                  "label": "El reto",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "contribution",
+                  "label": "Mi aportación",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "flow",
+                  "label": "Componentes del sistema",
+                  "type": "string",
+                  "list": true,
+                  "required": true
+                },
+                {
+                  "name": "focus",
+                  "label": "Enfoque",
+                  "type": "string"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "content": {
+      "merge": true
+    },
+    "commit": {
+      "templates": {
+        "create": "Add {path} through project manager",
+        "update": "Update {path} through project manager",
+        "delete": "Remove {path} through project manager"
+      }
+    }
+  }
+}

@@ -7,7 +7,7 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs && node scripts/serve.mjs",
     "start": "node scripts/serve.mjs --open",
-    "check": "node scripts/check.mjs && node scripts/check-chess.mjs && node scripts/check-motion.mjs && node scripts/check-terrain.mjs"
+    "check": "node scripts/check.mjs && node scripts/check-chess.mjs && node scripts/check-motion.mjs && node scripts/check-terrain.mjs && node scripts/check-cms.mjs"
   },
   "engines": { "node": ">=22" }
 }

@@ -1,0 +1,48 @@
+{
+  "id": "club-palentino",
+  "published": true,
+  "visibility": "public",
+  "name": "Club Palentino de Ajedrez",
+  "shortName": "Club Palentino",
+  "year": "2026",
+  "status": "built",
+  "visual": "chess",
+  "repo": "https://github.com/villarrubi/clubPalentino",
+  "demo": "https://clubpalentinoajedrez.es/",
+  "tags": [
+    "React",
+    "TypeScript",
+    "Node.js",
+    "SQLite"
+  ],
+  "category": {
+    "es": "Web / Comunidad",
+    "en": "Web / Community"
+  },
+  "summary": {
+    "es": "La web del club, su escuela y una biblioteca de materiales para aprender ajedrez.",
+    "en": "The club website, its school, and a library of chess learning materials."
+  },
+  "idea": {
+    "es": "Dar al club un espacio para informar, organizar actividades y compartir materiales de sus clases.",
+    "en": "Giving the club a space to share information, organise activities, and distribute class materials."
+  },
+  "built": {
+    "es": [
+      "Web pública con escuela, noticias, torneos y contacto.",
+      "Biblioteca de materiales con búsqueda y descarga.",
+      "Gestión de contenidos con perfiles de profesor y administrador."
+    ],
+    "en": [
+      "Public website with school information, news, tournaments, and contact.",
+      "Searchable, downloadable learning library.",
+      "Content management with teacher and administrator roles."
+    ]
+  },
+  "stage": {
+    "es": "Web publicada y operativa.",
+    "en": "Published and operational website."
+  },
+  "featured": false,
+  "order": 80
+}

@@ -1,0 +1,68 @@
+{
+  "id": "mapforge",
+  "published": true,
+  "visibility": "private",
+  "name": "MapForge",
+  "year": "2026",
+  "status": "development",
+  "featured": true,
+  "visual": "map",
+  "tags": [
+    "TypeScript",
+    "Canvas 2D",
+    "Electron"
+  ],
+  "category": {
+    "es": "Herramientas / Mundos 2D",
+    "en": "Tools / 2D worlds"
+  },
+  "summary": {
+    "es": "Un editor de mundos 2D: dibujar terreno, dar forma al paisaje y preparar escenarios para Deriva.",
+    "en": "A 2D world editor: paint terrain, shape a landscape, and prepare environments for Deriva."
+  },
+  "idea": {
+    "es": "Construir mundos que se puedan editar, guardar y reutilizar. MapForge es la herramienta de creación; Deriva es la exploración de simulación que podrá utilizar esos escenarios.",
+    "en": "Building worlds that can be edited, saved, and reused. MapForge is the creation tool; Deriva is the simulation exploration that can use those environments."
+  },
+  "built": {
+    "es": [
+      "Editor de escritorio con pinceles, capas, objetos, historial y minimapa.",
+      "Generación de islas, valles y archipiélagos mediante semillas reproducibles.",
+      "Edición de elevación, temperatura, agua y recursos; exportación de mundos a JSON versionado."
+    ],
+    "en": [
+      "Desktop editor with brushes, layers, objects, history, and a minimap.",
+      "Island, valley, and archipelago generation with reproducible seeds.",
+      "Elevation, temperature, water, and resource editing; versioned JSON world exports."
+    ]
+  },
+  "stage": {
+    "es": "Existe una aplicación funcional de Windows. El editor sigue evolucionando; la simulación de poblaciones pertenece al trabajo pendiente de Deriva.",
+    "en": "A functional Windows application is available. The editor is evolving; population simulation remains future work in Deriva."
+  },
+  "capture": "/assets/images/mapforge.png",
+  "order": 30,
+  "cover": "/assets/images/mapforge.png",
+  "caseStudy": {
+    "es": {
+      "problem": "Crear escenarios 2D que se puedan editar, guardar y reutilizar en una simulación.",
+      "contribution": "He construido el editor con pinceles, capas e historial, la generación por semillas y la exportación a JSON versionado.",
+      "flow": [
+        "Semilla reproducible",
+        "Editor Canvas 2D",
+        "Mundo en JSON"
+      ],
+      "focus": "Herramientas de escritorio"
+    },
+    "en": {
+      "problem": "Create 2D environments that can be edited, saved, and reused in a simulation.",
+      "contribution": "I built the editor with brushes, layers, and history, seed-based generation, and versioned JSON export.",
+      "flow": [
+        "Reproducible seed",
+        "Canvas 2D editor",
+        "JSON world"
+      ],
+      "focus": "Desktop tools"
+    }
+  }
+}

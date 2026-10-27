@@ -1,0 +1,44 @@
+{
+  "id": "mapviewer",
+  "published": true,
+  "visibility": "private",
+  "name": "MapViewer",
+  "year": "2026",
+  "status": "development",
+  "visual": "map",
+  "tags": [
+    "Cartografía",
+    "APIs",
+    "Desktop"
+  ],
+  "category": {
+    "es": "Visualización / Datos abiertos",
+    "en": "Visualisation / Open data"
+  },
+  "summary": {
+    "es": "Un panel de escritorio para explorar el planeta mediante mapas, capas y eventos.",
+    "en": "A desktop dashboard for exploring the planet through maps, layers, and events."
+  },
+  "idea": {
+    "es": "Reunir fenómenos geográficos en una interfaz visual, con origen y momento de actualización de los datos.",
+    "en": "Bringing geographic phenomena into a visual interface with data provenance and update times."
+  },
+  "built": {
+    "es": [
+      "Prototipo Windows con globo y mapa plano.",
+      "Panel de capas y selección de periodos temporales.",
+      "Consultas de eventos según las fuentes disponibles."
+    ],
+    "en": [
+      "Windows prototype with globe and flat map views.",
+      "Layer panel and time-period selection.",
+      "Event queries depending on available sources."
+    ]
+  },
+  "stage": {
+    "es": "Prototipo ejecutable en desarrollo. La disponibilidad de cada capa depende de la cobertura de sus fuentes.",
+    "en": "Runnable prototype under development. Layer availability depends on source coverage."
+  },
+  "featured": false,
+  "order": 110
+}

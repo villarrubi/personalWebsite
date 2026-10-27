@@ -1,0 +1,45 @@
+{
+  "id": "deriva",
+  "published": true,
+  "visibility": "private",
+  "localOnly": true,
+  "name": "Deriva",
+  "year": "2026",
+  "status": "development",
+  "visual": "map",
+  "tags": [
+    "JavaScript",
+    "JSON",
+    "Simulación"
+  ],
+  "category": {
+    "es": "Experimento / Ecosistemas",
+    "en": "Experiment / Ecosystems"
+  },
+  "summary": {
+    "es": "Un laboratorio en desarrollo para explorar ecosistemas, evolución y memoria individual.",
+    "en": "A laboratory in development for exploring ecosystems, evolution, and individual memory."
+  },
+  "idea": {
+    "es": "Explorar comportamientos y poblaciones en mundos 2D preparados con MapForge.",
+    "en": "Exploring behaviours and populations in 2D worlds prepared with MapForge."
+  },
+  "built": {
+    "es": [
+      "Importador y validador de mundos MapForge v1 y v2.",
+      "Consultas de celdas, recursos y agua cercana.",
+      "Contrato de intercambio y pruebas del lector."
+    ],
+    "en": [
+      "MapForge v1 and v2 world importer and validator.",
+      "Cell, resource, and nearby water queries.",
+      "Interchange contract and reader tests."
+    ]
+  },
+  "stage": {
+    "es": "Fase de diseño y fundamentos. La simulación de criaturas, evolución y poblaciones todavía no está implementada.",
+    "en": "Design and foundations stage. Creature, evolution, and population simulation is not yet implemented."
+  },
+  "featured": true,
+  "order": 100
+}

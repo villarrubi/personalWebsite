@@ -14,13 +14,17 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 
 ## Editar
 
-- `src/content.mjs`: perfil, textos, traducciones, proyectos, publicación (`published`), estados y visibilidad del código.
+- `src/content.mjs`: perfil, textos generales, traducciones e importación del catálogo.
+- `content/projects/*.json`: una ficha por proyecto, editable desde Pages CMS; textos bilingües, imágenes, enlaces, publicación, grupo y orden.
+- `.pages.yml`: formularios y biblioteca de imágenes del gestor. Usa JSON, válido como YAML, para permitir comprobaciones sin dependencias.
+- `src/project-catalog.mjs`: lectura, orden y validación del catálogo antes de construir.
+- `public/admin/`: acceso al editor, con el estilo del portfolio y ayuda de inicio.
 - `scripts/build.mjs`: plantillas y generación de páginas estáticas.
 - `src/home.mjs`: composición de portada, proyectos, biografía y contacto.
 - `src/hero.mjs` y `public/hero-lab.css`: primera pantalla abierta, tipografía, controles y adaptación móvil.
 - `public/hero-world.js` y `public/terrain.js`: generador de paisajes conservado para una posible recuperación del experimento; no se carga en la portada actual.
 - `scripts/prepare-hero-poster.mjs`: regenera `public/assets/hero-world.svg` desde el mismo generador, sin dependencias. `scripts/check-terrain.mjs` comprueba semillas, variantes y límites.
-- `src/project-cases.mjs`: reto, aportación y componentes de Pipα, MapForge y ChessBot para las páginas de detalle.
+- `src/project-cases.mjs`: muestra el caso de estudio opcional definido en cada ficha (`caseStudy`).
 - `src/project-explorer.mjs`: escena orbital como única vista de proyectos, sin tarjetas ni selector. No depende de preferencias guardadas. Conserva el enlace antiguo `#archive` como acceso a los proyectos; sin JavaScript aparecen todos los cuerpos con enlaces normales.
 - `public/engineering.css`: jerarquía de la portada, acceso directo a las órbitas, componentes técnicos, legibilidad y ajustes de móvil.
 - `public/styles.css`: diseño y adaptación a pantallas.
@@ -32,7 +36,7 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 - `public/chess-code.js`: reconstrucción del tablero y las piezas en caracteres blancos; la misma malla de caracteres toma las formas y colores de la portada y se resuelve por celdas en el HTML real. Usa color y profundidad del tablero y un atlas generado localmente.
 - `public/intro-page.js`: guía de color y formas de la portada visible, preparada una vez antes de animar con html2canvas local y las posiciones reales del texto. No se muestra una captura en lugar de la web.
 - `public/chess-timeline.js`: recorrido de cámara y encuadre adaptable. `scripts/check-chess.mjs` verifica posiciones, continuidad y encuadre.
-- `src/project-map.mjs`: grupos de proyectos, cuerpos en órbita y fichas. `majorProjectIds` define los seis destacados; el resto aparece en complementarios.
+- `src/project-map.mjs`: grupos de proyectos, cuerpos en órbita y fichas. Los destacados se obtienen del campo `featured` del catálogo.
 - `src/project-bodies.mjs`: versiones SVG representativas de los proyectos para la carga inicial y los navegadores sin WebGL2.
 - `public/project-symbols.js`: iconos SVG originales y específicos de los 15 proyectos, compartidos entre las ilustraciones de respaldo y las fichas. Caballos de ajedrez, asistente, mapa, escudo, hoja, calendario, célula, globo, velas de mercado, diálogo y radar ayudan a distinguir su función.
 - `public/solar-layout.js`: distribución orbital con separación entre cuerpos y sus nombres, calculada según las dimensiones disponibles y la fase de la órbita.
@@ -53,19 +57,33 @@ npm run check
 
 El movimiento de las órbitas, estrellas y nebulosas empieza activado en cada visita, recarga o regreso desde el historial, incluso si el sistema indica movimiento reducido o una versión anterior guardó una pausa. El visitante puede pausarlo desde el pie de la escena; la pausa sólo afecta a la página actual y no se guarda para la próxima visita. Las opciones `?motion=on` y `?motion=off` permiten indicar el estado al abrir un enlace. Las transiciones entre páginas usan View Transitions si el navegador las admite; el resto mantiene navegación HTML normal. Todas las fuentes, texturas y bibliotecas se sirven localmente.
 
-Para añadir un proyecto basta con incorporarlo a `src/content.mjs`. Permanece oculto hasta marcar `published: true`; una vez publicado, aparece en complementarios salvo que su ID esté en `majorProjectIds`. Añadir su ID a esa lista lo mueve a destacados. El orden de cada grupo sigue el del catálogo, sin ordenar por estado de desarrollo. Los IDs nuevos reciben un modelo de navegador web como respaldo, que se puede personalizar en `public/project-models.js` y en su símbolo SVG. Las posiciones, tamaños y constelaciones se calculan automáticamente sin definir coordenadas. `npm run check` verifica distribución, límites y ausencia de solapamientos en varias fases de órbita y colecciones de hasta 100 proyectos. La sección mantiene su altura al añadir proyectos.
+Para añadir un proyecto, usa el gestor o crea `content/projects/identificador.json`. Permanece oculto hasta marcar `published: true`; `featured` selecciona destacados o complementarios y `order` determina su posición dentro del grupo. Los IDs nuevos reciben un modelo de navegador web como respaldo, personalizable en `public/project-models.js`. Las posiciones y constelaciones se calculan automáticamente. `npm run check` verifica distribución y movimiento para colecciones de hasta 100 proyectos, además de altas, edición, retirada, borrado, imágenes y limpieza de páginas en una copia temporal.
+
+## Gestor de proyectos
+
+Acceso: `/admin/` en el alojamiento actual o futuro. La página de acceso es pública y tiene `noindex`; el editor autenticado se abre en [Pages CMS](https://app.pagescms.org/villarrubi/personalWebsite/main/collection/projects). No hay contraseñas, tokens ni permisos de escritura incluidos en la web estática. GitHub controla las cuentas con acceso de escritura.
+
+La primera vez hay que iniciar sesión con GitHub y autorizar la aplicación Pages CMS solo para `personalWebsite`. Después, la colección **Proyectos** permite crear, modificar, ocultar y eliminar fichas, además de subir imágenes. La autorización de la aplicación es un paso separado de publicar el código de integración; hasta completarla, el editor no puede escribir en el repositorio.
+
+Cada guardado crea un cambio en `main` y activa la publicación existente. La web se actualiza cuando terminan las comprobaciones y el despliegue. Si un campo obligatorio para publicar está incompleto o una imagen referenciada no existe, el despliegue falla y permanece la última versión válida. Se puede consultar el resultado desde «Consultar la última publicación». El historial de Git permite recuperar contenido eliminado.
+
+Los proyectos nuevos empiezan como borradores. Para publicar, completa en ambos idiomas el área, resumen, idea, lista de funcionalidades y estado actual; añade el año y, si el código es público, su repositorio. El identificador debe coincidir con el archivo y mantenerse estable al editar. Los textos son texto plano, no HTML. La imagen principal (`cover`) aparece en la ficha y la cabecera; `capture` es una imagen adicional. `caseStudy` permite editar el reto, la aportación y los componentes del sistema.
+
+**Oculto no significa confidencial:** este repositorio es público. Un borrador no se incluye en las páginas generadas, pero su JSON y las imágenes siguen en GitHub y en el historial. No se deben guardar secretos o material privado en las fichas.
+
+El dominio y el alojamiento son independientes del editor. En un dominio propio servido desde la raíz, construye sin `SITE_BASE_PATH`; en una subcarpeta, indica su prefijo. Los archivos conservan rutas `/assets/images/...` y el build adapta los enlaces. `dist/` se puede publicar en cualquier alojamiento estático. Si se abandona GitHub como proveedor de contenidos, los JSON e imágenes son portables; habría que sustituir la conexión del editor y el proceso de publicación.
 
 ## Publicar u ocultar proyectos
 
-Cada ficha de `src/content.mjs` tiene controles independientes:
+Cada ficha de `content/projects/` tiene controles independientes:
 
 - `published: true`: aparece en la web. `false` o ausencia del campo: oculto. El filtro se aplica a las órbitas, los diálogos, las páginas de detalle y los enlaces entre proyectos.
 - `status`: estado editorial del proyecto (`built` o `development`). No determina si se publica ni su prioridad; se mantiene manualmente según indique el autor.
 - `visibility`: visibilidad del **código fuente** (`public` o `private`). Un proyecto privado puede tener una ficha pública, y un repositorio público puede quedarse fuera del portfolio.
-- La pertenencia a `majorProjectIds`, en `src/project-map.mjs`, define destacados/complementarios; el orden del catálogo define el orden dentro de cada grupo. La portada usa un experimento propio, definido en `src/hero.mjs`; no elige proyectos automáticamente por su estado ni por actividad de GitHub.
+- `featured` define destacados/complementarios; `order` define el orden dentro de cada grupo. No se eligen proyectos automáticamente por su estado ni por actividad de GitHub.
 - `demo`: enlace opcional a una aplicación que el autor haya decidido mostrar.
 
-Tras editar, ejecutar `npm run build` y `npm run check`. El build regenera `dist/` y elimina las páginas antiguas de proyectos despublicados. Al publicar en `main`, GitHub Pages despliega el resultado. No hay sincronización automática ni panel de administración: los cambios se gestionan en estos archivos.
+Tras editar archivos localmente, ejecutar `npm run build` y `npm run check`. Desde el gestor, esas comprobaciones se ejecutan en GitHub antes de publicar. El build regenera `dist/` y elimina las páginas antiguas de proyectos ocultados o borrados.
 
 LiDAR y Desarrollo Web II quedan con `published: false`. Los demás conservan su estado, grupo y orden anteriores, sin reclasificarlos. Ocultar una ficha del sitio no elimina el contenido del repositorio ni su historial, y tampoco modifica el CV o la trayectoria profesional. La biografía deja de enlazar a una ficha si se despublica. La portada no enlaza directamente a ninguna ficha seleccionada de forma implícita.
 

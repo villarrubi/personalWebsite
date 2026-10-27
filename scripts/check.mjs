@@ -9,7 +9,7 @@ const root=resolve(import.meta.dirname,'../dist');
 const pages=[],assets=[];
 async function walk(dir){for(const file of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,file.name);if(file.isDirectory()){if(file.name!=='vendor')await walk(path);}else if(path.endsWith('.html'))pages.push(path);else if(/\.(js|css)$/.test(path))assets.push(path);}}
 await walk(root);
-assert.equal(pages.length,4+publishedProjects.length*2,'Only published project pages are generated');
+assert.equal(pages.length,5+publishedProjects.length*2,'Only published project pages and the admin entry are generated');
 const hiddenProjects=projects.filter(p=>p.published!==true);
 let links=0;
 for(const path of pages){
@@ -55,10 +55,10 @@ for(const p of projects){
   else assert(!pages.includes(detail),`Unpublished detail page must not exist: ${p.id}/${lang}`);
  }
  assert(['public','private'].includes(p.visibility),`Explicit source visibility: ${p.id}`);
- if(p.visibility==='public')assert.match(p.repo||'',/^https:\/\/github\.com\/villarrubi\/[^/]+$/,`Public repository: ${p.id}`);
+ if(p.visibility==='public'&&p.published)assert.match(p.repo||'',/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?$/,`Public repository: ${p.id}`);
  else assert(!p.repo,`Private project must not expose a source link: ${p.id}`);
  if(p.localOnly)assert.equal(p.visibility,'private',`Local project visibility: ${p.id}`);
- for(const lang of ['es','en'])assert(p.summary[lang]&&p.idea[lang]&&p.built[lang].length&&p.stage[lang]);
+ if(p.published)for(const lang of ['es','en'])assert(p.summary[lang]&&p.idea[lang]&&p.built[lang].length&&p.stage[lang]);
 }
 for(const home of ['index.html','en/index.html','es/index.html']){
  const html=await readFile(resolve(root,home),'utf8');

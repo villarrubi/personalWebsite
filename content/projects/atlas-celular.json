@@ -1,0 +1,45 @@
+{
+  "id": "atlas-celular",
+  "published": true,
+  "visibility": "private",
+  "name": "Atlas celular",
+  "enName": "Cell atlas",
+  "year": "2026",
+  "status": "built",
+  "visual": "science",
+  "tags": [
+    "TypeScript",
+    "WebGL",
+    "3D"
+  ],
+  "category": {
+    "es": "Educación / Visualización",
+    "en": "Education / Visualisation"
+  },
+  "summary": {
+    "es": "Un atlas educativo con tres modelos celulares 3D desmontables para explorar en clase.",
+    "en": "An educational atlas with three explorable, disassemblable 3D cell models for the classroom."
+  },
+  "idea": {
+    "es": "Hacer visible la estructura de las células con una herramienta interactiva que se pueda usar en clase sin conexión.",
+    "en": "Making cell structures visible through an interactive tool usable offline in a classroom."
+  },
+  "built": {
+    "es": [
+      "Modelos de célula animal, vegetal y bacteriana.",
+      "Exploración de estructuras mediante una interfaz 3D.",
+      "Versión portátil de Windows para uso local sin cuentas."
+    ],
+    "en": [
+      "Animal, plant, and bacterial cell models.",
+      "Structure exploration through a 3D interface.",
+      "Portable Windows version for local use without accounts."
+    ]
+  },
+  "stage": {
+    "es": "Aplicación local realizada, con modelos originales y distribución portátil.",
+    "en": "Completed local application with original models and a portable distribution."
+  },
+  "featured": false,
+  "order": 90
+}

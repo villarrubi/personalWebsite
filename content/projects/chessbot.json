@@ -1,0 +1,71 @@
+{
+  "id": "chessbot",
+  "published": true,
+  "visibility": "public",
+  "name": "ChessBot",
+  "year": "2026",
+  "status": "development",
+  "featured": true,
+  "visual": "chess",
+  "repo": "https://github.com/villarrubi/ChessBot",
+  "tags": [
+    "C++20",
+    "Python",
+    "C#",
+    "UCI",
+    "Ollama"
+  ],
+  "category": {
+    "es": "Algoritmos / IA local",
+    "en": "Algorithms / Local AI"
+  },
+  "summary": {
+    "es": "Un motor de ajedrez propio. De las reglas y la búsqueda a una aplicación para jugar, analizar y experimentar.",
+    "en": "A chess engine built from scratch. From rules and search to an application for playing, analysing, and experimenting."
+  },
+  "idea": {
+    "es": "Entender cómo toma decisiones un motor de ajedrez construyendo uno desde sus fundamentos. Un proyecto donde se encuentran mi afición al ajedrez, los algoritmos y la inteligencia artificial.",
+    "en": "Understanding how a chess engine makes decisions by building one from the ground up. A meeting point for my interest in chess, algorithms, and artificial intelligence."
+  },
+  "built": {
+    "es": [
+      "Motor propio en C++20 con reglas, búsqueda, evaluación y protocolo UCI.",
+      "Aplicación Windows para jugar y analizar PGN, FEN, variantes y alternativas.",
+      "Herramientas de autojuego y experimentación con evaluadores NNUE; explicaciones opcionales mediante Ollama local."
+    ],
+    "en": [
+      "Custom C++20 engine with rules, search, evaluation, and UCI support.",
+      "Windows application for playing and analysing PGN, FEN, variations, and alternatives.",
+      "Self-play tools and NNUE evaluation experiments; optional explanations through local Ollama models."
+    ]
+  },
+  "stage": {
+    "es": "Motor y aplicación funcionales, con entrenamiento y evaluación en desarrollo. La fuerza de juego no tiene una certificación Elo; los experimentos se contrastan antes de promover cambios.",
+    "en": "Working engine and application, with training and evaluation under development. Playing strength has no certified Elo rating; experiments are compared before changes are promoted."
+  },
+  "capture": "/assets/images/chessbot-training.png",
+  "order": 10,
+  "cover": "/assets/images/chessbot-app.png",
+  "caseStudy": {
+    "es": {
+      "problem": "Entender cómo decide un motor, desde las reglas hasta la búsqueda y la evaluación de posiciones.",
+      "contribution": "He construido el motor en C++20, su protocolo UCI y la aplicación de análisis, con herramientas de autojuego y experimentación.",
+      "flow": [
+        "Motor C++20",
+        "Protocolo UCI",
+        "Aplicación de análisis"
+      ],
+      "focus": "Algoritmos e inteligencia artificial"
+    },
+    "en": {
+      "problem": "Understand how an engine makes decisions, from the rules to search and position evaluation.",
+      "contribution": "I built the C++20 engine, its UCI protocol, and the analysis application, with self-play and experimentation tools.",
+      "flow": [
+        "C++20 engine",
+        "UCI protocol",
+        "Analysis application"
+      ],
+      "focus": "Algorithms and AI"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "id": "chatbot",
+  "published": true,
+  "visibility": "private",
+  "name": "Agente conversacional",
+  "enName": "Conversational agent",
+  "year": "2026",
+  "status": "development",
+  "visual": "pipa",
+  "tags": [
+    "Python",
+    "FastAPI",
+    "SQLite"
+  ],
+  "category": {
+    "es": "Asistentes / Automatización",
+    "en": "Assistants / Automation"
+  },
+  "summary": {
+    "es": "Una base local para gestionar conversaciones con borradores y acciones supervisadas.",
+    "en": "A local foundation for managing conversations with drafts and supervised actions."
+  },
+  "idea": {
+    "es": "Explorar un asistente que tenga en cuenta el contexto de las conversaciones y mantenga la decisión final en manos del usuario.",
+    "en": "Exploring an assistant that considers conversational context while leaving the final decision with the user."
+  },
+  "built": {
+    "es": [
+      "Backend y modelos de conversaciones, contactos y permisos.",
+      "Flujos de aprobación y procesamiento de eventos.",
+      "Pruebas de arquitectura, persistencia e integración."
+    ],
+    "en": [
+      "Backend and conversation, contact, and permission models.",
+      "Approval workflows and event processing.",
+      "Architecture, persistence, and integration tests."
+    ]
+  },
+  "stage": {
+    "es": "Fundamentos implementados. El despliegue y las integraciones de uso real siguen pendientes; el envío autónomo está desactivado.",
+    "en": "Foundations implemented. Deployment and live integrations remain pending; autonomous sending is disabled."
+  },
+  "featured": false,
+  "order": 130
+}

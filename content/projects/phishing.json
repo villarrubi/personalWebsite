@@ -1,0 +1,47 @@
+{
+  "id": "phishing",
+  "published": true,
+  "visibility": "public",
+  "name": "Detector de phishing",
+  "enName": "Phishing detector",
+  "year": "2026",
+  "status": "built",
+  "visual": "security",
+  "repo": "https://github.com/villarrubi/TFG",
+  "tags": [
+    "Python",
+    "scikit-learn",
+    "Streamlit",
+    "MLP"
+  ],
+  "category": {
+    "es": "Ciberseguridad / TFG",
+    "en": "Cybersecurity / Thesis"
+  },
+  "summary": {
+    "es": "Análisis de correo con reglas explicables y modelos de aprendizaje automático en español e inglés.",
+    "en": "Email analysis with explainable rules and machine learning models in Spanish and English."
+  },
+  "idea": {
+    "es": "Combinar indicios comprensibles con clasificación neuronal para estudiar la detección de phishing en correo electrónico. Desarrollado como Trabajo de Fin de Grado.",
+    "en": "Combining understandable signals with neural classification to study email phishing detection. Developed as my bachelor’s thesis."
+  },
+  "built": {
+    "es": [
+      "Modos heurístico, neuronal y combinado sobre un backend común.",
+      "Pipeline TF-IDF + MLP y análisis de cabeceras, enlaces y contenido.",
+      "Interfaz web, extensión de Gmail y monitor opcional con alertas."
+    ],
+    "en": [
+      "Heuristic, neural, and combined modes on a shared backend.",
+      "TF-IDF + MLP pipeline and header, link, and content analysis.",
+      "Web interface, Gmail extension, and optional alert monitor."
+    ]
+  },
+  "stage": {
+    "es": "Proyecto de TFG realizado. Los resultados del clasificador deben interpretarse dentro de sus datasets y evaluación, como apoyo al análisis.",
+    "en": "Completed thesis project. Classifier results should be interpreted within their datasets and evaluation, as an aid to analysis."
+  },
+  "featured": true,
+  "order": 40
+}

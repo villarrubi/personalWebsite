@@ -1,0 +1,69 @@
+{
+  "id": "pipa",
+  "published": true,
+  "visibility": "public",
+  "name": "Pipα",
+  "year": "2026",
+  "status": "development",
+  "featured": true,
+  "visual": "pipa",
+  "repo": "https://github.com/villarrubi/Pipa-Personal-Assistant",
+  "tags": [
+    "Python",
+    "ESP32-S3",
+    "C++",
+    "Swift"
+  ],
+  "category": {
+    "es": "Hardware / Asistente local",
+    "en": "Hardware / Local assistant"
+  },
+  "summary": {
+    "es": "Un asistente local que une voz, software y un dispositivo físico para controlar el ordenador.",
+    "en": "A local assistant connecting voice, software, and a physical device to control a computer."
+  },
+  "idea": {
+    "es": "Dar una forma física a un asistente personal: pedir una acción, saber qué va a ocurrir y conservar el control. El núcleo vive en el ordenador y se comunica con una interfaz ESP32-S3.",
+    "en": "Giving a personal assistant a physical form: ask for an action, understand what will happen, and stay in control. The core runs on the computer and communicates with an ESP32-S3 interface."
+  },
+  "built": {
+    "es": [
+      "Agente Windows con panel de procesos, comandos configurables y confirmaciones.",
+      "Control de aplicaciones, multimedia y temporizadores, con integraciones opcionales.",
+      "Firmware ESP32-S3, transporte cifrado por USB y trabajo experimental en voz local y cliente iOS."
+    ],
+    "en": [
+      "Windows agent with a process panel, configurable commands, and confirmations.",
+      "Application, media, and timer control, with optional integrations.",
+      "ESP32-S3 firmware, encrypted USB transport, and experimental work on local voice and an iOS client."
+    ]
+  },
+  "stage": {
+    "es": "El agente local es funcional. El firmware, la voz, el cliente iOS y otros componentes experimentales tienen validaciones específicas pendientes.",
+    "en": "The local agent is functional. Firmware, voice, the iOS client, and other experimental components still require their specific validation."
+  },
+  "order": 20,
+  "cover": "/assets/images/pipa-control.jpg",
+  "caseStudy": {
+    "es": {
+      "problem": "Controlar el ordenador desde un asistente local y un dispositivo físico, manteniendo las acciones bajo control.",
+      "contribution": "He construido el agente Windows y su panel de control, los comandos con confirmación y la comunicación con ESP32-S3.",
+      "flow": [
+        "Agente Python",
+        "USB cifrado",
+        "ESP32-S3"
+      ],
+      "focus": "Software + hardware"
+    },
+    "en": {
+      "problem": "Control a computer through a local assistant and a physical device, while staying in control of its actions.",
+      "contribution": "I built the Windows agent and control panel, commands with confirmations, and communication with ESP32-S3.",
+      "flow": [
+        "Python agent",
+        "Encrypted USB",
+        "ESP32-S3"
+      ],
+      "focus": "Software + hardware"
+    }
+  }
+}

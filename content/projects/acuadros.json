@@ -1,0 +1,45 @@
+{
+  "id": "acuadros",
+  "published": true,
+  "visibility": "public",
+  "name": "aCuadros",
+  "year": "2026",
+  "status": "built",
+  "visual": "planning",
+  "repo": "https://github.com/villarrubi/aCuadros",
+  "tags": [
+    "TypeScript",
+    "PWA",
+    "Offline"
+  ],
+  "category": {
+    "es": "Producto / Organización",
+    "en": "Product / Organisation"
+  },
+  "summary": {
+    "es": "Un calendario instalable para reunir estudios, tareas, hábitos y comidas, también sin conexión.",
+    "en": "An installable calendar bringing together study, tasks, habits, and meals, including offline use."
+  },
+  "idea": {
+    "es": "Organizar distintas partes del día en una herramienta personal cómoda para iPad.",
+    "en": "Organising different parts of the day in a personal tool designed for comfortable iPad use."
+  },
+  "built": {
+    "es": [
+      "Calendario con vistas de mes, semana y agenda.",
+      "Planificación de estudios, hábitos, rutinas, tareas y comidas.",
+      "Instalación como PWA, uso sin conexión y copias exportables."
+    ],
+    "en": [
+      "Month, week, and agenda calendar views.",
+      "Study, habit, routine, task, and meal planning.",
+      "PWA installation, offline use, and exportable backups."
+    ]
+  },
+  "stage": {
+    "es": "Aplicación funcional, con mejoras de uso y mantenimiento.",
+    "en": "A functional application with ongoing usability improvements and maintenance."
+  },
+  "featured": false,
+  "order": 70
+}

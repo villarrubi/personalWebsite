@@ -1,0 +1,44 @@
+{
+  "id": "trader",
+  "published": true,
+  "visibility": "private",
+  "name": "Trader",
+  "year": "2026",
+  "status": "development",
+  "visual": "data",
+  "tags": [
+    "Python",
+    "Ollama",
+    "APIs"
+  ],
+  "category": {
+    "es": "IA local / Análisis",
+    "en": "Local AI / Analysis"
+  },
+  "summary": {
+    "es": "Un laboratorio de análisis con modelos locales, fuentes consultables y simulación de decisiones.",
+    "en": "An analysis laboratory with local models, inspectable sources, and simulated decisions."
+  },
+  "idea": {
+    "es": "Experimentar con varios roles de IA que contrastan información y explican sus propuestas en un entorno local.",
+    "en": "Experimenting with multiple AI roles that compare information and explain proposals in a local environment."
+  },
+  "built": {
+    "es": [
+      "Panel de seguimiento y conversación con un comité de IA.",
+      "Búsqueda de noticias, fuentes y actas consultables.",
+      "Herramientas de simulación y evaluación histórica."
+    ],
+    "en": [
+      "Monitoring dashboard and conversations with an AI committee.",
+      "News search, sources, and inspectable decision records.",
+      "Simulation and historical evaluation tools."
+    ]
+  },
+  "stage": {
+    "es": "Proyecto experimental en desarrollo; el foco de esta presentación es su arquitectura y visualización.",
+    "en": "Experimental project under development; this presentation focuses on its architecture and visualisation."
+  },
+  "featured": false,
+  "order": 120
+}

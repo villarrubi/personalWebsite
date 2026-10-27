@@ -1,0 +1,45 @@
+{
+  "id": "lidar",
+  "published": false,
+  "visibility": "private",
+  "name": "Sistema LiDAR",
+  "enName": "LiDAR system",
+  "year": "2025",
+  "status": "built",
+  "visual": "data",
+  "tags": [
+    "Python",
+    "C",
+    "LiDAR"
+  ],
+  "category": {
+    "es": "Sensores / Integración",
+    "en": "Sensors / Integration"
+  },
+  "summary": {
+    "es": "Adquisición, procesamiento y visualización de datos para detección de objetos en vía.",
+    "en": "Data acquisition, processing, and visualisation for railway object detection."
+  },
+  "idea": {
+    "es": "Integrar hardware y software para interpretar medidas de un sensor LiDAR. Trabajo realizado durante mis prácticas en REDALSA.",
+    "en": "Integrating hardware and software to interpret LiDAR sensor measurements. Work completed during my internship at REDALSA."
+  },
+  "built": {
+    "es": [
+      "Captura y procesamiento de señales.",
+      "Medición de distancias y representación de objetos.",
+      "Cálculos de trayectorias y posibles colisiones en tiempo real."
+    ],
+    "en": [
+      "Signal acquisition and processing.",
+      "Distance measurement and object representation.",
+      "Real-time trajectory and potential collision calculations."
+    ]
+  },
+  "stage": {
+    "es": "Trabajo de prácticas realizado. Se presenta una descripción general de la experiencia de integración.",
+    "en": "Completed internship work. Presented as a general account of the integration experience."
+  },
+  "featured": false,
+  "order": 140
+}

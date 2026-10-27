@@ -3,7 +3,7 @@ import { projectBody } from './project-bodies.mjs';
 import { projectSymbol } from '../public/project-symbols.js';
 
 // Editorial grouping: scale and focus are independent of source visibility.
-export const majorProjectIds = ['chessbot', 'pipa', 'mapforge', 'chessprep', 'deriva', 'phishing'];
+export const majorProjectIds = projects.filter(project => project.featured).map(project => project.id);
 const esc = value => String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 export function projectIcon(project) { return projectSymbol(project.id); }
 function state(p, lang) {
@@ -12,11 +12,11 @@ function state(p, lang) {
 }
 function projectDialog(p,lang) {
  const es=lang==='es', c=copy[lang];
- const image={chessbot:'chessbot-app.png',pipa:'pipa-control.jpg',mapforge:'mapforge.png'}[p.id];
- return `<template id="project-info-${p.id}"><div class="map-dialog-art art-${p.visual}">${image?`<img src="/assets/images/${image}" alt="${c.realCapture}: ${esc(getName(p,lang))}" loading="lazy">`:`${projectIcon(p)}<span>${esc(p.category[lang])}</span>`}</div><div class="map-dialog-copy"><p class="eyebrow">${majorProjectIds.includes(p.id)?(es?'PROYECTO DESTACADO':'FEATURED PROJECT'):(es?'PROYECTO COMPLEMENTARIO':'SIDE PROJECT')} / ${p.year}</p><h2 id="project-dialog-title">${esc(getName(p,lang))}</h2>${state(p,lang)}<p class="map-dialog-summary">${esc(p.summary[lang])}</p><div class="map-tags">${p.tags.map(t=>`<span>${esc(getTagName(t,lang))}</span>`).join('')}</div><h3>${c.overview}</h3><p>${esc(p.idea[lang])}</p><h3>${c.implementation}</h3><ul>${p.built[lang].map(item=>`<li>${esc(item)}</li>`).join('')}</ul><p class="map-stage-note">${esc(p.stage[lang])}</p><div class="map-dialog-links"><a class="button primary" href="/${lang}/projects/${p.id}/">${es?'Ver el proyecto completo':'Explore full project'} <span aria-hidden="true">↗</span></a>${p.visibility==='public'&&p.repo?`<a class="underlined" href="${esc(p.repo)}" target="_blank" rel="noopener noreferrer">GitHub ↗</a>`:`<span class="map-private">${p.localOnly?c.localCodeNote:c.privateNote}</span>`}${p.demo?`<a class="underlined" href="${esc(p.demo)}" target="_blank" rel="noopener noreferrer">${c.live} ↗</a>`:''}</div></div></template>`;
+ const image=p.cover;
+ return `<template id="project-info-${p.id}"><div class="map-dialog-art art-${p.visual}">${image?`<img src="${esc(image)}" alt="${c.realCapture}: ${esc(getName(p,lang))}" loading="lazy">`:`${projectIcon(p)}<span>${esc(p.category[lang])}</span>`}</div><div class="map-dialog-copy"><p class="eyebrow">${majorProjectIds.includes(p.id)?(es?'PROYECTO DESTACADO':'FEATURED PROJECT'):(es?'PROYECTO COMPLEMENTARIO':'SIDE PROJECT')} / ${esc(p.year)}</p><h2 id="project-dialog-title">${esc(getName(p,lang))}</h2>${state(p,lang)}<p class="map-dialog-summary">${esc(p.summary[lang])}</p><div class="map-tags">${p.tags.map(t=>`<span>${esc(getTagName(t,lang))}</span>`).join('')}</div><h3>${c.overview}</h3><p>${esc(p.idea[lang])}</p><h3>${c.implementation}</h3><ul>${p.built[lang].map(item=>`<li>${esc(item)}</li>`).join('')}</ul><p class="map-stage-note">${esc(p.stage[lang])}</p><div class="map-dialog-links"><a class="button primary" href="/${lang}/projects/${p.id}/">${es?'Ver el proyecto completo':'Explore full project'} <span aria-hidden="true">↗</span></a>${p.visibility==='public'&&p.repo?`<a class="underlined" href="${esc(p.repo)}" target="_blank" rel="noopener noreferrer">GitHub ↗</a>`:`<span class="map-private">${p.localOnly?c.localCodeNote:c.privateNote}</span>`}${p.demo?`<a class="underlined" href="${esc(p.demo)}" target="_blank" rel="noopener noreferrer">${c.live} ↗</a>`:''}</div></div></template>`;
 }
 function planet(p,i,lang,major){
- const title=p.id==='club-palentino'?'Club Palentino':getName(p,lang);
+ const title=p.shortName||getName(p,lang);
  return `<a class="map-node planet-node ${major?'planet-major':'planet-side'}" href="/${lang}/projects/${p.id}/" data-project="${p.id}" data-name="${esc(getName(p,lang))}" data-search="${esc([getName(p,lang),p.category[lang],...p.tags].join(' '))}" style="--drift-delay:${-i*2.3}s;--drift-period:${12+i%4*3}s" aria-haspopup="dialog"><span class="planet-visual">${projectBody(p,i)}</span><span class="planet-label"><span class="planet-title">${esc(title)} <span aria-hidden="true">↗</span></span><span class="planet-category">${esc(p.category[lang])}</span></span></a>`;
 }
 function constellation(items,lang,major){
