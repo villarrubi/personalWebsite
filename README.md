@@ -1,6 +1,6 @@
 # Alejandro Villarrubia · Personal website
 
-Portfolio bilingüe inglés/español centrado en ingeniería de software, IA local y sistemas físicos, sobre una paleta azul noche. La portada presenta el nombre, la profesión, acceso directo a proyectos y una captura real de Pipα. Los proyectos publicados se recorren en una única escena orbital, con grupos de destacados y complementarios, fichas, páginas de detalle y CV en ambos idiomas. El ajedrez se conserva como detalle personal y entrada 3D breve.
+Portfolio bilingüe inglés/español centrado en ingeniería de software, IA local y sistemas físicos, sobre una paleta azul noche. La portada presenta el nombre a gran escala y un paisaje 3D que se puede generar y girar: un experimento interactivo propio de esta web, independiente del catálogo de proyectos. Los proyectos publicados se recorren en una única escena orbital, con grupos de destacados y complementarios, fichas, páginas de detalle y CV en ambos idiomas. El ajedrez se conserva como detalle personal y entrada 3D breve.
 
 ## Abrir en Windows
 
@@ -16,8 +16,11 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 
 - `src/content.mjs`: perfil, textos, traducciones, proyectos, publicación (`published`), estados y visibilidad del código.
 - `scripts/build.mjs`: plantillas y generación de páginas estáticas.
-- `src/home.mjs`: portada orientada al perfil técnico, tecnologías y contacto.
-- `src/project-cases.mjs`: reto, aportación y componentes de Pipα, MapForge y ChessBot para la portada y las páginas de detalle.
+- `src/home.mjs`: composición de portada, proyectos, biografía y contacto.
+- `src/hero.mjs` y `public/hero-lab.css`: primera pantalla abierta, tipografía, controles y adaptación móvil.
+- `public/hero-world.js` y `public/terrain.js`: generador de paisajes reproducibles, agua, iluminación, interacción por arrastre y teclado, y transiciones entre terrenos.
+- `scripts/prepare-hero-poster.mjs`: regenera `public/assets/hero-world.svg` desde el mismo generador, sin dependencias. `scripts/check-terrain.mjs` comprueba semillas, variantes y límites.
+- `src/project-cases.mjs`: reto, aportación y componentes de Pipα, MapForge y ChessBot para las páginas de detalle.
 - `src/project-explorer.mjs`: escena orbital como única vista de proyectos, sin tarjetas ni selector. No depende de preferencias guardadas. Conserva el enlace antiguo `#archive` como acceso a los proyectos; sin JavaScript aparecen todos los cuerpos con enlaces normales.
 - `public/engineering.css`: jerarquía de la portada, acceso directo a las órbitas, componentes técnicos, legibilidad y ajustes de móvil.
 - `public/styles.css`: diseño y adaptación a pantallas.
@@ -59,12 +62,22 @@ Cada ficha de `src/content.mjs` tiene controles independientes:
 - `published: true`: aparece en la web. `false` o ausencia del campo: oculto. El filtro se aplica a las órbitas, los diálogos, las páginas de detalle y los enlaces entre proyectos.
 - `status`: estado editorial del proyecto (`built` o `development`). No determina si se publica ni su prioridad; se mantiene manualmente según indique el autor.
 - `visibility`: visibilidad del **código fuente** (`public` o `private`). Un proyecto privado puede tener una ficha pública, y un repositorio público puede quedarse fuera del portfolio.
-- La pertenencia a `majorProjectIds`, en `src/project-map.mjs`, define destacados/complementarios; el orden del catálogo define el orden dentro de cada grupo. La portada continúa siendo una composición explícita de `src/home.mjs`, no una selección automática por estado ni por actividad de GitHub.
+- La pertenencia a `majorProjectIds`, en `src/project-map.mjs`, define destacados/complementarios; el orden del catálogo define el orden dentro de cada grupo. La portada usa un experimento propio, definido en `src/hero.mjs`; no elige proyectos automáticamente por su estado ni por actividad de GitHub.
 - `demo`: enlace opcional a una aplicación que el autor haya decidido mostrar.
 
 Tras editar, ejecutar `npm run build` y `npm run check`. El build regenera `dist/` y elimina las páginas antiguas de proyectos despublicados. Al publicar en `main`, GitHub Pages despliega el resultado. No hay sincronización automática ni panel de administración: los cambios se gestionan en estos archivos.
 
-LiDAR y Desarrollo Web II quedan con `published: false`. Los demás conservan su estado, grupo y orden anteriores, sin reclasificarlos. Ocultar una ficha del sitio no elimina el contenido del repositorio ni su historial, y tampoco modifica el CV o la trayectoria profesional. La portada y la biografía dejan de enlazar a una ficha si se despublica.
+LiDAR y Desarrollo Web II quedan con `published: false`. Los demás conservan su estado, grupo y orden anteriores, sin reclasificarlos. Ocultar una ficha del sitio no elimina el contenido del repositorio ni su historial, y tampoco modifica el CV o la trayectoria profesional. La biografía deja de enlazar a una ficha si se despublica. La portada no enlaza directamente a ninguna ficha seleccionada de forma implícita.
+
+## Experimento de portada
+
+La cabecera tiene un paisaje procedural real, calculado en el navegador, con dos variantes (islas y montañas), un botón para generar otra semilla y una transición de un segundo entre terrenos. Es un estudio creado para esta web; no se presenta como demo de MapForge ni de otro proyecto. La tarjeta de Pipα, su estado y sus tecnologías dejan de ocupar la primera pantalla. El CV sigue disponible en la biografía y los proyectos conservan sus grupos y orden.
+
+Arrastrar gira el paisaje. También se puede enfocar con Tab y usar flechas; Inicio restablece el ángulo. En pantalla táctil se conserva el desplazamiento vertical de la página y se gira mediante arrastre horizontal. Los cambios se anuncian a lectores de pantalla. La escena se detiene fuera de pantalla, con la pestaña oculta y durante la entrada; comparte la preferencia de movimiento de las órbitas y tiene un control de pausa junto a las instrucciones. Con movimiento reducido, el paisaje se mantiene quieto y los cambios pedidos por el visitante son inmediatos. Sin JavaScript o WebGL queda una ilustración SVG y se ocultan los controles inactivos.
+
+La entrada utiliza una imagen del render actual del paisaje como guía, junto al texto y las formas reales de la portada. El SVG sólo es respaldo; la demo final es interactiva. El tablero pequeño y el acceso al CV pasan a «Sobre mí», y se puede repetir la entrada desde la portada o la biografía. No se ha añadido una fotografía del autor sin disponer de ella.
+
+Para regenerar el respaldo tras modificar el terreno: `node scripts/prepare-hero-poster.mjs`, seguido del build normal.
 
 ## Entrada de ajedrez
 
