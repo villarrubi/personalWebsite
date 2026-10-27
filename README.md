@@ -1,6 +1,6 @@
 # Alejandro Villarrubia · Personal website
 
-Portfolio bilingüe inglés/español centrado en ingeniería de software, IA local y sistemas físicos, sobre una paleta azul noche. La portada presenta el nombre, la profesión, acceso directo a proyectos y una captura real de Pipα. Los 15 proyectos se recorren en una única escena orbital, con grupos de destacados y complementarios, fichas, páginas de detalle y CV en ambos idiomas. El ajedrez se conserva como detalle personal y entrada 3D breve.
+Portfolio bilingüe inglés/español centrado en ingeniería de software, IA local y sistemas físicos, sobre una paleta azul noche. La portada presenta el nombre, la profesión, acceso directo a proyectos y una captura real de Pipα. Los proyectos publicados se recorren en una única escena orbital, con grupos de destacados y complementarios, fichas, páginas de detalle y CV en ambos idiomas. El ajedrez se conserva como detalle personal y entrada 3D breve.
 
 ## Abrir en Windows
 
@@ -14,7 +14,7 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 
 ## Editar
 
-- `src/content.mjs`: perfil, textos, traducciones, proyectos, estados y visibilidad del código.
+- `src/content.mjs`: perfil, textos, traducciones, proyectos, publicación (`published`), estados y visibilidad del código.
 - `scripts/build.mjs`: plantillas y generación de páginas estáticas.
 - `src/home.mjs`: portada orientada al perfil técnico, tecnologías y contacto.
 - `src/project-cases.mjs`: reto, aportación y componentes de Pipα, MapForge y ChessBot para la portada y las páginas de detalle.
@@ -50,7 +50,21 @@ npm run check
 
 El movimiento de la escena respeta la preferencia de movimiento reducido del sistema cuando no hay una elección explícita del visitante. El visitante puede pausarlo desde el pie de la escena; su elección se conserva durante la sesión. Las opciones `?motion=on` y `?motion=off` permiten indicar el estado al abrir un enlace. Las transiciones entre páginas usan View Transitions si el navegador las admite; el resto mantiene navegación HTML normal. Todas las fuentes, texturas y bibliotecas se sirven localmente.
 
-Para añadir un proyecto basta con incorporarlo a `src/content.mjs`. Aparece en complementarios por defecto; añadir su ID a `majorProjectIds` lo mueve a destacados. Los IDs nuevos reciben un modelo de navegador web como respaldo, que se puede personalizar en `public/project-models.js` y en su símbolo SVG. Las posiciones, tamaños y constelaciones se calculan automáticamente sin definir coordenadas. `npm run check` verifica distribución, límites y ausencia de solapamientos en varias fases de órbita y colecciones de hasta 100 proyectos. La sección mantiene su altura al añadir proyectos.
+Para añadir un proyecto basta con incorporarlo a `src/content.mjs`. Permanece oculto hasta marcar `published: true`; una vez publicado, aparece en complementarios salvo que su ID esté en `majorProjectIds`. Añadir su ID a esa lista lo mueve a destacados. El orden de cada grupo sigue el del catálogo, sin ordenar por estado de desarrollo. Los IDs nuevos reciben un modelo de navegador web como respaldo, que se puede personalizar en `public/project-models.js` y en su símbolo SVG. Las posiciones, tamaños y constelaciones se calculan automáticamente sin definir coordenadas. `npm run check` verifica distribución, límites y ausencia de solapamientos en varias fases de órbita y colecciones de hasta 100 proyectos. La sección mantiene su altura al añadir proyectos.
+
+## Publicar u ocultar proyectos
+
+Cada ficha de `src/content.mjs` tiene controles independientes:
+
+- `published: true`: aparece en la web. `false` o ausencia del campo: oculto. El filtro se aplica a las órbitas, los diálogos, las páginas de detalle y los enlaces entre proyectos.
+- `status`: estado editorial del proyecto (`built` o `development`). No determina si se publica ni su prioridad; se mantiene manualmente según indique el autor.
+- `visibility`: visibilidad del **código fuente** (`public` o `private`). Un proyecto privado puede tener una ficha pública, y un repositorio público puede quedarse fuera del portfolio.
+- La pertenencia a `majorProjectIds`, en `src/project-map.mjs`, define destacados/complementarios; el orden del catálogo define el orden dentro de cada grupo. La portada continúa siendo una composición explícita de `src/home.mjs`, no una selección automática por estado ni por actividad de GitHub.
+- `demo`: enlace opcional a una aplicación que el autor haya decidido mostrar.
+
+Tras editar, ejecutar `npm run build` y `npm run check`. El build regenera `dist/` y elimina las páginas antiguas de proyectos despublicados. Al publicar en `main`, GitHub Pages despliega el resultado. No hay sincronización automática ni panel de administración: los cambios se gestionan en estos archivos.
+
+LiDAR y Desarrollo Web II quedan con `published: false`. Los demás conservan su estado, grupo y orden anteriores, sin reclasificarlos. Ocultar una ficha del sitio no elimina el contenido del repositorio ni su historial, y tampoco modifica el CV o la trayectoria profesional. La portada y la biografía dejan de enlazar a una ficha si se despublica.
 
 ## Entrada de ajedrez
 
@@ -76,7 +90,7 @@ La reconstrucción del CV conserva la trayectoria y recoge la corrección del ca
 
 La portada toma como referencia la composición tipográfica y la navegación de [Calder, de Chayan Panda](https://www.framer.com/marketplace/templates/calder/). Es una implementación propia en este repositorio, con contenido y capturas del autor. Utiliza Instrument Serif para nombre y titulares editoriales, DM Sans para contenido y proyectos, un fondo azul noche con acentos azul verdoso y transiciones entre páginas. Software, IA y hardware ocupan la jerarquía principal; el tablero 3D aparece como detalle personal.
 
-La vista inicial muestra tarjetas con capturas reales, el reto, la aportación del autor y componentes técnicos. Pipα y MapForge preceden a ChessBot. La vista alternativa representa los proyectos en órbita con una cámara estable; el 3D sólo se carga al mostrar esa vista. Las siluetas, los reflejos, los cambios de perspectiva y los materiales físicos dan volumen a cada proyecto. El fondo espacial mantiene estrellas a distintas profundidades y trazas orbitales sutiles. La interacción sigue en HTML nativo para conservar acceso por teclado y enlaces de respaldo. La escena no intercepta el scroll y se pausa cuando está oculta. La proyección de etiquetas actualiza la cámara antes del primer fotograma, también con movimiento reducido.
+La única vista de proyectos los representa en órbita con una cámara estable; el 3D sólo se carga al mostrar la sección. No hay tarjetas ni selector de vista. Las siluetas, los reflejos, los cambios de perspectiva y los materiales físicos dan volumen a cada proyecto. El fondo espacial mantiene estrellas a distintas profundidades y trazas orbitales sutiles. La interacción sigue en HTML nativo para conservar acceso por teclado y enlaces de respaldo. La escena no intercepta el scroll y se pausa cuando está oculta. La proyección de etiquetas actualiza la cámara antes del primer fotograma, también con movimiento reducido.
 
 ## Licencias de recursos
 

@@ -1,4 +1,4 @@
-import { projects, getName, getTagName, copy } from './content.mjs';
+import { publishedProjects as projects, getName, getTagName, copy } from './content.mjs';
 import { projectBody } from './project-bodies.mjs';
 import { projectSymbol } from '../public/project-symbols.js';
 

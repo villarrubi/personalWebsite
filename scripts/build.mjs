@@ -1,12 +1,22 @@
-import { mkdir, writeFile, cp } from 'node:fs/promises';
+import { mkdir, writeFile, cp, lstat, realpath, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { copy, profile, projects, getName, getTagName } from '../src/content.mjs';
+import { copy, profile, publishedProjects as projects, getName, getTagName } from '../src/content.mjs';
 import { homeContent } from '../src/home.mjs';
 import { projectCases, technicalFlow } from '../src/project-cases.mjs';
 import {prepareDeployment} from './deploy-paths.mjs';
 
-const root = resolve(import.meta.dirname, '..');
+const root = await realpath(resolve(import.meta.dirname, '..'));
 const out = resolve(root, 'dist');
+// Regenerate the build so unpublished projects cannot leave stale detail pages.
+// Only remove the concrete generated directory; refuse symlinks or junctions.
+const outputInfo = await lstat(out).catch(error => {
+ if (error.code !== 'ENOENT') throw error;
+});
+if (outputInfo) {
+ if (!outputInfo.isDirectory() || outputInfo.isSymbolicLink() || await realpath(out) !== out)
+  throw new Error(`Build output must be a regular directory inside the workspace: ${out}`);
+ await rm(out, { recursive: true });
+}
 await mkdir(out, { recursive: true });
 await cp(resolve(root, 'public'), out, { recursive: true });
 const esc = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');

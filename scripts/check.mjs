@@ -1,7 +1,7 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import assert from 'node:assert/strict';
-import { projects } from '../src/content.mjs';
+import { projects, publishedProjects } from '../src/content.mjs';
 import { layoutPlanets } from '../public/solar-layout.js';
 import { createOrbitPaths, orbitPoint } from '../public/solar-motion.js';
 import {basePath} from './deploy-paths.mjs';
@@ -9,12 +9,19 @@ const root=resolve(import.meta.dirname,'../dist');
 const pages=[];
 async function walk(dir){for(const file of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,file.name);if(file.isDirectory())await walk(path);else if(path.endsWith('.html'))pages.push(path);}}
 await walk(root);
+assert.equal(pages.length,4+publishedProjects.length*2,'Only published project pages are generated');
+const hiddenProjects=projects.filter(p=>p.published!==true);
 let links=0;
 for(const path of pages){
  const html=await readFile(path,'utf8');
  assert.equal((html.match(/<h1[ >]/g)||[]).length,1,`One h1: ${path}`);
  assert.match(html,/<html lang="(es|en)"/);
  assert(!html.includes('Technical Sales Manager'),`Outdated role: ${path}`);
+ for(const p of hiddenProjects){
+  assert(!html.includes(`/projects/${p.id}/`),`Unpublished project link: ${p.id} in ${path}`);
+  assert(!html.includes(`data-project="${p.id}"`),`Unpublished orbital object: ${p.id} in ${path}`);
+  assert(!html.includes(`id="project-info-${p.id}"`),`Unpublished project dialog: ${p.id} in ${path}`);
+ }
  for(const [,href] of html.matchAll(/(?:href|src)="([^"#]+)(?:#[^"]*)?"/g)){
   if(/^(https?:|mailto:|data:)/.test(href))continue;
   if(basePath&&href.startsWith('/'))assert(href.startsWith(`/${basePath}/`),`URL must include deployment prefix: ${href}`);
@@ -25,11 +32,21 @@ for(const path of pages){
 }
 assert.equal(new Set(projects.map(p=>p.id)).size,projects.length);
 for(const p of projects){
+ assert(p.published===undefined||typeof p.published==='boolean',`Publication flag must be a boolean: ${p.id}`);
+ for(const lang of ['es','en']){
+  const detail=resolve(root,lang,'projects',p.id,'index.html');
+  if(p.published===true)assert(pages.includes(detail),`Published detail page: ${p.id}/${lang}`);
+  else assert(!pages.includes(detail),`Unpublished detail page must not exist: ${p.id}/${lang}`);
+ }
  assert(['public','private'].includes(p.visibility),`Explicit source visibility: ${p.id}`);
  if(p.visibility==='public')assert.match(p.repo||'',/^https:\/\/github\.com\/villarrubi\/[^/]+$/,`Public repository: ${p.id}`);
  else assert(!p.repo,`Private project must not expose a source link: ${p.id}`);
  if(p.localOnly)assert.equal(p.visibility,'private',`Local project visibility: ${p.id}`);
  for(const lang of ['es','en'])assert(p.summary[lang]&&p.idea[lang]&&p.built[lang].length&&p.stage[lang]);
+}
+for(const home of ['index.html','en/index.html','es/index.html']){
+ const html=await readFile(resolve(root,home),'utf8');
+ assert.deepEqual([...html.matchAll(/data-project="([^"]+)"/g)].map(m=>m[1]).sort(),publishedProjects.map(p=>p.id).sort(),`Home contains exactly the published projects: ${home}`);
 }
 for(const count of [1,20,50,100])for(const [width,height,capacity] of [[338,443,6],[640,443,8],[1324,650,12]])for(const phase of [0,.8,1.6,3.1,4.8]){
  const items=Array.from({length:count},(_,i)=>({id:`planet-${i}`}));
@@ -72,4 +89,4 @@ for(const [width,height,count] of [[338,443,4],[640,443,6],[1324,650,9],[1324,65
   }
  }
 }
-console.log(`PASS: ${pages.length} HTML pages, ${links} local assets/links, ${projects.length} bilingual projects; responsive constellations up to 100 projects; continuous orbits over 180 seconds.`);
+console.log(`PASS: ${pages.length} HTML pages, ${links} local assets/links, ${publishedProjects.length} published bilingual projects (${hiddenProjects.length} hidden); responsive constellations up to 100 projects; continuous orbits over 180 seconds.`);
