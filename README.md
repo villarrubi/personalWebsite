@@ -1,6 +1,6 @@
 # Alejandro Villarrubia · Personal website
 
-Portfolio bilingüe inglés/español centrado en ingeniería de software, IA local y sistemas físicos, sobre una paleta azul noche. La portada presenta el nombre a gran escala y un paisaje 3D que se puede generar y girar: un experimento interactivo propio de esta web, independiente del catálogo de proyectos. Los proyectos publicados se recorren en una única escena orbital, con grupos de destacados y complementarios, fichas, páginas de detalle y CV en ambos idiomas. El ajedrez se conserva como detalle personal y entrada 3D breve.
+Portfolio bilingüe inglés/español centrado en ingeniería de software, IA local y sistemas físicos, sobre una paleta azul noche. La portada presenta el nombre a gran escala, una introducción y los accesos a proyectos y contacto. El experimento de paisaje interactivo está retirado temporalmente. Los proyectos publicados se recorren en una única escena orbital, con grupos de destacados y complementarios, fichas, páginas de detalle y CV en ambos idiomas. El ajedrez se conserva como detalle personal y entrada 3D breve.
 
 ## Abrir en Windows
 
@@ -18,7 +18,7 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 - `scripts/build.mjs`: plantillas y generación de páginas estáticas.
 - `src/home.mjs`: composición de portada, proyectos, biografía y contacto.
 - `src/hero.mjs` y `public/hero-lab.css`: primera pantalla abierta, tipografía, controles y adaptación móvil.
-- `public/hero-world.js` y `public/terrain.js`: generador de paisajes reproducibles, agua, iluminación, interacción por arrastre y teclado, y transiciones entre terrenos.
+- `public/hero-world.js` y `public/terrain.js`: generador de paisajes conservado para una posible recuperación del experimento; no se carga en la portada actual.
 - `scripts/prepare-hero-poster.mjs`: regenera `public/assets/hero-world.svg` desde el mismo generador, sin dependencias. `scripts/check-terrain.mjs` comprueba semillas, variantes y límites.
 - `src/project-cases.mjs`: reto, aportación y componentes de Pipα, MapForge y ChessBot para las páginas de detalle.
 - `src/project-explorer.mjs`: escena orbital como única vista de proyectos, sin tarjetas ni selector. No depende de preferencias guardadas. Conserva el enlace antiguo `#archive` como acceso a los proyectos; sin JavaScript aparecen todos los cuerpos con enlaces normales.
@@ -71,13 +71,9 @@ LiDAR y Desarrollo Web II quedan con `published: false`. Los demás conservan su
 
 ## Experimento de portada
 
-La cabecera tiene un paisaje procedural real, calculado en el navegador, con dos variantes (islas y montañas), un botón para generar otra semilla y una transición de un segundo entre terrenos. Es un estudio creado para esta web; no se presenta como demo de MapForge ni de otro proyecto. La tarjeta de Pipα, su estado y sus tecnologías dejan de ocupar la primera pantalla. El CV sigue disponible en la biografía y los proyectos conservan sus grupos y orden.
+El paisaje interactivo se ha retirado temporalmente de ambos idiomas, incluidos el rótulo, los controles y su carga de JavaScript. La portada ocupa el ancho disponible con el nombre y conserva los enlaces a proyectos, contacto y la entrada de ajedrez. En móvil no reserva el espacio que antes ocupaba el paisaje.
 
-Arrastrar gira el paisaje. También se puede enfocar con Tab y usar flechas; Inicio restablece el ángulo. En pantalla táctil se conserva el desplazamiento vertical de la página y se gira mediante arrastre horizontal. Los cambios se anuncian a lectores de pantalla. La escena se detiene fuera de pantalla, con la pestaña oculta y durante la entrada; comparte la preferencia de movimiento de las órbitas y tiene un control de pausa junto a las instrucciones. Con movimiento reducido, el paisaje se mantiene quieto y los cambios pedidos por el visitante son inmediatos. Sin JavaScript o WebGL queda una ilustración SVG y se ocultan los controles inactivos.
-
-La entrada utiliza una imagen del render actual del paisaje como guía, junto al texto y las formas reales de la portada. El SVG sólo es respaldo; la demo final es interactiva. El tablero pequeño y el acceso al CV pasan a «Sobre mí», y se puede repetir la entrada desde la portada o la biografía. No se ha añadido una fotografía del autor sin disponer de ella.
-
-Para regenerar el respaldo tras modificar el terreno: `node scripts/prepare-hero-poster.mjs`, seguido del build normal.
+Se conservan el generador, el SVG de respaldo y sus comprobaciones por si se recupera más adelante. La entrada de ajedrez prepara su guía directamente desde el texto y las formas de la portada actual.
 
 ## Entrada de ajedrez
 
@@ -85,7 +81,7 @@ La secuencia dura 8,3 segundos una vez preparada. La conversión a código tiene
 
 El tablero 3D se captura una vez cuando la cámara se detiene; el resto de la secuencia sólo anima la composición de código. El modelo se sirve localmente en `public/assets/chess/staunton.bin` (1,86 MB). Las seis geometrías Staunton proceden de clarkerubber, bajo licencia MIT, y se comparten entre las 32 piezas; no hay peticiones a terceros en ejecución. html2canvas 1.4.1 sólo se carga cuando se reproduce la entrada y se sirve con su licencia MIT en `public/assets/vendor/`. La página y la escena comparten el fondo `#061327`.
 
-Se reproduce automáticamente al abrir o refrescar la portada, aunque la versión anterior haya guardado que ya se vio. Respeta movimiento reducido y pausa. Los enlaces directos a secciones omiten la entrada al navegar; refrescar una de esas direcciones sí la reproduce y conserva la sección de destino. «Repetir la entrada» solicita otra reproducción; `?intro=cinematic` la fuerza para previsualizar. Las antiguas opciones `knight` y `squares` se resuelven a la nueva entrada. Saltar o Escape liberan inmediatamente la navegación; el foco vuelve a un enlace o al botón de repetición. La carga tiene un límite de espera. Sin JavaScript o WebGL queda una imagen del mismo tablero renderizada desde arriba. Esa imagen WebP (49 KB) se precarga antes del 3D y coincide con su encuadre, evitando el destello de símbolos al cambiar de idioma. No se utilizan iconos Unicode como estado de carga.
+Se reproduce automáticamente al abrir o refrescar la portada, aunque la versión anterior haya guardado que ya se vio. Respeta movimiento reducido y pausa cuando no hay una elección explícita. Activar las animaciones en la web o abrir `?motion=on` permite reproducirla aunque Windows indique movimiento reducido; esa elección se conserva durante la sesión. `?motion=off` vuelve a pausarlas. Los enlaces directos a secciones omiten la entrada al navegar; refrescar una de esas direcciones sí la reproduce y conserva la sección de destino. «Repetir la entrada» solicita otra reproducción; `?intro=cinematic` la fuerza para previsualizar. Las antiguas opciones `knight` y `squares` se resuelven a la nueva entrada. Saltar o Escape liberan inmediatamente la navegación; el foco vuelve a un enlace o al botón de repetición. La carga tiene un límite de espera. Sin JavaScript o WebGL queda una imagen del mismo tablero renderizada desde arriba. Esa imagen WebP (49 KB) se precarga antes del 3D y coincide con su encuadre, evitando el destello de símbolos al cambiar de idioma. No se utilizan iconos Unicode como estado de carga.
 
 El tablero de la portada sólo se renderiza al cambiar de tamaño; no mantiene un bucle de animación en reposo. La secuencia pausa los fotogramas al ocultar la pestaña y libera sus recursos al salir. Los proyectos mantienen su propio control de pausa. `npm run check` verifica también el juego completo y que ninguna pieza salga del encuadre durante el giro en cinco relaciones de aspecto, de móvil a ultrapanorámica.
 

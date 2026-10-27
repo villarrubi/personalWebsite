@@ -43,13 +43,13 @@ assert.equal(introPose(INTRO_DURATION).reveal,1,'Resolve every cell before remov
 // Every homepage visit and refresh can play the entrance, including browsers
 // with the old seen flag. Direct section links and motion preferences still work.
 const boot=await readFile(new URL('../public/intro-boot.js',import.meta.url),'utf8');
-function entrancePending({persisted=false,session=false,hash='',search='',reduced=false,paused=false,storageBlocked=false,reload=false}={}){
+function entrancePending({persisted=false,session=false,hash='',search='',reduced=false,paused=false,enabled=false,storageBlocked=false,reload=false,pathname='/es/',script=boot}={}){
   const classes=new Set();
-  runInNewContext(boot,{
-    location:{pathname:'/es/',hash,search},URLSearchParams,
+  runInNewContext(script,{
+    location:{pathname,hash,search},URLSearchParams,
     performance:{getEntriesByType:()=>[{type:reload?'reload':'navigate'}]},
     localStorage:{getItem:()=>{if(storageBlocked)throw new Error('Unavailable');return persisted?'1':null;}},
-    sessionStorage:{getItem:key=>key==='chess-opening-seen'?(session?'1':null):paused?'off':null},
+    sessionStorage:{getItem:key=>{if(storageBlocked)throw new Error('Unavailable');return key==='chess-opening-seen'?(session?'1':null):paused?'off':enabled?'on':null;}},
     matchMedia:()=>({matches:reduced}),document:{documentElement:{classList:{add:name=>classes.add(name)}}},
     window:{},setTimeout:()=>1,
   });
@@ -64,6 +64,22 @@ assert(!entrancePending({hash:'#projects'}),'Direct project navigation skips the
 assert(!entrancePending({reduced:true}),'Automatic motion respects the OS');
 assert(!entrancePending({paused:true}),'A paused scene skips automatic motion');
 assert(entrancePending({persisted:true,reduced:true,search:'?intro=cinematic'}),'Explicit replay remains available');
+// The early curtain and runtime must honour the visitor's explicit motion choice,
+// including a deployed subdirectory and direct index.html entry points.
+const deployedBoot=await readFile(new URL('../dist/intro-boot.js',import.meta.url),'utf8');
+for(const [script,prefix] of [[boot,''],[deployedBoot,basePath?`/${basePath}`:'']]){
+ for(const route of ['/','/en/','/es/','/index.html']){
+  const entry={script,pathname:prefix+route,reduced:true};
+  assert(!entrancePending(entry),'Default automatic motion respects the OS');
+  assert(entrancePending({...entry,enabled:true}),'The saved motion-on choice overrides the OS');
+  assert(entrancePending({...entry,search:'?motion=on'}),'An explicit motion-on URL overrides the OS');
+  assert(entrancePending({...entry,paused:true,search:'?motion=on'}),'The URL overrides a saved pause');
+  assert(!entrancePending({...entry,enabled:true,search:'?motion=off'}),'An explicit pause overrides the saved choice');
+  assert(!entrancePending({...entry,enabled:true,hash:'#projects'}),'Direct section links still skip the intro');
+  assert(entrancePending({...entry,enabled:true,hash:'#projects',reload:true}),'Reloading a section honours motion-on');
+ }
+ assert(!entrancePending({script,pathname:`${prefix}/es/projects/chessbot/`,search:'?motion=on'}),'Detail pages never show the entrance curtain');
+}
 // Validate the actual imported assets against the camera's framing envelope.
 const packed=await readFile(new URL('../public/assets/chess/staunton.bin',import.meta.url));
 const geometries=parseStauntonGeometry(THREE,packed.buffer.slice(packed.byteOffset,packed.byteOffset+packed.byteLength));

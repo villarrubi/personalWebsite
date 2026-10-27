@@ -1,12 +1,11 @@
 // Capture only a colour/shape guide. The final pixels always belong to the live
 // HTML below the effect, so font rendering and links never become a screenshot.
-import {prepareHeroWorld} from './hero-world.js';
 export async function captureIntroPage(signal) {
  const width=innerWidth,height=innerHeight;
  let cloneFrame;
  try {
   const [{default:html2canvas}]=await Promise.all([
-   import('./assets/vendor/html2canvas.js'),document.fonts.ready,prepareHeroWorld(),
+   import('./assets/vendor/html2canvas.js'),document.fonts.ready,
    ...[...document.querySelectorAll('.hero img')].map(image=>image.decode().catch(()=>{})),
   ]);
   if(signal.aborted)return null;
@@ -25,7 +24,7 @@ export async function captureIntroPage(signal) {
     cloneFrame=doc.defaultView.frameElement;
     doc.documentElement.classList.remove('intro-pending');
     const style=doc.createElement('style');
-    style.textContent='*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;color:transparent!important;text-shadow:none!important}.world-poster{opacity:1!important}';
+    style.textContent='*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;color:transparent!important;text-shadow:none!important}';
     doc.head.append(style);
    },
   });

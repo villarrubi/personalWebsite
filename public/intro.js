@@ -4,7 +4,6 @@ import {captureIntroPage} from './intro-page.js';
 
 const host=document.querySelector('[data-chess-stage]');
 const es=document.documentElement.lang==='es';
-const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const requested=new URLSearchParams(location.search).get('intro');
 const forced=['cinematic','squares','knight'].includes(requested);
 const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
@@ -28,7 +27,7 @@ async function getScene(){
 }
 async function playIntro(trigger){
   if(active||!host||disposed)return;
-  const still=!trigger&&!forced&&(reduced.matches||sceneMotion.matches);
+  const still=!trigger&&!forced&&sceneMotion.matches;
   const overlay=document.createElement('div');overlay.className='chess-intro';
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label',es?'Del ajedrez al código. Animación de entrada.':'From chess to code. Entrance animation.');
@@ -103,9 +102,9 @@ if(host){
   controls.forEach(button=>button.addEventListener('click',()=>playIntro(button)));
   host.querySelector('.chess-canvas').addEventListener('chess:lost',()=>{active?.finish();host.classList.remove('chess-ready');scene?.dispose();scene=null;loading=null;});
   const observer=new ResizeObserver(()=>{if(!active)scene?.render();});observer.observe(host);
-  const motionChanged=()=>{if(reduced.matches||sceneMotion.matches)active?.finish();};
-  reduced.addEventListener('change',motionChanged);sceneMotion.addEventListener('change',motionChanged);
-  if(forced||((!location.hash||reloading)&&!reduced.matches&&!sceneMotion.matches))playIntro();
+  const motionChanged=()=>{if(sceneMotion.matches)active?.finish();};
+  sceneMotion.addEventListener('change',motionChanged);
+  if(forced||((!location.hash||reloading)&&!sceneMotion.matches))playIntro();
   else {clearPending();getScene();}
   window.addEventListener('pagehide',event=>{
     active?.finish();
