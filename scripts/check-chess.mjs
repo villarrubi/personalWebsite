@@ -41,7 +41,7 @@ assert.equal(introPose(INTRO_DURATION).dock,0,'Do not shrink the board into the 
 assert.equal(introPose(INTRO_DURATION).curtain,0);
 assert.equal(introPose(INTRO_DURATION).reveal,1,'Resolve every cell before removing the overlay');
 // Every homepage visit and refresh can play the entrance, including browsers
-// with the old seen flag. Direct section links and motion preferences still work.
+// with old seen/pause flags and OS reduced motion. Explicit opt-outs still work.
 const boot=await readFile(new URL('../public/intro-boot.js',import.meta.url),'utf8');
 function entrancePending({persisted=false,session=false,hash='',search='',reduced=false,paused=false,enabled=false,storageBlocked=false,reload=false,pathname='/es/',script=boot}={}){
   const classes=new Set();
@@ -61,20 +61,26 @@ assert(entrancePending({session:true,reload:true}),'Refreshing replays the entra
 assert(entrancePending({session:true,storageBlocked:true}),'The entrance does not depend on persistent storage');
 assert(entrancePending({hash:'#projects',reload:true}),'Refreshing a section URL also replays the entrance');
 assert(!entrancePending({hash:'#projects'}),'Direct project navigation skips the entrance');
-assert(!entrancePending({reduced:true}),'Automatic motion respects the OS');
-assert(!entrancePending({paused:true}),'A paused scene skips automatic motion');
+assert(entrancePending({reduced:true}),'A direct visit plays the opening even with OS reduced motion');
+assert(entrancePending({paused:true}),'Pausing ambient motion does not suppress the opening');
 assert(entrancePending({persisted:true,reduced:true,search:'?intro=cinematic'}),'Explicit replay remains available');
-// The early curtain and runtime must honour the visitor's explicit motion choice,
+// A normal URL must play without special parameters or stored preferences,
 // including a deployed subdirectory and direct index.html entry points.
 const deployedBoot=await readFile(new URL('../dist/intro-boot.js',import.meta.url),'utf8');
 for(const [script,prefix] of [[boot,''],[deployedBoot,basePath?`/${basePath}`:'']]){
- for(const route of ['/','/en/','/es/','/index.html']){
+ for(const route of ['/','/en/','/es/','/index.html','/en/index.html','/es/index.html']){
   const entry={script,pathname:prefix+route,reduced:true};
-  assert(!entrancePending(entry),'Default automatic motion respects the OS');
+  assert(entrancePending(entry),'The opening plays automatically despite OS reduced motion');
+  assert(entrancePending({...entry,paused:true}),'An old ambient pause cannot hide the opening');
+  assert(entrancePending({...entry,storageBlocked:true}),'Storage is not required to play the opening');
+  assert(entrancePending({...entry,hash:'#top'}),'A link to the top is still a homepage visit');
+  assert(entrancePending({...entry,hash:'#home'}),'A link to the hero is still a homepage visit');
   assert(entrancePending({...entry,enabled:true}),'The saved motion-on choice overrides the OS');
   assert(entrancePending({...entry,search:'?motion=on'}),'An explicit motion-on URL overrides the OS');
   assert(entrancePending({...entry,paused:true,search:'?motion=on'}),'The URL overrides a saved pause');
   assert(!entrancePending({...entry,enabled:true,search:'?motion=off'}),'An explicit pause overrides the saved choice');
+  assert(!entrancePending({...entry,search:'?intro=off'}),'An explicit intro opt-out skips the curtain');
+  assert(entrancePending({...entry,search:'?intro=cinematic&motion=off'}),'An explicit replay overrides a motion opt-out');
   assert(!entrancePending({...entry,enabled:true,hash:'#projects'}),'Direct section links still skip the intro');
   assert(entrancePending({...entry,enabled:true,hash:'#projects',reload:true}),'Reloading a section honours motion-on');
  }

@@ -1,11 +1,12 @@
 import {introPose, INTRO_DURATION} from './chess-timeline.js';
-import {sceneMotion} from './scene-motion.js';
 import {captureIntroPage} from './intro-page.js';
 
 const host=document.querySelector('[data-chess-stage]');
 const es=document.documentElement.lang==='es';
-const requested=new URLSearchParams(location.search).get('intro');
+const query=new URLSearchParams(location.search);
+const requested=query.get('intro');
 const forced=['cinematic','squares','knight'].includes(requested);
+const disabled=requested==='off'||query.get('motion')==='off';
 const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
 const controls=[...document.querySelectorAll('[data-intro]')];
 let scene,loading,active,disposed=false;
@@ -27,7 +28,6 @@ async function getScene(){
 }
 async function playIntro(trigger){
   if(active||!host||disposed)return;
-  const still=!trigger&&!forced&&sceneMotion.matches;
   const overlay=document.createElement('div');overlay.className='chess-intro';
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label',es?'Del ajedrez al código. Animación de entrada.':'From chess to code. Entrance animation.');
@@ -87,13 +87,13 @@ async function playIntro(trigger){
   function frame(now){
     if(finished||document.hidden)return;
     if(last)elapsed+=Math.min(now-last,250);last=now;
-    const pose=still?{pitch:.88,yaw:0,dock:0,appearance:1-Math.min(1,elapsed/650),dissolve:0,reveal:Math.min(1,elapsed/650),caption:0,controls:0,progress:1}:introPose(elapsed);
+    const pose=introPose(elapsed);
     meta.style.opacity=pose.caption;caption.style.opacity=pose.caption;
     progress.style.transform=`scaleX(${pose.progress})`;
     progress.parentElement.style.opacity=pose.controls;skip.style.opacity=pose.controls;
     renderScene.render(pose,innerWidth,innerHeight);mount.style.opacity='1';curtain.style.opacity='0';
     overlay.dataset.phase=pose.reveal>0?'reveal':pose.assemble>0?'assemble':pose.matrix>0?'matrix':pose.dissolve>0?'board-code':'board';
-    if(elapsed>=(still?650:INTRO_DURATION))finish();else raf=requestAnimationFrame(frame);
+    if(elapsed>=INTRO_DURATION)finish();else raf=requestAnimationFrame(frame);
   }
   raf=requestAnimationFrame(frame);
 }
@@ -102,9 +102,7 @@ if(host){
   controls.forEach(button=>button.addEventListener('click',()=>playIntro(button)));
   host.querySelector('.chess-canvas').addEventListener('chess:lost',()=>{active?.finish();host.classList.remove('chess-ready');scene?.dispose();scene=null;loading=null;});
   const observer=new ResizeObserver(()=>{if(!active)scene?.render();});observer.observe(host);
-  const motionChanged=()=>{if(sceneMotion.matches)active?.finish();};
-  sceneMotion.addEventListener('change',motionChanged);
-  if(forced||((!location.hash||reloading)&&!sceneMotion.matches))playIntro();
+  if(forced||((['','#top','#home'].includes(location.hash)||reloading)&&!disabled))playIntro();
   else {clearPending();getScene();}
   window.addEventListener('pagehide',event=>{
     active?.finish();
