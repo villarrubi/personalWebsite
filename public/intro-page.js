@@ -6,7 +6,7 @@ export async function captureIntroPage(signal) {
  try {
   const [{default:html2canvas}]=await Promise.all([
    import('./assets/vendor/html2canvas.js'),document.fonts.ready,
-   ...[...document.querySelectorAll('.impact-hero img')].map(image=>image.decode().catch(()=>{})),
+   ...[...document.querySelectorAll('.hero img')].map(image=>image.decode().catch(()=>{})),
   ]);
   if(signal.aborted)return null;
   const canvas=await html2canvas(document.body,{
@@ -23,7 +23,6 @@ export async function captureIntroPage(signal) {
    onclone:doc=>{
     cloneFrame=doc.defaultView.frameElement;
     doc.documentElement.classList.remove('intro-pending');
-    doc.querySelector('.atlas-preview')?.classList.remove('is-ready');
     const style=doc.createElement('style');
     style.textContent='*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;color:transparent!important;text-shadow:none!important}';
     doc.head.append(style);

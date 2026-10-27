@@ -28,6 +28,5 @@ if('IntersectionObserver'in window&&!reduceMotion.matches){
 }
 
 import './intro.js';
-import './atlas-preview.js';
 
 import './project-map.js';

@@ -105,8 +105,8 @@ if(host){
   const observer=new ResizeObserver(()=>{if(!active)scene?.render();});observer.observe(host);
   const motionChanged=()=>{if(reduced.matches||sceneMotion.matches)active?.finish();};
   reduced.addEventListener('change',motionChanged);sceneMotion.addEventListener('change',motionChanged);
-  if(forced)playIntro();
-  else clearPending();
+  if(forced||((!location.hash||reloading)&&!reduced.matches&&!sceneMotion.matches))playIntro();
+  else {clearPending();getScene();}
   window.addEventListener('pagehide',event=>{
     active?.finish();
     if(!event.persisted){disposed=true;observer.disconnect();scene?.dispose();}

@@ -1,10 +1,10 @@
 # Alejandro Villarrubia · Personal website
 
-Portfolio bilingüe inglés/español de Alejandro Villarrubia. La portada abre directamente con una demostración interactiva del Atlas celular, seguida de tres trabajos realizados (Atlas, detector de phishing y Club Palentino), experiencia, universo orbital y contacto. Los proyectos en desarrollo quedan en su propio grupo al final. Paleta azul noche, tipografía editorial y CV en ambos idiomas.
+Portfolio bilingüe inglés/español centrado en ingeniería de software, IA local y sistemas físicos, sobre una paleta azul noche. La portada presenta el nombre, la profesión, acceso directo a proyectos y una captura real de Pipα. Los 15 proyectos se recorren en una única escena orbital, con grupos de destacados y complementarios, fichas, páginas de detalle y CV en ambos idiomas. El ajedrez se conserva como detalle personal y entrada 3D breve.
 
 ## Abrir en Windows
 
-Doble clic en **Abrir web.cmd**. La portada aparece inmediatamente, también al refrescar. La entrada de ajedrez es opcional: se abre desde «Ver la entrada de ajedrez» en Sobre mí. Requiere Node.js 22 o posterior. No instala dependencias.
+Doble clic en **Abrir web.cmd**. La vista previa abre la portada. La entrada se reproduce al abrir y refrescar la portada, respetando la reducción de movimiento de Windows. El botón «Repetir la entrada» permite verla de nuevo. Requiere Node.js 22 o posterior. No instala dependencias.
 
 ```powershell
 npm run dev
@@ -16,13 +16,9 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 
 - `src/content.mjs`: perfil, textos, traducciones, proyectos, estados y visibilidad del código.
 - `scripts/build.mjs`: plantillas y generación de páginas estáticas.
-- `src/home.mjs`: portada, demostración del Atlas, experiencia y contacto.
-- `src/selected-work.mjs`: selección de tres trabajos realizados, resultados, aportaciones y capturas.
-- `public/impact.css`: composición de portada, demostración, selección y ajustes adaptables.
-- `public/atlas-preview.js`: vista interior simplificada de los modelos originales del Atlas; selección de célula, separación, giro con ratón y teclado, rotación opcional, imagen de respaldo y pausa fuera de pantalla.
-- `public/assets/atlas/models.js`: geometría original del Atlas preparada para compartir la biblioteca Three.js local. `scripts/prepare-atlas.mjs ruta/al/Atlas` permite regenerarla con el proyecto original; el build normal no necesita ese proyecto ni dependencias nuevas.
+- `src/home.mjs`: portada orientada al perfil técnico, tecnologías y contacto.
 - `src/project-cases.mjs`: reto, aportación y componentes de Pipα, MapForge y ChessBot para la portada y las páginas de detalle.
-- `src/project-explorer.mjs`: universo orbital al final de la portada (`#universe`). Conserva `#archive` como acceso antiguo; `#projects` lleva a los trabajos seleccionados. Sin JavaScript aparecen todos los cuerpos con enlaces normales.
+- `src/project-explorer.mjs`: escena orbital como única vista de proyectos, sin tarjetas ni selector. No depende de preferencias guardadas. Conserva el enlace antiguo `#archive` como acceso a los proyectos; sin JavaScript aparecen todos los cuerpos con enlaces normales.
 - `public/engineering.css`: jerarquía de la portada, acceso directo a las órbitas, componentes técnicos, legibilidad y ajustes de móvil.
 - `public/styles.css`: diseño y adaptación a pantallas.
 - `public/app.js`: menú móvil, copiar correo y navegación de idioma.
@@ -33,7 +29,7 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 - `public/chess-code.js`: reconstrucción del tablero y las piezas en caracteres blancos; la misma malla de caracteres toma las formas y colores de la portada y se resuelve por celdas en el HTML real. Usa color y profundidad del tablero y un atlas generado localmente.
 - `public/intro-page.js`: guía de color y formas de la portada visible, preparada una vez antes de animar con html2canvas local y las posiciones reales del texto. No se muestra una captura en lugar de la web.
 - `public/chess-timeline.js`: recorrido de cámara y encuadre adaptable. `scripts/check-chess.mjs` verifica posiciones, continuidad y encuadre.
-- `src/project-map.mjs`: grupos orbitales y fichas. `majorProjectIds` deriva de `status: built`; la segunda colección contiene los proyectos en desarrollo. La visibilidad del repositorio sigue siendo independiente.
+- `src/project-map.mjs`: grupos de proyectos, cuerpos en órbita y fichas. `majorProjectIds` define los seis destacados; el resto aparece en complementarios.
 - `src/project-bodies.mjs`: versiones SVG representativas de los proyectos para la carga inicial y los navegadores sin WebGL2.
 - `public/project-symbols.js`: iconos SVG originales y específicos de los 15 proyectos, compartidos entre las ilustraciones de respaldo y las fichas. Caballos de ajedrez, asistente, mapa, escudo, hoja, calendario, célula, globo, velas de mercado, diálogo y radar ayudan a distinguir su función.
 - `public/solar-layout.js`: distribución orbital con separación entre cuerpos y sus nombres, calculada según las dimensiones disponibles y la fase de la órbita.
@@ -54,15 +50,15 @@ npm run check
 
 El movimiento de la escena respeta la preferencia de movimiento reducido del sistema cuando no hay una elección explícita del visitante. El visitante puede pausarlo desde el pie de la escena; su elección se conserva durante la sesión. Las opciones `?motion=on` y `?motion=off` permiten indicar el estado al abrir un enlace. Las transiciones entre páginas usan View Transitions si el navegador las admite; el resto mantiene navegación HTML normal. Todas las fuentes, texturas y bibliotecas se sirven localmente.
 
-Para añadir un proyecto basta con incorporarlo a `src/content.mjs`. Su estado lo sitúa en Realizados o En desarrollo. La selección inicial se edita en `src/selected-work.mjs`. Los IDs nuevos reciben un modelo de navegador web como respaldo, personalizable en `public/project-models.js` y `public/project-symbols.js`. Las posiciones y las constelaciones se calculan automáticamente; `npm run check` verifica límites, navegación, prioridad de trabajos realizados y ausencia de solapamientos.
+Para añadir un proyecto basta con incorporarlo a `src/content.mjs`. Aparece en complementarios por defecto; añadir su ID a `majorProjectIds` lo mueve a destacados. Los IDs nuevos reciben un modelo de navegador web como respaldo, que se puede personalizar en `public/project-models.js` y en su símbolo SVG. Las posiciones, tamaños y constelaciones se calculan automáticamente sin definir coordenadas. `npm run check` verifica distribución, límites y ausencia de solapamientos en varias fases de órbita y colecciones de hasta 100 proyectos. La sección mantiene su altura al añadir proyectos.
 
 ## Entrada de ajedrez
 
-La secuencia dura 4,5 segundos una vez preparada, conservando las fases de la transformación y suavizando el giro de cámara. El tablero aparece, la cámara sube a una vista oblicua y el tablero y las piezas se convierten en caracteres blancos conservando su forma. El código se extiende por el fondo mientras empieza a adoptar las formas y los colores de la portada: los caracteres de los espacios vacíos desaparecen y los que forman textos e imágenes se conservan. Cada celda se transforma gradualmente en el HTML real de su misma posición, sin un barrido por columnas ni un cambio de escena. La guía visual usa el contenido y la distribución actuales, incluidos el idioma y el tamaño de pantalla; las posiciones de los caracteres se toman del navegador para mantener alineada la tipografía. La captura se prepara antes de animar, con un límite de espera de 3,5 segundos; si no está disponible, queda una disolución por celdas. Si se cambia el tamaño durante la entrada, se deja de utilizar la guía antigua para evitar desalineaciones.
+La secuencia dura 7,5 segundos una vez preparada, conservando las mismas fases y proporciones de la transformación. El tablero aparece, la cámara sube a una vista oblicua y el tablero y las piezas se convierten en caracteres blancos conservando su forma. El código se extiende por el fondo mientras empieza a adoptar las formas y los colores de la portada: los caracteres de los espacios vacíos desaparecen y los que forman textos e imágenes se conservan. Cada celda se transforma gradualmente en el HTML real de su misma posición, sin un barrido por columnas ni un cambio de escena. La guía visual usa el contenido y la distribución actuales, incluidos el idioma y el tamaño de pantalla; las posiciones de los caracteres se toman del navegador para mantener alineada la tipografía. La captura se prepara antes de animar, con un límite de espera de 3,5 segundos; si no está disponible, queda una disolución por celdas. Si se cambia el tamaño durante la entrada, se deja de utilizar la guía antigua para evitar desalineaciones.
 
 El tablero 3D se captura una vez cuando la cámara se detiene; el resto de la secuencia sólo anima la composición de código. El modelo se sirve localmente en `public/assets/chess/staunton.bin` (1,86 MB). Las seis geometrías Staunton proceden de clarkerubber, bajo licencia MIT, y se comparten entre las 32 piezas; no hay peticiones a terceros en ejecución. html2canvas 1.4.1 sólo se carga cuando se reproduce la entrada y se sirve con su licencia MIT en `public/assets/vendor/`. La página y la escena comparten el fondo `#061327`.
 
-La entrada solo se reproduce al pulsar «Ver la entrada de ajedrez» o al abrir `?intro=cinematic`. Las antiguas opciones `knight` y `squares` se conservan como alias. La navegación normal, los enlaces a secciones y las recargas no disparan la secuencia ni cargan el tablero 3D. Saltar o Escape liberan inmediatamente la navegación y devuelven el foco. La imagen WebP del tablero se carga de forma diferida en Sobre mí.
+Se reproduce automáticamente al abrir o refrescar la portada, aunque la versión anterior haya guardado que ya se vio. Respeta movimiento reducido y pausa. Los enlaces directos a secciones omiten la entrada al navegar; refrescar una de esas direcciones sí la reproduce y conserva la sección de destino. «Repetir la entrada» solicita otra reproducción; `?intro=cinematic` la fuerza para previsualizar. Las antiguas opciones `knight` y `squares` se resuelven a la nueva entrada. Saltar o Escape liberan inmediatamente la navegación; el foco vuelve a un enlace o al botón de repetición. La carga tiene un límite de espera. Sin JavaScript o WebGL queda una imagen del mismo tablero renderizada desde arriba. Esa imagen WebP (49 KB) se precarga antes del 3D y coincide con su encuadre, evitando el destello de símbolos al cambiar de idioma. No se utilizan iconos Unicode como estado de carga.
 
 El tablero de la portada sólo se renderiza al cambiar de tamaño; no mantiene un bucle de animación en reposo. La secuencia pausa los fotogramas al ocultar la pestaña y libera sus recursos al salir. Los proyectos mantienen su propio control de pausa. `npm run check` verifica también el juego completo y que ninguna pieza salga del encuadre durante el giro en cinco relaciones de aspecto, de móvil a ultrapanorámica.
 
@@ -80,7 +76,7 @@ La reconstrucción del CV conserva la trayectoria y recoge la corrección del ca
 
 La portada toma como referencia la composición tipográfica y la navegación de [Calder, de Chayan Panda](https://www.framer.com/marketplace/templates/calder/). Es una implementación propia en este repositorio, con contenido y capturas del autor. Utiliza Instrument Serif para nombre y titulares editoriales, DM Sans para contenido y proyectos, un fondo azul noche con acentos azul verdoso y transiciones entre páginas. Software, IA y hardware ocupan la jerarquía principal; el tablero 3D aparece como detalle personal.
 
-La primera pantalla demuestra el Atlas con sus modelos originales. La selección muestra Atlas celular, Detector de phishing y Club Palentino, con imágenes reales, resultados y aportaciones. El universo orbital queda después de la experiencia: Realizados es el grupo inicial y En desarrollo reúne los experimentos. La navegación conserva enlaces HTML, fichas accesibles y páginas de detalle. El Atlas solo renderiza al interactuar o si se activa el giro; detiene el renderizado fuera de pantalla y en pestañas ocultas. Su imagen de respaldo mantiene el contenido disponible sin WebGL o JavaScript.
+La vista inicial muestra tarjetas con capturas reales, el reto, la aportación del autor y componentes técnicos. Pipα y MapForge preceden a ChessBot. La vista alternativa representa los proyectos en órbita con una cámara estable; el 3D sólo se carga al mostrar esa vista. Las siluetas, los reflejos, los cambios de perspectiva y los materiales físicos dan volumen a cada proyecto. El fondo espacial mantiene estrellas a distintas profundidades y trazas orbitales sutiles. La interacción sigue en HTML nativo para conservar acceso por teclado y enlaces de respaldo. La escena no intercepta el scroll y se pausa cuando está oculta. La proyección de etiquetas actualiza la cámara antes del primer fotograma, también con movimiento reducido.
 
 ## Licencias de recursos
 

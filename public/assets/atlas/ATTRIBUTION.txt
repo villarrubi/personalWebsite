@@ -1,4 +1,0 @@
-Original procedural cell models by Alejandro Villarrubia, adapted from the local Atlas celular project.
-Prepared with scripts/prepare-atlas.mjs. No remote models or textures.
-Bundled Three.js geometry helpers are MIT licensed; see ../vendor/THREE-LICENSE.txt.
-The portfolio preview shows a simplified interior view; it is not the complete educational application.
