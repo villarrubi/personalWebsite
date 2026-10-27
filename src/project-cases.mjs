@@ -1,5 +1,4 @@
 // Editorial summaries derived from the documented scope in content.mjs.
-export const caseOrder = ['pipa', 'mapforge', 'chessbot'];
 export const projectCases = {
   pipa: {
     image:'pipa-control.jpg', width:1089, height:485,

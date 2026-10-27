@@ -29,6 +29,4 @@ if('IntersectionObserver'in window&&!reduceMotion.matches){
 
 import './intro.js';
 
-import './project-explorer.js';
-
 import './project-map.js';

@@ -1,6 +1,6 @@
 # Alejandro Villarrubia · Personal website
 
-Portfolio bilingüe inglés/español centrado en ingeniería de software, IA local y sistemas físicos, sobre una paleta azul noche. La portada presenta el nombre, la profesión, acceso directo a proyectos y una captura real de Pipα. Los 15 proyectos se pueden recorrer en tarjetas o en una escena orbital predeterminada, con fichas, páginas de detalle y CV en ambos idiomas. El ajedrez se conserva como detalle personal y entrada 3D breve.
+Portfolio bilingüe inglés/español centrado en ingeniería de software, IA local y sistemas físicos, sobre una paleta azul noche. La portada presenta el nombre, la profesión, acceso directo a proyectos y una captura real de Pipα. Los 15 proyectos se recorren en una única escena orbital, con grupos de destacados y complementarios, fichas, páginas de detalle y CV en ambos idiomas. El ajedrez se conserva como detalle personal y entrada 3D breve.
 
 ## Abrir en Windows
 
@@ -17,9 +17,9 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 - `src/content.mjs`: perfil, textos, traducciones, proyectos, estados y visibilidad del código.
 - `scripts/build.mjs`: plantillas y generación de páginas estáticas.
 - `src/home.mjs`: portada orientada al perfil técnico, tecnologías y contacto.
-- `src/project-cases.mjs`: reto, aportación y componentes de Pipα, MapForge y ChessBot; compartidos entre las tarjetas y las páginas de detalle.
-- `src/project-explorer.mjs`, `public/project-explorer.js`: vista orbital predeterminada y tarjetas de los 15 proyectos; el selector recuerda la elección durante la sesión, también al cambiar de idioma. `public/project-view-boot.js` aplica esa vista antes de pintar la página para evitar destellos al cambiar de idioma. Sin JavaScript quedan todos los proyectos accesibles por enlaces normales.
-- `public/engineering.css`: jerarquía de la portada, tarjetas, componentes técnicos, legibilidad y ajustes de móvil.
+- `src/project-cases.mjs`: reto, aportación y componentes de Pipα, MapForge y ChessBot para la portada y las páginas de detalle.
+- `src/project-explorer.mjs`: escena orbital como única vista de proyectos, sin tarjetas ni selector. No depende de preferencias guardadas. Conserva el enlace antiguo `#archive` como acceso a los proyectos; sin JavaScript aparecen todos los cuerpos con enlaces normales.
+- `public/engineering.css`: jerarquía de la portada, acceso directo a las órbitas, componentes técnicos, legibilidad y ajustes de móvil.
 - `public/styles.css`: diseño y adaptación a pantallas.
 - `public/app.js`: menú móvil, copiar correo y navegación de idioma.
 - `public/night.css`: paleta azul noche, marfil y metal cálido, compartida por portada, proyectos, fichas, páginas de detalle y contacto.

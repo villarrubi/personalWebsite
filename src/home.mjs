@@ -28,7 +28,6 @@ export function homeContent(lang){
     </div>
    </div>
   </div>
-  <div class="engineering-baseline"><div class="hero-now"><i></i><p>Technical Sales Engineer <span>ALTEN × MAHLE</span></p></div><p>SOFTWARE <span>/</span> ${es?'IA LOCAL':'LOCAL AI'} <span>/</span> HARDWARE</p></div>
  </section>
  ${projectExplorer(lang)}
  <section id="about" class="about-section container"><div class="section-heading"><div><p class="eyebrow">02 / ${es?'CÓMO TRABAJO':'HOW I WORK'}</p><h2>${es?'Entender el sistema.<br>Construir la solución.':'Understand the system.<br>Build the solution.'}</h2></div></div>
