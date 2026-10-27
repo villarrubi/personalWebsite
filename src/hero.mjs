@@ -5,7 +5,7 @@ export function experienceHero(lang) {
   <div class="experience-layout container">
    <div class="experience-copy">
     <p class="experience-eyebrow"><span></span> ${es?'INGENIERO INFORMÁTICO':'SOFTWARE ENGINEER'} <span class="eyebrow-rule"></span> PALENCIA, ES</p>
-    <h1 id="hero-name" class="experience-name">Alejandro<br><em>Villarrubia.</em></h1>
+    <h1 id="hero-name" class="experience-name">Alejandro <em>Villarrubia.</em></h1>
     <p class="experience-intro">${es?'La curiosidad toma forma.':'Curiosity takes shape.'}</p>
     <p class="experience-description">${es?'Construyo software. Aquí puedes empezar a explorarlo.':'I build software. Explore some of my work.'}</p>
     <div class="hero-actions experience-actions"><a class="button primary" href="#projects">${es?'Explorar proyectos':'Explore my work'} <span aria-hidden="true">↘</span></a><a class="experience-contact" href="#contact">${es?'Hablemos':'Let’s talk'} ↗</a></div>

@@ -71,7 +71,7 @@ LiDAR y Desarrollo Web II quedan con `published: false`. Los demás conservan su
 
 ## Experimento de portada
 
-El paisaje interactivo se ha retirado temporalmente de ambos idiomas, incluidos el rótulo, los controles y su carga de JavaScript. La portada ocupa el ancho disponible con el nombre y conserva los enlaces a proyectos, contacto y la entrada de ajedrez. En móvil no reserva el espacio que antes ocupaba el paisaje.
+El paisaje interactivo se ha retirado temporalmente de ambos idiomas, incluidos el rótulo, los controles y su carga de JavaScript. La portada compacta centra el nombre y sus enlaces, y acerca el comienzo de los proyectos a la primera pantalla. El nombre ocupa una línea en escritorio y dos en móvil. Conserva los enlaces a proyectos, contacto y la entrada de ajedrez, junto con el fundido del fondo hacia la sección siguiente.
 
 Se conservan el generador, el SVG de respaldo y sus comprobaciones por si se recupera más adelante. La entrada de ajedrez prepara su guía directamente desde el texto y las formas de la portada actual.
 
