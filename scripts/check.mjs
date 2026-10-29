@@ -1,5 +1,5 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, relative, sep } from 'node:path';
 import assert from 'node:assert/strict';
 import { projects, publishedProjects } from '../src/content.mjs';
 import { layoutPlanets } from '../public/solar-layout.js';
@@ -11,11 +11,32 @@ async function walk(dir){for(const file of await readdir(dir,{withFileTypes:true
 await walk(root);
 assert.equal(pages.length,5+publishedProjects.length*2,'Only published project pages and the admin entry are generated');
 const hiddenProjects=projects.filter(p=>p.published!==true);
+const publicBase=new URL(process.env.SITE_URL||'https://villarrubi.github.io/personalWebsite/');
+publicBase.pathname=publicBase.pathname.replace(/\/+$/,'')+'/';
+const expectedUrls=['es','en'].flatMap(lang=>[new URL(`${lang}/`,publicBase).href,...publishedProjects.map(p=>new URL(`${lang}/projects/${p.id}/`,publicBase).href)]);
+const sitemap=await readFile(resolve(root,'sitemap.xml'),'utf8');
+assert.match(sitemap,/<urlset xmlns="http:\/\/www.sitemaps.org\/schemas\/sitemap\/0.9">/);
+assert.deepEqual([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1].replaceAll('&amp;','&')).sort(),expectedUrls.sort(),'Sitemap lists exactly the canonical published pages in both languages');
 let links=0;
 for(const path of pages){
  const html=await readFile(path,'utf8');
  assert.equal((html.match(/<h1[ >]/g)||[]).length,1,`One h1: ${path}`);
  assert.match(html,/<html lang="(es|en)"/);
+ const route=relative(root,path).split(sep).join('/');
+ if(route==='404.html'||route==='admin/index.html'){
+  assert.match(html,/<meta name="robots" content="noindex/,'Utility pages must not be indexed');
+  assert(!html.includes('rel="canonical"'),'Utility pages are not canonical homepages');
+ }else{
+  const canonicalRoute=route==='index.html'?'en/':route.replace(/index\.html$/,'');
+  const expected=new URL(canonicalRoute,publicBase).href;
+  assert.deepEqual([...html.matchAll(/<link rel="canonical" href="([^"]+)"/g)].map(m=>m[1]),[expected],'One absolute canonical URL per page');
+  assert(html.includes(`<meta property="og:url" content="${expected}">`));
+  for(const lang of ['es','en','x-default']){
+   const target=canonicalRoute.replace(/^(es|en)\//,`${lang==='x-default'?'en':lang}/`);
+   assert(html.includes(`<link rel="alternate" hreflang="${lang}" href="${new URL(target,publicBase).href}">`),'Language alternates identify the same project with absolute URLs');
+  }
+ }
+ for(const [img] of html.matchAll(/<img\b[^>]*>/g))assert.match(img,/alt="[^"]+"/,'Project screenshots have a text alternative');
  assert(!html.includes('Technical Sales Manager'),`Outdated role: ${path}`);
  for(const p of hiddenProjects){
   assert(!html.includes(`/projects/${p.id}/`),`Unpublished project link: ${p.id} in ${path}`);

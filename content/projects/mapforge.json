@@ -64,5 +64,13 @@
       ],
       "focus": "Desktop tools"
     }
+  },
+  "coverAlt": {
+    "es": "Editor de MapForge con una isla en cuadrícula, herramientas para pintar terrenos, minimapa e inspector de clima y población.",
+    "en": "MapForge editor showing a grid-based island, terrain painting tools, a minimap, and a climate and population inspector."
+  },
+  "captureAlt": {
+    "es": "Vista completa de MapForge: isla con praderas, bosques, roca y agua; paneles de edición de terreno y propiedades del mundo.",
+    "en": "Full MapForge view: an island with grassland, forests, rock, and water, alongside terrain editing and world properties panels."
   }
 }

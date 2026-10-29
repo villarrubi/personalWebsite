@@ -65,5 +65,9 @@
       ],
       "focus": "Software + hardware"
     }
+  },
+  "coverAlt": {
+    "es": "Centro de control de Pipα con el agente conectado y el resumen de procesos, comandos y automatizaciones locales.",
+    "en": "Pipα control center showing the connected agent and an overview of local processes, commands, and automations."
   }
 }

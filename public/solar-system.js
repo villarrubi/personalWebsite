@@ -79,7 +79,18 @@ if(root){
  root.addEventListener('pointerleave',schedule);
  document.addEventListener('visibilitychange',schedule);
  const motionButton=root.querySelector('.space-motion-toggle');
- function syncMotion(){const enabled=!motion.matches;root.dataset.motion=enabled?'on':'off';root.classList.toggle('scene-motion-on',enabled);motionButton?.setAttribute('aria-pressed',String(enabled));if(motionButton){motionButton.title=enabled?(es?'Pausar animación':'Pause animation'):(es?'Activar animación':'Enable animation');motionButton.querySelector('.motion-toggle-label').textContent=enabled?(es?'Pausar':'Pause motion'):(es?'Activar movimiento':'Enable motion');motionButton.querySelector('.motion-toggle-icon').textContent=enabled?'Ⅱ':'▷';}}
+ function syncMotion(){
+  const enabled=!motion.matches;
+  root.dataset.motion=enabled?'on':'off';
+  root.classList.toggle('scene-motion-on',enabled);
+  if(motionButton){
+   const label=enabled?(es?'Pausar animación':'Pause motion'):(es?'Activar movimiento':'Enable motion');
+   motionButton.title=label;
+   motionButton.setAttribute('aria-label',label);
+   motionButton.querySelector('.motion-toggle-label').textContent=label;
+   motionButton.querySelector('.motion-toggle-icon').textContent=enabled?'Ⅱ':'▷';
+  }
+ }
  motionButton?.addEventListener('click',()=>motion.setEnabled(motion.matches));
  motion.addEventListener('change',()=>{syncMotion();schedule();});
  syncMotion();

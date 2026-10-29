@@ -194,12 +194,48 @@
           "description": "Aparece en la ficha y en la cabecera de la página del proyecto."
         },
         {
+          "name": "coverAlt",
+          "label": "Texto alternativo de la imagen principal",
+          "type": "object",
+          "description": "Describe lo que muestra esta imagen. Obligatorio en ambos idiomas al publicar una ficha con esta imagen.",
+          "fields": [
+            {
+              "name": "es",
+              "label": "Español",
+              "type": "text"
+            },
+            {
+              "name": "en",
+              "label": "English",
+              "type": "text"
+            }
+          ]
+        },
+        {
           "name": "capture",
           "label": "Captura adicional",
           "type": "image",
           "options": {
             "media": "images"
           }
+        },
+        {
+          "name": "captureAlt",
+          "label": "Texto alternativo de la captura adicional",
+          "type": "object",
+          "description": "Describe lo que muestra esta imagen. Obligatorio en ambos idiomas al publicar una ficha con esta imagen.",
+          "fields": [
+            {
+              "name": "es",
+              "label": "Español",
+              "type": "text"
+            },
+            {
+              "name": "en",
+              "label": "English",
+              "type": "text"
+            }
+          ]
         },
         {
           "name": "visual",

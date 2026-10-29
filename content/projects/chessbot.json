@@ -67,5 +67,13 @@
       ],
       "focus": "Algorithms and AI"
     }
+  },
+  "coverAlt": {
+    "es": "ChessBot: tablero en la posición inicial y controles para elegir color, tiempo del motor e iniciar una partida.",
+    "en": "ChessBot: board in the starting position with controls to choose a side, set engine thinking time, and start a game."
+  },
+  "captureAlt": {
+    "es": "Panel de entrenamiento de ChessBot con selección del dataset, parámetros de la red, autojuego, aperturas y botones para entrenar o ejecutar el ciclo completo.",
+    "en": "ChessBot training panel with dataset selection, network parameters, self-play, openings, and buttons to train or run the full cycle."
   }
 }

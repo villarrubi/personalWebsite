@@ -65,6 +65,10 @@ export function validateProject(input, filename) {
     if (!value) { delete project[key]; continue; }
     if (!/^\/assets\/images\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(?:png|jpe?g|webp|avif)$/i.test(value))
       fail(`Selecciona una imagen de la biblioteca para ${key}.`);
+    const altKey = `${key}Alt`;
+    project[altKey] ??= {};
+    if (!isObject(project[altKey])) fail(`Revisa ${altKey} en español e inglés.`);
+    for (const lang of languages) project[altKey][lang] = text(project[altKey][lang], `${altKey}.${lang}`, project.published, 1000);
   }
   if (!hasContent(project.caseStudy)) delete project.caseStudy;
   if (project.caseStudy != null) {

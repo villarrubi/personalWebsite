@@ -6,7 +6,8 @@ const es=document.documentElement.lang==='es';
 const query=new URLSearchParams(location.search);
 const requested=query.get('intro');
 const forced=['cinematic','squares','knight'].includes(requested);
-const disabled=requested==='off'||query.get('motion')==='off';
+const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+const disabled=requested==='off'||query.get('motion')==='off'||(reducedMotion.matches&&query.get('motion')!=='on');
 const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
 const controls=[...document.querySelectorAll('[data-intro]')];
 let scene,active,disposed=false;
@@ -95,6 +96,7 @@ async function playIntro(trigger){
 }
 
 if(home){
+  reducedMotion.addEventListener('change',event=>{if(event.matches)active?.finish();});
   controls.forEach(button=>button.addEventListener('click',()=>playIntro(button)));
   if(forced||((['','#top','#home'].includes(location.hash)||reloading)&&!disabled))playIntro();
   else clearPending();
