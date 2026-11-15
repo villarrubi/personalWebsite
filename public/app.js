@@ -6,6 +6,10 @@ toggle?.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expan
 nav?.addEventListener('click',event=>{if(event.target.closest('a'))closeMenu();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&toggle?.getAttribute('aria-expanded')==='true'){closeMenu();toggle.focus();}});
 
+// The header firms up once content passes beneath it.
+const siteHeader=document.querySelector('.site-header');
+if(siteHeader){let ticking=false;const syncHeader=()=>{ticking=false;siteHeader.classList.toggle('is-scrolled',scrollY>8);};addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(syncHeader);}},{passive:true});syncHeader();}
+
 const copyButton=document.querySelector('.copy-email');let toastTimeout;
 copyButton?.addEventListener('click',async()=>{const toast=document.querySelector('#toast');try{await navigator.clipboard.writeText(copyButton.dataset.email);toast.textContent=copyButton.dataset.success;}catch{toast.textContent=copyButton.dataset.failure;}toast.classList.add('visible');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>toast.classList.remove('visible'),3000);});
 
