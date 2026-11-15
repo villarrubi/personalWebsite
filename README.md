@@ -4,7 +4,7 @@ Portfolio bilingüe inglés/español centrado en ingeniería de software, IA loc
 
 ## Abrir en Windows
 
-Doble clic en **Abrir web.cmd**. La vista previa abre la portada. La entrada completa se reproduce siempre al abrir, refrescar o volver a la portada, con cualquier sección en la dirección y aunque el sistema pida reducir el movimiento. Sólo `?intro=off` o `?motion=off` la omiten. El botón «Volver al tablero» de la portada permite verla de nuevo. Requiere Node.js 22 o posterior. No instala dependencias.
+Doble clic en **Abrir web.cmd**. La vista previa abre la portada. La entrada completa se reproduce siempre al abrir, refrescar o volver a la portada, con cualquier sección en la dirección y aunque el sistema pida reducir el movimiento. Sólo `?intro=off` o `?motion=off` la omiten. Requiere Node.js 22 o posterior. No instala dependencias.
 
 ```powershell
 npm run dev
@@ -15,10 +15,10 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 ## Editar
 
 - `src/content.mjs`: perfil, textos generales, traducciones e importación del catálogo.
-- `content/projects/*.json`: una ficha por proyecto, editable desde Pages CMS; textos bilingües, imágenes, enlaces, publicación, grupo y orden.
+- `content/projects/*.json`: una ficha por proyecto, editable desde el panel `/admin/` (o Pages CMS); textos bilingües, imágenes, enlaces, publicación, grupo y orden.
 - `.pages.yml`: formularios y biblioteca de imágenes del gestor. Usa JSON, válido como YAML, para permitir comprobaciones sin dependencias.
 - `src/project-catalog.mjs`: lectura, orden y validación del catálogo antes de construir.
-- `public/admin/`: acceso al editor, con el estilo del portfolio y ayuda de inicio.
+- `public/admin/`: panel de administración propio (`index.html`, `admin.js`, `admin.css`) para crear, editar y eliminar proyectos. `project-schema.js` contiene la validación de fichas, compartida por el panel y por el build.
 - `scripts/build.mjs`: plantillas y generación de páginas estáticas.
 - `src/home.mjs`: composición de portada, proyectos, biografía y contacto.
 - `src/hero.mjs` y `public/hero-lab.css`: primera pantalla abierta, tipografía, controles y adaptación móvil.
@@ -62,9 +62,13 @@ Para añadir un proyecto, usa el gestor o crea `content/projects/identificador.j
 
 ## Gestor de proyectos
 
-Acceso: `/admin/` en el alojamiento actual o futuro. La página de acceso es pública y tiene `noindex`; el editor autenticado se abre en [Pages CMS](https://app.pagescms.org/villarrubi/personalWebsite/main/collection/projects). No hay contraseñas, tokens ni permisos de escritura incluidos en la web estática. GitHub controla las cuentas con acceso de escritura.
+Acceso: `/admin/` (en GitHub Pages, https://villarrubi.github.io/personalWebsite/admin/). La página tiene `noindex` y no incluye contraseñas ni permisos: se entra con un **token de acceso de GitHub** de grano fino, que sólo se envía a la API de GitHub y se guarda en la pestaña (o en el dispositivo si se marca «Recordar»).
 
-La primera vez hay que iniciar sesión con GitHub y autorizar la aplicación Pages CMS solo para `personalWebsite`. Después, la colección **Proyectos** permite crear, modificar, ocultar y eliminar fichas, además de subir imágenes. La autorización de la aplicación es un paso separado de publicar el código de integración; hasta completarla, el editor no puede escribir en el repositorio.
+Para crear el token: GitHub → Settings → Developer settings → Fine-grained tokens → *Generate new token*; *Repository access*: sólo `personalWebsite`; *Permissions*: **Contents: Read and write** (y, opcional, **Actions: Read-only** para ver en el panel cuándo termina la publicación). El panel incluye estas instrucciones y un enlace directo.
+
+El panel lista todos los proyectos con búsqueda y filtros (publicados y borradores) y permite crear, editar y eliminar fichas: nombre, identificador, año, orden, publicación, destacado, estado, visibilidad, repositorio, demo, tecnologías, ilustración, todos los textos en español e inglés, imágenes (las grandes se reducen y convierten a WebP en el navegador) y caso de estudio. Antes de guardar aplica la misma validación que el build, por lo que una ficha incompleta no puede publicarse. Cada acción es un único commit en `main` (ficha e imágenes juntas); si la ficha cambió en GitHub después de abrirla, el panel lo avisa en lugar de sobrescribirla. Al eliminar, se pide escribir el identificador y se pueden borrar también las imágenes que ningún otro proyecto usa.
+
+Pages CMS sigue configurado en `.pages.yml` como alternativa.
 
 Cada guardado crea un cambio en `main` y activa la publicación existente. La web se actualiza cuando terminan las comprobaciones y el despliegue. Si un campo obligatorio para publicar está incompleto o una imagen referenciada no existe, el despliegue falla y permanece la última versión válida. Se puede consultar el resultado desde «Consultar la última publicación». El historial de Git permite recuperar contenido eliminado.
 
@@ -100,7 +104,7 @@ La secuencia dura 8,3 segundos una vez preparada. La conversión a código tiene
 
 El tablero 3D se captura una vez cuando la cámara se detiene; el resto de la secuencia sólo anima la composición de código. El modelo se sirve localmente en `public/assets/chess/staunton.bin` (1,86 MB). Las seis geometrías Staunton proceden de clarkerubber, bajo licencia MIT, y se comparten entre las 32 piezas; no hay peticiones a terceros en ejecución. html2canvas 1.4.1 sólo se carga cuando se reproduce la entrada y se sirve con su licencia MIT en `public/assets/vendor/`. La página y la escena comparten el fondo `#061327`.
 
-Se reproduce automáticamente al abrir o refrescar la portada, aunque la versión anterior haya guardado que ya se vio. La entrada automática se omite cuando el sistema solicita movimiento reducido; no se llega a mostrar la cortina inicial. Sin esa preferencia, la dirección normal reproduce la secuencia completa. `?motion=on`, `?intro=cinematic` y «Volver al tablero» permiten solicitarla explícitamente. Activar movimiento reducido durante la entrada la termina inmediatamente. Se puede omitir explícitamente con `?intro=off` o `?motion=off`, además de saltarla con el botón o Escape. Los enlaces `#top` y `#home` también reproducen la entrada. Los enlaces directos a otras secciones la omiten al navegar; refrescar una de esas direcciones sí la reproduce y conserva la sección de destino. «Volver al tablero», en la portada, solicita otra reproducción; `?intro=cinematic` la fuerza para previsualizar. Las antiguas opciones `knight` y `squares` se resuelven a la nueva entrada. Saltar o Escape liberan inmediatamente la navegación; el foco vuelve a un enlace o al botón de repetición. La carga tiene un límite de espera. El tablero se crea dentro de la introducción y se elimina al terminar o saltarla. Sin JavaScript o WebGL se accede directamente al contenido. El bloque pequeño de tablero, frase y repetición de «Sobre mí» está retirado; ya no se carga ni se precarga su imagen.
+Se reproduce automáticamente cada vez que se abre, se refresca o se vuelve a la portada, con cualquier sección en la dirección y sin depender de la preferencia de movimiento reducido del sistema. Se puede omitir explícitamente con `?intro=off` o `?motion=off`, además de saltarla con el botón o Escape, que liberan inmediatamente la navegación. La carga tiene un límite de espera que sólo cuenta el tiempo con la pestaña visible. El tablero se crea dentro de la introducción y se elimina al terminar o saltarla. Sin JavaScript o WebGL se accede directamente al contenido.
 
 No queda ningún tablero ni contexto WebGL de ajedrez en reposo después de la entrada. La secuencia pausa los fotogramas al ocultar la pestaña y libera sus recursos al terminar o saltarla, incluso si se cancela antes de completar la carga. Los proyectos mantienen su propio control de pausa. `npm run check` verifica también el juego completo y que ninguna pieza salga del encuadre durante el giro en cinco relaciones de aspecto, de móvil a ultrapanorámica.
 
@@ -116,13 +120,13 @@ La reconstrucción del CV conserva la trayectoria y recoge la corrección del ca
 
 ## Dirección visual
 
-La portada toma como referencia la composición tipográfica y la navegación de [Calder, de Chayan Panda](https://www.framer.com/marketplace/templates/calder/). Es una implementación propia en este repositorio, con contenido y capturas del autor. Utiliza Instrument Serif para nombre y titulares editoriales, DM Sans para contenido y proyectos, un fondo azul noche con acentos azul verdoso y transiciones entre páginas. Software, IA y hardware ocupan la jerarquía principal; el tablero 3D aparece como detalle personal.
+La portada toma como referencia la composición tipográfica y la navegación de [Calder, de Chayan Panda](https://www.framer.com/marketplace/templates/calder/). Es una implementación propia en este repositorio, con contenido y capturas del autor. Utiliza Instrument Serif para nombre y titulares editoriales, Instrument Sans para contenido y proyectos, un fondo azul noche con acentos azul verdoso y transiciones entre páginas. Software, IA y hardware ocupan la jerarquía principal; el tablero 3D aparece como detalle personal.
 
 La única vista de proyectos los representa en órbita con una cámara estable; el 3D sólo se carga al mostrar la sección. No hay tarjetas ni selector de vista. Las siluetas, los reflejos, los cambios de perspectiva y los materiales físicos dan volumen a cada proyecto. El fondo espacial mantiene estrellas a distintas profundidades y trazas orbitales sutiles. La interacción sigue en HTML nativo para conservar acceso por teclado y enlaces de respaldo. La escena no intercepta el scroll y se pausa cuando está oculta. La proyección de etiquetas actualiza la cámara antes del primer fotograma, también con movimiento reducido.
 
 ## Licencias de recursos
 
-DM Sans se distribuye con su licencia OFL en `public/assets/fonts/OFL.txt`. Instrument Serif procede de Google Fonts y conserva su licencia en `public/assets/fonts/InstrumentSerif-OFL.txt`. Capturas procedentes de los proyectos locales del autor; la imagen de Pipα muestra únicamente la vista de resumen del panel. No se han incorporado código ni imágenes de la plantilla de referencia.
+Instrument Sans, la tipografía principal, procede de Google Fonts y se distribuye con su licencia OFL en `public/assets/fonts/InstrumentSans-OFL.txt`. Instrument Serif procede de Google Fonts y conserva su licencia en `public/assets/fonts/InstrumentSerif-OFL.txt`. Capturas procedentes de los proyectos locales del autor; la imagen de Pipα muestra únicamente la vista de resumen del panel. No se han incorporado código ni imágenes de la plantilla de referencia.
 
 Three.js 0.180.0 se incluye con licencia MIT en `public/assets/vendor/THREE-LICENSE.txt`. El fondo estelar procede de [Solar System Scope / INOVE](https://www.solarsystemscope.com/textures/), bajo [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), y se ha convertido a WebP. Los créditos del pie enlazan a `public/assets/credits.txt`; la atribución del fondo está en `public/assets/space/ATTRIBUTION.txt`. Las geometrías de los objetos orbitales y su iluminación son propias. Las piezas de la entrada utilizan los modelos Staunton de [clarkerubber](https://github.com/clarkerubber/Staunton-Pieces), con su licencia MIT y atribución en `public/assets/chess/`. El tablero, los materiales de madera y la iluminación de la entrada son propios.
 

@@ -95,7 +95,8 @@ for(const lang of ['es','en']){
   const html=basePath?built.replaceAll(`/${basePath}/`,'/'):built;
   assert(!html.includes('personal-opening')&&!html.includes('data-chess-stage'),'The small biography chess block is removed');
   assert(!html.includes('staunton-poster.webp'),'The removed biography image is not loaded');
-  assert.match(html,/data-intro="cinematic"/,'The hero keeps an explicit intro replay control');
+  assert(!html.includes('experience-footer')&&!html.includes('data-intro='),'The hero no longer shows the scroll cue or the replay button');
+  assert(!/class="button primary" href="#projects"/.test(html),'The hero no longer shows the explore button');
   assert(!html.includes('chess-fallback'),'Never flash Unicode pieces during navigation');
 }
 for(const aspect of [320/844,390/844,768/1024,1440/900,2560/1080]){

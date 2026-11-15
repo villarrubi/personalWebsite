@@ -66,7 +66,6 @@ async function playIntro(trigger){
     document.documentElement.classList.remove('intro-playing');clearPending();
     active=null;
     if(trigger)previousFocus?.focus({preventScroll:true});
-    else if(document.activeElement===document.body)document.querySelector('.hero-actions .primary')?.focus({preventScroll:true});
     document.dispatchEvent(new Event('chess:intro-end'));
   };
   const key=event=>{if(event.key==='Escape')finish();if(event.key==='Tab'){event.preventDefault();skip.focus({preventScroll:true});}};
@@ -92,7 +91,10 @@ async function playIntro(trigger){
   renderScene.setPageGuide(pageGuide);
   overlay.dataset.pageGuide=pageGuide?'ready':'fallback';
   overlay.classList.add('is-ready');started=true;
-  cancelWatchdog();cancelWatchdog=visibleTimeout(finish,INTRO_DURATION+5000);
+  // Slow GPUs play the entrance in slow motion (each frame advances at most 250 ms),
+  // so only give up when frames stop arriving, never because it took longer.
+  const stall=()=>{cancelWatchdog();cancelWatchdog=visibleTimeout(finish,4000);};
+  stall();
   function frame(now){
     if(finished||document.hidden)return;
     if(last)elapsed+=Math.min(now-last,250);last=now;
@@ -102,6 +104,7 @@ async function playIntro(trigger){
     progress.parentElement.style.opacity=pose.controls;skip.style.opacity=pose.controls;
     renderScene.render(pose,innerWidth,innerHeight);mount.style.opacity='1';curtain.style.opacity='0';
     overlay.dataset.phase=pose.reveal>0?'reveal':pose.assemble>0?'assemble':pose.matrix>0?'matrix':pose.dissolve>0?'board-code':'board';
+    stall();
     if(elapsed>=INTRO_DURATION)finish();else raf=requestAnimationFrame(frame);
   }
   raf=requestAnimationFrame(frame);
