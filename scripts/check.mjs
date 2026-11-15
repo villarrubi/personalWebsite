@@ -126,4 +126,10 @@ for(const [width,height,count] of [[338,443,4],[640,443,6],[1324,650,9],[1324,65
   }
  }
 }
+// The admin panel stores root-relative image paths: deployment must never rewrite its code.
+for(const file of ['admin/admin.js','admin/project-schema.js']){
+ const built=(await readFile(resolve(root,file),'utf8')).replace(/\?v=[0-9a-f]+/g,'');
+ const source=await readFile(resolve(import.meta.dirname,'../public',file),'utf8');
+ assert.equal(built,source,`${file} must reach the site unchanged apart from cache versions`);
+}
 console.log(`PASS: ${pages.length} HTML pages, ${links} local assets/links, ${publishedProjects.length} published bilingual projects (${hiddenProjects.length} hidden); responsive constellations up to 100 projects; continuous orbits over 180 seconds.`);

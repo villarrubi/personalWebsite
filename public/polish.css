@@ -88,6 +88,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
  .button:hover,.engineering-toolbox dl>div:hover{transform:none}
 }
 @media(hover:none){.engineering-toolbox dl>div:hover{transform:none}}
+/* Without the footer row the hero only needs breathing room below the copy. */
+.experience-layout{padding-block:58px 84px}
+@media(max-width:760px){.experience-layout{padding-block:44px 64px}}
 @media(max-width:600px){
  .site-header{background:#061327e0}
  .experience-atmosphere:before{top:38%;aspect-ratio:1}

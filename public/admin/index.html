@@ -4,34 +4,100 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>Gestionar proyectos — Alejandro Villarrubia</title>
+  <meta name="referrer" content="no-referrer">
+  <title>Administración — Alejandro Villarrubia</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/admin/admin.css">
+  <script type="module" src="/admin/admin.js"></script>
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
-  <header><a class="brand" href="/es/" aria-label="Alejandro Villarrubia — Inicio">av.</a><span>MI PORTFOLIO</span><a class="back" href="/es/">Ver la web ↗</a></header>
+  <header class="bar">
+    <a class="brand" href="/es/" aria-label="Alejandro Villarrubia — Ver la web">av.</a>
+    <span class="bar-label">ADMINISTRACIÓN</span>
+    <span class="publish-state" id="publish-state" role="status" aria-live="polite" hidden></span>
+    <div class="account" id="account" hidden>
+      <img id="account-avatar" alt="Avatar de GitHub" width="28" height="28">
+      <span id="account-login"></span>
+      <button type="button" class="link-button" id="logout">Cerrar sesión</button>
+    </div>
+    <a class="bar-link" href="/es/">Ver la web ↗</a>
+  </header>
+
   <main id="main">
-    <section class="welcome" aria-labelledby="admin-title">
-      <p class="eyebrow"><span aria-hidden="true">✧</span> ESPACIO DE EDICIÓN</p>
-      <h1 id="admin-title">Tus proyectos.<br><em>A tu manera.</em></h1>
-      <p class="intro">Añade lo que estás construyendo, actualiza tus avances y decide qué quieres mostrar.</p>
-      <a class="primary" href="https://app.pagescms.org/villarrubi/personalWebsite/main/collection/projects">Entrar con GitHub <span aria-hidden="true">↗</span></a>
-      <p class="access-note">El editor se abre en Pages CMS. Solo las cuentas con permiso sobre tu portfolio pueden guardar cambios.</p>
+    <h1 class="visually-hidden" id="page-title">Administración de proyectos</h1>
+
+    <section class="view login" id="view-login" aria-labelledby="login-title" hidden>
+      <div class="login-copy">
+        <p class="eyebrow"><span aria-hidden="true">✧</span> ESPACIO DE EDICIÓN</p>
+        <h2 id="login-title">Tus proyectos.<br><em>A tu manera.</em></h2>
+        <p class="lede">Crea, edita y elimina los proyectos del portfolio. Cada cambio se guarda en GitHub y la web se publica sola en unos minutos.</p>
+      </div>
+      <form class="card login-card" id="login-form" novalidate>
+        <label for="token">Token de acceso de GitHub</label>
+        <input id="token" name="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" required>
+        <label class="check"><input type="checkbox" id="remember"> Recordar en este dispositivo</label>
+        <p class="form-error" id="login-error" role="alert" hidden></p>
+        <button class="primary" type="submit">Entrar <span aria-hidden="true">→</span></button>
+        <details>
+          <summary>Cómo conseguir el token (solo la primera vez)</summary>
+          <ol>
+            <li>Abre <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">GitHub → Fine-grained tokens ↗</a>.</li>
+            <li>En <strong>Repository access</strong> elige <em>Only select repositories</em> y marca <strong id="repo-name">personalWebsite</strong>.</li>
+            <li>En <strong>Permissions → Contents</strong> elige <em>Read and write</em>. Opcional: <strong>Actions → Read-only</strong> para ver el estado de publicación.</li>
+            <li>Genera el token, cópialo y pégalo aquí.</li>
+          </ol>
+          <p>El token sólo se envía a GitHub. Si no marcas «Recordar», se borra al cerrar la pestaña.</p>
+        </details>
+      </form>
     </section>
-    <section class="guide" aria-labelledby="guide-title">
-      <h2 id="guide-title">Todo en su sitio.</h2>
-      <dl>
-        <div><dt><span>01</span> Crear y editar</dt><dd>Nombres, textos, tecnologías y enlaces, en español e inglés.</dd></div>
-        <div><dt><span>02</span> Subir imágenes</dt><dd>Elige una portada y una captura adicional desde tu dispositivo.</dd></div>
-        <div><dt><span>03</span> Decidir qué se ve</dt><dd>Publica, destaca, ordena u oculta una ficha. También puedes eliminarla.</dd></div>
-      </dl>
-      <div class="publish-note"><span class="status-dot" aria-hidden="true"></span><p>Al guardar, la web se actualiza automáticamente en unos minutos.</p></div>
-      <details><summary>La primera vez que entres</summary><ol><li>Inicia sesión con tu cuenta de GitHub.</li><li>Autoriza Pages CMS únicamente para <strong>personalWebsite</strong>.</li><li>Abre <strong>Proyectos</strong> para crear o modificar una ficha.</li></ol><p>Para retirar una ficha sin perderla, desactiva «Publicado en la web». Los borradores quedan fuera del portfolio, pero el contenido del repositorio sigue siendo público.</p></details>
-      <a class="deployment-link" href="https://github.com/villarrubi/personalWebsite/actions/workflows/pages.yml" target="_blank" rel="noopener noreferrer">Consultar la última publicación ↗</a>
+
+    <section class="view" id="view-list" aria-labelledby="list-title" hidden>
+      <div class="list-head">
+        <div>
+          <p class="eyebrow">PROYECTOS</p>
+          <h2 id="list-title">Lo que estás construyendo.</h2>
+        </div>
+        <a class="primary" href="#/nuevo">Nuevo proyecto <span aria-hidden="true">+</span></a>
+      </div>
+      <div class="toolbar">
+        <label class="search"><span class="visually-hidden">Buscar</span><input id="search" type="search" placeholder="Buscar por nombre o tecnología"></label>
+        <div class="filters" role="group" aria-label="Filtrar">
+          <button type="button" data-filter="all" aria-pressed="true">Todos <span id="count-all"></span></button>
+          <button type="button" data-filter="published" aria-pressed="false">Publicados <span id="count-published"></span></button>
+          <button type="button" data-filter="draft" aria-pressed="false">Borradores <span id="count-draft"></span></button>
+        </div>
+      </div>
+      <ul class="project-list" id="project-list" aria-live="polite"></ul>
+      <p class="empty" id="list-empty" hidden>No hay proyectos que coincidan.</p>
     </section>
+
+    <section class="view" id="view-edit" aria-labelledby="edit-title" hidden>
+      <a class="back" href="#/">← Todos los proyectos</a>
+      <div class="edit-head">
+        <h2 id="edit-title"></h2>
+        <p class="edit-meta" id="edit-meta"></p>
+      </div>
+      <form id="editor" novalidate></form>
+    </section>
+
+    <section class="view loading" id="view-loading" hidden><p>Cargando…</p></section>
   </main>
-  <footer><span>Alejandro Villarrubia</span><span>Un espacio para lo que sigue.</span></footer>
+
+  <dialog class="confirm" id="confirm-delete" aria-labelledby="confirm-title">
+    <form method="dialog">
+      <h2 id="confirm-title">¿Eliminar este proyecto?</h2>
+      <p>Se borrará de la web y del repositorio. Escribe <strong id="confirm-id"></strong> para confirmarlo.</p>
+      <input id="confirm-input" autocomplete="off" spellcheck="false" aria-label="Identificador del proyecto">
+      <label class="check"><input type="checkbox" id="confirm-images" checked> Eliminar también sus imágenes si ningún otro proyecto las usa</label>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary">Cancelar</button>
+        <button value="confirm" class="danger" id="confirm-button" disabled>Eliminar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <noscript><p class="noscript">El panel de administración necesita JavaScript.</p></noscript>
 </body>
 </html>
