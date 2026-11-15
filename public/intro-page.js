@@ -56,7 +56,7 @@ function paintPageBoxes(ctx,width,height){
 
 function paintPageText(canvas) {
  // DOM ranges give us the browser's actual wrapping/kerning and font baseline.
- // Measured per grapheme so wrapping and Instrument Serif's baseline stay exact.
+ // Measured per grapheme so wrapping and the serif's baseline stay exact.
  const ctx=canvas.getContext('2d'),walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  const range=document.createRange(),metrics=new Map();
  const segmenter=new Intl.Segmenter(document.documentElement.lang,{granularity:'grapheme'});
