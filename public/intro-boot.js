@@ -2,16 +2,9 @@
 (() => {
   if(!['/','/en/','/es/','/index.html','/en/index.html','/es/index.html'].includes(location.pathname))return;
   const query=new URLSearchParams(location.search);
-  const navigation=performance.getEntriesByType('navigation')[0]?.type;
-  const reloading=navigation==='reload';
-  const forced=['cinematic','knight','squares'].includes(query.get('intro'));
-  // Skip the curtain as well as the animation when reduced motion is requested.
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches&&query.get('motion')!=='on';
-  if(!forced&&(query.get('intro')==='off'||query.get('motion')==='off'||reduced))return;
-  // Returning through history is not a new visit: browsers restore some pages from
-  // the back/forward cache and reload others, so only fresh opens and refreshes play.
-  if(!forced&&navigation==='back_forward')return;
-  if(!forced&&!['','#top','#home'].includes(location.hash)&&!reloading)return;
+  // Every open, refresh and history return plays the entrance; only an explicit
+  // `?intro=off` or `?motion=off` link skips it.
+  if(query.get('intro')==='off'||query.get('motion')==='off')return;
   const root=document.documentElement;
   root.classList.add('intro-pending');
   // Start the heavy entrance downloads with the HTML instead of after the module graph.
