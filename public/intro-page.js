@@ -1,47 +1,62 @@
 // Capture only a colour/shape guide. The final pixels always belong to the live
 // HTML below the effect, so font rendering and links never become a screenshot.
+// Painted directly from computed styles: cloning the whole document (html2canvas)
+// froze the main thread once the orbital WebGL scene was running.
 export async function captureIntroPage(signal) {
  const width=innerWidth,height=innerHeight;
- let cloneFrame;
  try {
-  const [{default:html2canvas}]=await Promise.all([
-   import('./assets/vendor/html2canvas.js'),document.fonts.ready,
-   ...[...document.querySelectorAll('.hero img')].map(image=>image.decode().catch(()=>{})),
-  ]);
+  await Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1200))]);
   if(signal.aborted)return null;
-  const canvas=await html2canvas(document.body,{
-   backgroundColor:getComputedStyle(document.body).backgroundColor,
-   width,height,x:scrollX,y:scrollY,scrollX,scrollY,windowWidth:width,windowHeight:height,
-   scale:1,logging:false,imageTimeout:1800,
-   ignoreElements:element=>{
-    if(element.matches('.chess-intro,canvas,script,iframe'))return true;
-    if(element.matches('section,.site-footer')){
-     const rect=element.getBoundingClientRect();return rect.top>=height||rect.bottom<=0;
-    }
-    return false;
-   },
-   onclone:doc=>{
-    cloneFrame=doc.defaultView.frameElement;
-    doc.documentElement.classList.remove('intro-pending');
-    const style=doc.createElement('style');
-    style.textContent='*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;color:transparent!important;text-shadow:none!important}';
-    doc.head.append(style);
-   },
-  });
+  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle=getComputedStyle(document.body).backgroundColor;ctx.fillRect(0,0,width,height);
+  paintPageBoxes(ctx,width,height);
   if(signal.aborted){canvas.width=canvas.height=1;return null;}
   paintPageText(canvas);
   return canvas;
  } catch {
   // Capture is decorative: a restricted browser still gets a clean entrance.
   return null;
- } finally {
-  cloneFrame?.remove();
  }
+}
+
+const transparent=color=>!color||color==='transparent'||/rgba\([^)]*,\s*0\)$/.test(color);
+// Solid backgrounds, borders and images of what is on screen: enough for the code
+// grid to take the shape of buttons, rules and the header before the page appears.
+function paintPageBoxes(ctx,width,height){
+ const skip='.chess-intro,script,style,canvas,svg,noscript,template,[hidden]';
+ for(const element of document.body.querySelectorAll('*')){
+  if(element.closest(skip))continue;
+  const rect=element.getBoundingClientRect();
+  if(!rect.width||!rect.height||rect.bottom<=0||rect.top>=height||rect.right<=0||rect.left>=width)continue;
+  const style=getComputedStyle(element);
+  if(style.visibility!=='visible'||style.display==='none'||Number(style.opacity)===0)continue;
+  const radius=Math.min(parseFloat(style.borderTopLeftRadius)||0,rect.width/2,rect.height/2);
+  ctx.globalAlpha=Number(style.opacity);
+  if(!transparent(style.backgroundColor)){
+   ctx.fillStyle=style.backgroundColor;ctx.beginPath();ctx.roundRect(rect.left,rect.top,rect.width,rect.height,radius);ctx.fill();
+  }
+  if(element instanceof HTMLImageElement&&element.complete&&element.naturalWidth){
+   try{ctx.drawImage(element,rect.left,rect.top,rect.width,rect.height);}catch{}
+  }
+  const sides=[['Top',rect.left,rect.top,rect.width,'h'],['Bottom',rect.left,rect.bottom,rect.width,'h'],['Left',rect.left,rect.top,rect.height,'v'],['Right',rect.right,rect.top,rect.height,'v']];
+  const uniform=['Top','Right','Bottom','Left'].every(side=>style[`border${side}Width`]===style.borderTopWidth&&style[`border${side}Color`]===style.borderTopColor&&style[`border${side}Style`]!=='none');
+  if(uniform&&radius&&parseFloat(style.borderTopWidth)>0&&!transparent(style.borderTopColor)){
+   const w=parseFloat(style.borderTopWidth);
+   ctx.strokeStyle=style.borderTopColor;ctx.lineWidth=w;ctx.beginPath();ctx.roundRect(rect.left+w/2,rect.top+w/2,rect.width-w,rect.height-w,Math.max(0,radius-w/2));ctx.stroke();
+  }else for(const [side,x,y,length,axis] of sides){
+   const w=parseFloat(style[`border${side}Width`]);
+   if(!w||style[`border${side}Style`]==='none'||transparent(style[`border${side}Color`]))continue;
+   ctx.fillStyle=style[`border${side}Color`];
+   if(axis==='h')ctx.fillRect(x,side==='Bottom'?y-w:y,length,w);else ctx.fillRect(side==='Right'?x-w:x,y,w,length);
+  }
+ }
+ ctx.globalAlpha=1;
 }
 
 function paintPageText(canvas) {
  // DOM ranges give us the browser's actual wrapping/kerning and font baseline.
- // html2canvas's line-box baseline drifts noticeably with Instrument Serif.
+ // Measured per grapheme so wrapping and Instrument Serif's baseline stay exact.
  const ctx=canvas.getContext('2d'),walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  const range=document.createRange(),metrics=new Map();
  const segmenter=new Intl.Segmenter(document.documentElement.lang,{granularity:'grapheme'});

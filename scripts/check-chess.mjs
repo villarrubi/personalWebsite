@@ -56,17 +56,8 @@ function entrancePending({persisted=false,session=false,hash='',search='',reduce
   });
   return classes.has('intro-pending');
 }
-assert(entrancePending(),'A first visit can show the entrance');
-assert(entrancePending({persisted:true}),'An old persistent seen flag does not suppress the entrance');
-assert(entrancePending({session:true,reload:true}),'Refreshing replays the entrance despite a session seen flag');
-assert(entrancePending({session:true,storageBlocked:true}),'The entrance does not depend on persistent storage');
-assert(entrancePending({hash:'#projects',reload:true}),'Refreshing a section URL also replays the entrance');
-assert(!entrancePending({hash:'#projects'}),'Direct project navigation skips the entrance');
-assert(!entrancePending({reduced:true}),'Reduced motion skips the automatic opening');
-assert(entrancePending({paused:true}),'Pausing ambient motion does not suppress the opening');
-assert(entrancePending({persisted:true,reduced:true,search:'?intro=cinematic'}),'Explicit replay remains available');
-assert(!entrancePending({history:true}),'Back/forward returns never cover the page, whether or not the browser cached it');
-assert(entrancePending({history:true,search:'?intro=cinematic'}),'Explicit replay also works from history');
+for(const options of [{},{persisted:true},{session:true,reload:true},{storageBlocked:true},{hash:'#projects'},{hash:'#contact',reload:true},{history:true},{reduced:true},{reduced:true,reload:true},{reduced:true,hash:'#about'},{paused:true},{hidden:true}])
+  assert(entrancePending(options),`Every open and refresh covers the page for the entrance: ${JSON.stringify(options)}`);
 {
   const preloads=[],timers=[];
   assert(entrancePending({preloads,timers}),'A fresh visit covers the page');
@@ -76,29 +67,16 @@ assert(entrancePending({history:true,search:'?intro=cinematic'}),'Explicit repla
   assert(entrancePending({hidden:true,timers:hiddenTimers}),'A background tab keeps the curtain for when it is shown');
   assert.equal(hiddenTimers.length,0,'Hidden time does not use up the curtain budget');
 }
-// A normal URL must play without special parameters or stored preferences,
-// including a deployed subdirectory and direct index.html entry points.
 const deployedBoot=await readFile(new URL('../dist/intro-boot.js',import.meta.url),'utf8');
 for(const [script,prefix] of [[boot,''],[deployedBoot,basePath?`/${basePath}`:'']]){
  for(const route of ['/','/en/','/es/','/index.html','/en/index.html','/es/index.html']){
   const entry={script,pathname:prefix+route};
-  assert(entrancePending(entry),'The opening plays without a reduced-motion preference');
-  assert(entrancePending({...entry,paused:true}),'An old saved pause does not override the OS');
-  assert(entrancePending({...entry,storageBlocked:true}),'Storage is not required');
-  assert(entrancePending({...entry,hash:'#top'}),'Top links are homepage visits');
-  assert(entrancePending({...entry,hash:'#home'}),'Hero links are homepage visits');
-  assert(!entrancePending({...entry,reduced:true}),'Reduced motion skips the curtain on every home route');
-  assert(!entrancePending({...entry,reduced:true,reload:true}),'Reduced motion also skips the curtain on refresh');
-  assert(!entrancePending({...entry,reduced:true,enabled:true}),'A stale saved choice cannot override the OS');
-  assert(entrancePending({...entry,reduced:true,search:'?motion=on'}),'An explicit motion-on URL overrides the OS');
+  for(const extra of [{},{reload:true},{history:true},{reduced:true},{hash:'#top'},{hash:'#projects'},{reduced:true,hash:'#projects',reload:true}])
+   assert(entrancePending({...entry,...extra}),`The opening plays on ${route} ${JSON.stringify(extra)}`);
   assert(!entrancePending({...entry,search:'?motion=off'}),'Explicit motion opt-out skips the curtain');
   assert(!entrancePending({...entry,search:'?intro=off'}),'Explicit intro opt-out skips the curtain');
-  assert(entrancePending({...entry,reduced:true,search:'?intro=cinematic&motion=off'}),'Explicit replay remains available');
-  assert(!entrancePending({...entry,hash:'#projects'}),'Direct section links skip the intro');
-  assert(entrancePending({...entry,hash:'#projects',reload:true}),'Reloading a section can play the opening');
-  assert(!entrancePending({...entry,reduced:true,hash:'#projects',reload:true}),'Reduced motion also applies to section reloads');
  }
- assert(!entrancePending({script,pathname:`${prefix}/es/projects/chessbot/`,search:'?motion=on'}),'Detail pages never show the entrance curtain');
+ assert(!entrancePending({script,pathname:`${prefix}/es/projects/chessbot/`}),'Detail pages never show the entrance curtain');
 }
 // Validate the actual imported assets against the camera's framing envelope.
 const packed=await readFile(new URL('../public/assets/chess/staunton.bin',import.meta.url));

@@ -4,12 +4,9 @@ import {captureIntroPage} from './intro-page.js';
 const home=document.querySelector('.experience-hero');
 const es=document.documentElement.lang==='es';
 const query=new URLSearchParams(location.search);
-const requested=query.get('intro');
-const forced=['cinematic','squares','knight'].includes(requested);
-const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
-const disabled=requested==='off'||query.get('motion')==='off'||(reducedMotion.matches&&query.get('motion')!=='on');
-const navigation=performance.getEntriesByType('navigation')[0]?.type;
-const reloading=navigation==='reload';
+// The entrance plays on every open and refresh; only explicit links opt out.
+const disabled=query.get('intro')==='off'||query.get('motion')==='off';
+const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
 const controls=[...document.querySelectorAll('[data-intro]')];
 let scene,active,disposed=false;
 
@@ -111,15 +108,13 @@ async function playIntro(trigger){
 }
 
 if(home){
-  reducedMotion.addEventListener('change',event=>{if(event.matches)active?.finish();});
   controls.forEach(button=>button.addEventListener('click',()=>playIntro(button)));
-  // History navigation returns to a page already seen (restored or reloaded by the
-// browser); intro-boot.js applies the same rule so the curtain never mismatches.
-  const visit=navigation!=='back_forward'&&(['','#top','#home'].includes(location.hash)||reloading);
-  if(forced||(visit&&!disabled))playIntro();
-  else{clearPending();document.documentElement.classList.add('hero-enter');}
+  if(disabled){clearPending();document.documentElement.classList.add('hero-enter');}
+  else playIntro();
   window.addEventListener('pagehide',event=>{
     active?.finish();
     if(!event.persisted)disposed=true;
   });
+  // Pages restored from the back/forward cache are visits too.
+  window.addEventListener('pageshow',event=>{if(event.persisted&&!disabled)playIntro();});
 }else clearPending();
