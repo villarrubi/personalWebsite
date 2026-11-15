@@ -1,0 +1,94 @@
+/* Visual refinements shared by every page: depth, motion and interaction feedback.
+   Loaded last so it can tune the earlier layers without rewriting them. */
+:root{--ease-out:cubic-bezier(.2,.7,.2,1);--ring:#b9d4e4}
+
+/* Typography: balanced headings and fewer orphans in running text. */
+h1,h2,h3,.experience-intro,.contact-heading h2{text-wrap:balance}
+p,dd,li{text-wrap:pretty}
+
+/* Keyboard focus reads as part of the palette instead of the browser default. */
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--ring);outline-offset:4px;border-radius:6px}
+.button:focus-visible,#main-nav a:focus-visible{border-radius:30px}
+
+/* Header: translucent glass that firms up once the page scrolls. */
+.site-header{background:#061327b3;-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border-bottom-color:transparent;transition:background .3s,border-color .3s,box-shadow .3s}
+.site-header.is-scrolled{background:#061327e6;border-bottom-color:#a0b8d31f;box-shadow:0 12px 40px -24px #000c}
+.brand{transition:color .2s,opacity .2s}.brand:hover{color:#b9cdd8}
+#main-nav a{transition:background .2s,color .2s,border-color .2s}
+.language-switch{transition:color .2s}.language-switch:hover{color:#f0eee6}
+
+/* Buttons: a soft lift and a moving arrow give clear, quiet feedback. */
+.button{transition:background .25s,color .25s,border-color .25s,transform .25s var(--ease-out),box-shadow .25s}
+.button>span{display:inline-block;transition:transform .25s var(--ease-out)}
+.button:hover{transform:translateY(-1px)}
+.button:active{transform:translateY(0)}
+.button.primary:hover,.experience-actions .button:hover{box-shadow:0 14px 34px -14px #b9cdd8a0}
+.experience-actions .button:hover{background:#f4f2ea;border-color:#f4f2ea}
+.experience-actions .button:hover span{transform:translate(2px,2px)}
+.about-copy .button:hover span{transform:translateY(2px)}
+
+/* Hero: a deeper sky and a gentle staged entrance when no intro plays. */
+.experience-atmosphere:before{content:'';position:absolute;left:50%;top:46%;width:min(1100px,95vw);aspect-ratio:2.2;transform:translate(-50%,-50%);background:radial-gradient(closest-side,#5f86a826,transparent);filter:blur(10px);pointer-events:none}
+.experience-name{text-shadow:0 4px 55px #06132760,0 0 120px #6f97b31f}
+.experience-name em{color:#bcd2dd}
+.experience-eyebrow>span:first-child{animation:pulse-dot 3.2s ease-in-out infinite}
+.experience-contact{transition:color .2s,border-color .2s}
+.experience-contact:hover{color:#f1eee4;border-color:#d3dde4}
+.experience-footer>a,.experience-footer button{transition:color .2s}
+.experience-footer>a:hover,.experience-footer button:hover{color:#e3e9ee}
+.experience-scroll{transition:border-color .2s,color .2s}
+.experience-footer>a:hover .experience-scroll{border-color:#c2d1dc80;color:#f1eee4}
+.experience-scroll{animation:scroll-cue 2.6s ease-in-out infinite}
+.experience-footer button span{display:inline-block;transition:transform .25s var(--ease-out)}
+.experience-footer button:hover span{transform:translate(2px,-2px)}
+.hero-enter .experience-copy>*{animation:hero-rise .9s var(--ease-out) both}
+.hero-enter .experience-copy>:nth-child(2){animation-delay:.08s}
+.hero-enter .experience-copy>:nth-child(3){animation-delay:.18s}
+.hero-enter .experience-copy>:nth-child(4){animation-delay:.24s}
+.hero-enter .experience-copy>:nth-child(5){animation-delay:.32s}
+.hero-enter .experience-footer{animation:hero-fade 1.2s .45s ease both}
+
+/* About: the toolbox becomes a lit card whose rows respond to the pointer. */
+.engineering-toolbox{background:linear-gradient(160deg,#0f2339,#0a1829 70%);border-color:#a0b8d324;box-shadow:0 30px 70px -40px #000c,inset 0 1px 0 #ffffff0a;transition:border-color .3s}
+.engineering-toolbox:hover{border-color:#a0b8d340}
+.engineering-toolbox dt span{color:var(--accent);opacity:.8}
+.engineering-toolbox dl>div{transition:transform .25s var(--ease-out)}
+.engineering-toolbox dl>div:hover{transform:translateX(4px)}
+.personal-note .underlined{color:#d3dde8}
+
+/* Contact: the large call to action glows and every link confirms hover. */
+.contact-section{background:radial-gradient(ellipse at 85% 0%,#1c3a5a59,transparent 55%),#0b1b31}
+.contact-heading h2{transition:color .3s}
+.contact-heading:hover h2{color:#ffffff}
+.contact-heading>span{transition:transform .35s var(--ease-out),color .3s}
+.contact-heading:hover>span{color:var(--accent)}
+.contact-email{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .3s var(--ease-out),color .2s;padding-bottom:2px}
+.contact-email:hover{background-size:100% 1px;color:#fff}
+.copy-email{transition:background .2s,color .2s,border-color .2s}
+.copy-email:hover{background:#d7dfeb;color:#061327;border-color:#d7dfeb}
+.social-links a{transition:color .2s}.social-links a:hover{color:var(--accent)}
+.site-footer a{transition:color .2s}.site-footer a:hover{color:#eee9dd}
+#toast{border-radius:30px;box-shadow:0 18px 40px -18px #000c}
+
+/* Detail pages. */
+.back-link{transition:color .2s,border-color .2s}.back-link:hover{color:#eee9dd;border-color:#a0b8d380}
+.next-project>a .arrow{transition:transform .3s var(--ease-out)}.next-project>a:hover .arrow{transform:translateX(8px)}
+.detail-visual .project-art{box-shadow:0 40px 90px -50px #000}
+
+@keyframes hero-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes hero-fade{from{opacity:0}to{opacity:1}}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 #bfcdbb55}50%{box-shadow:0 0 0 6px #bfcdbb00}}
+@keyframes scroll-cue{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+
+/* The entrance overlay captures the page; keep everything still underneath it. */
+.intro-pending .experience-copy>*,.intro-playing .experience-copy>*,.intro-playing .experience-scroll,.intro-playing .experience-eyebrow>span:first-child{animation:none!important}
+
+@media(prefers-reduced-motion:reduce){
+ .hero-enter .experience-copy>*,.hero-enter .experience-footer,.experience-scroll,.experience-eyebrow>span:first-child{animation:none!important}
+ .button:hover,.engineering-toolbox dl>div:hover{transform:none}
+}
+@media(hover:none){.engineering-toolbox dl>div:hover{transform:none}}
+@media(max-width:600px){
+ .site-header{background:#061327e0}
+ .experience-atmosphere:before{top:38%;aspect-ratio:1}
+}
