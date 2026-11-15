@@ -42,15 +42,17 @@ assert.equal(introPose(INTRO_DURATION).curtain,0);
 assert.equal(introPose(INTRO_DURATION).reveal,1,'Resolve every cell before removing the overlay');
 // Homepage visits respect reduced motion and explicit URL overrides.
 const boot=await readFile(new URL('../public/intro-boot.js',import.meta.url),'utf8');
-function entrancePending({persisted=false,session=false,hash='',search='',reduced=false,paused=false,enabled=false,storageBlocked=false,reload=false,pathname='/es/',script=boot}={}){
+function entrancePending({persisted=false,session=false,hash='',search='',reduced=false,paused=false,enabled=false,storageBlocked=false,reload=false,history=false,hidden=false,pathname='/es/',script=boot,preloads=[],timers=[]}={}){
   const classes=new Set();
   runInNewContext(script,{
     location:{pathname,hash,search},URLSearchParams,
-    performance:{getEntriesByType:()=>[{type:reload?'reload':'navigate'}]},
+    performance:{getEntriesByType:()=>[{type:reload?'reload':history?'back_forward':'navigate'}]},Date,
     localStorage:{getItem:()=>{if(storageBlocked)throw new Error('Unavailable');return persisted?'1':null;}},
     sessionStorage:{getItem:key=>{if(storageBlocked)throw new Error('Unavailable');return key==='chess-opening-seen'?(session?'1':null):paused?'off':enabled?'on':null;}},
-    matchMedia:()=>({matches:reduced}),document:{documentElement:{classList:{add:name=>classes.add(name)}}},
-    window:{},setTimeout:()=>1,
+    matchMedia:()=>({matches:reduced}),
+    document:{hidden,documentElement:{classList:{add:name=>classes.add(name),remove:name=>classes.delete(name),contains:name=>classes.has(name)}},
+     createElement:()=>({}),head:{append:link=>preloads.push(link)},addEventListener(){},removeEventListener(){}},
+    window:{},setTimeout:(callback,delay)=>{timers.push(delay);return 1;},clearTimeout(){},
   });
   return classes.has('intro-pending');
 }
@@ -63,6 +65,17 @@ assert(!entrancePending({hash:'#projects'}),'Direct project navigation skips the
 assert(!entrancePending({reduced:true}),'Reduced motion skips the automatic opening');
 assert(entrancePending({paused:true}),'Pausing ambient motion does not suppress the opening');
 assert(entrancePending({persisted:true,reduced:true,search:'?intro=cinematic'}),'Explicit replay remains available');
+assert(!entrancePending({history:true}),'Back/forward returns never cover the page, whether or not the browser cached it');
+assert(entrancePending({history:true,search:'?intro=cinematic'}),'Explicit replay also works from history');
+{
+  const preloads=[],timers=[];
+  assert(entrancePending({preloads,timers}),'A fresh visit covers the page');
+  assert(preloads.some(link=>link.href==='/assets/chess/staunton.bin'&&link.as==='fetch')&&preloads.some(link=>link.href==='/chess-scene.js'),'The entrance assets start downloading with the HTML');
+  assert.deepEqual(timers,[12000],'The curtain fails open after 12 visible seconds');
+  const hiddenTimers=[];
+  assert(entrancePending({hidden:true,timers:hiddenTimers}),'A background tab keeps the curtain for when it is shown');
+  assert.equal(hiddenTimers.length,0,'Hidden time does not use up the curtain budget');
+}
 // A normal URL must play without special parameters or stored preferences,
 // including a deployed subdirectory and direct index.html entry points.
 const deployedBoot=await readFile(new URL('../dist/intro-boot.js',import.meta.url),'utf8');

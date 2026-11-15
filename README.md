@@ -28,9 +28,10 @@ Vista local: http://127.0.0.1:4173/en/ . El idioma predeterminado es inglés, co
 - `src/project-explorer.mjs`: escena orbital como única vista de proyectos, sin tarjetas ni selector. No depende de preferencias guardadas. Conserva el enlace antiguo `#archive` como acceso a los proyectos; sin JavaScript aparecen todos los cuerpos con enlaces normales.
 - `public/engineering.css`: jerarquía de la portada, acceso directo a las órbitas, componentes técnicos, legibilidad y ajustes de móvil.
 - `public/styles.css`: diseño y adaptación a pantallas.
+- `public/polish.css`: refinamientos visuales comunes (cabecera translúcida al desplazarse, foco, botones, entrada escalonada de la portada cuando no hay intro, tarjeta de herramientas y contacto). Se carga en último lugar.
 - `public/app.js`: menú móvil, copiar correo y navegación de idioma.
 - `public/night.css`: paleta azul noche, marfil y metal cálido, compartida por portada, proyectos, fichas, páginas de detalle y contacto.
-- `public/intro-boot.js`, `public/intro.js` y `public/intro.css`: entrada, transición a la portada, repetición, foco y recuperación.
+- `public/intro-boot.js`, `public/intro.js` y `public/intro.css`: entrada, transición a la portada, repetición, foco y recuperación. El arranque precarga Three.js, la escena y las piezas junto con el HTML. Los límites de seguridad sólo cuentan el tiempo con la pestaña visible, así que una pestaña abierta en segundo plano conserva la entrada. Volver con atrás/adelante no la repite.
 - `public/chess-model.js`: tablero de madera y 32 instancias de seis modelos Staunton. `public/staunton-assets.js` carga las geometrías indexadas y crea las vetas volumétricas de la madera clara y oscura.
 - `public/chess-scene.js`: renderizado del tablero, luz de estudio, reflejos, sombras y gestión de recursos.
 - `public/chess-code.js`: reconstrucción del tablero y las piezas en caracteres blancos; la misma malla de caracteres toma las formas y colores de la portada y se resuelve por celdas en el HTML real. Usa color y profundidad del tablero y un atlas generado localmente.

@@ -8,10 +8,23 @@ const requested=query.get('intro');
 const forced=['cinematic','squares','knight'].includes(requested);
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const disabled=requested==='off'||query.get('motion')==='off'||(reducedMotion.matches&&query.get('motion')!=='on');
-const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
+const navigation=performance.getEntriesByType('navigation')[0]?.type;
+const reloading=navigation==='reload';
 const controls=[...document.querySelectorAll('[data-intro]')];
 let scene,active,disposed=false;
 
+// Count only time the page is visible: a tab opened in the background must not
+// spend the entrance's safety budget before the visitor has seen it.
+function visibleTimeout(callback,delay){
+  let remaining=delay,since=0,timer=0;
+  const sync=()=>{
+    if(document.hidden){if(timer){clearTimeout(timer);timer=0;remaining-=performance.now()-since;}}
+    else if(!timer){since=performance.now();timer=setTimeout(()=>{cancel();callback();},Math.max(0,remaining));}
+  };
+  const cancel=()=>{clearTimeout(timer);timer=0;document.removeEventListener('visibilitychange',sync);};
+  document.addEventListener('visibilitychange',sync);sync();
+  return cancel;
+}
 function clearPending(){document.documentElement.classList.remove('intro-pending');clearTimeout(window.chessIntroWatchdog);}
 async function getScene(mount,isFinished){
   return import('./chess-scene.js').then(module=>module.createChessScene(mount)).then(result=>{
@@ -35,6 +48,8 @@ async function playIntro(trigger){
   const underlying=[...document.body.children].filter(el=>el.tagName!=='SCRIPT');
   const inertStates=underlying.map(el=>el.inert);
   document.body.style.overflow='hidden';
+  // The live page is revealed by the entrance itself; never stage it a second time.
+  document.documentElement.classList.remove('hero-enter');
   document.documentElement.classList.add('intro-playing');
   // The code is rebuilt into the layout below before handing it back to HTML.
   document.body.append(overlay);overlay.append(mount);
@@ -42,11 +57,11 @@ async function playIntro(trigger){
   Object.assign(mount.style,{position:'fixed',left:'0px',top:'0px',width:'100vw',height:'100dvh',opacity:'0'});
   const skip=overlay.querySelector('.intro-skip');
   const curtain=overlay.querySelector('.intro-curtain'),meta=overlay.querySelector('.intro-meta'),caption=overlay.querySelector('.intro-caption'),progress=overlay.querySelector('.intro-progress i');
-  let raf=0,watchdog,elapsed=0,last=0,started=false,finished=false;
+  let raf=0,cancelWatchdog=()=>{},elapsed=0,last=0,started=false,finished=false;
   const captureController=new AbortController();
   const finish=()=>{
     if(finished)return;finished=true;
-    cancelAnimationFrame(raf);clearTimeout(watchdog);captureController.abort();
+    cancelAnimationFrame(raf);cancelWatchdog();captureController.abort();
     document.removeEventListener('keydown',key);document.removeEventListener('visibilitychange',visibility);
     scene?.dispose();scene=null;overlay.remove();
     document.body.style.overflow=previousOverflow;
@@ -59,7 +74,7 @@ async function playIntro(trigger){
   };
   const key=event=>{if(event.key==='Escape')finish();if(event.key==='Tab'){event.preventDefault();skip.focus({preventScroll:true});}};
   const visibility=()=>{last=0;if(document.hidden){cancelAnimationFrame(raf);}else if(started&&!finished){raf=requestAnimationFrame(frame);}};
-  active={finish};watchdog=setTimeout(finish,14000);
+  active={finish};cancelWatchdog=visibleTimeout(finish,20000);
   mount.addEventListener('chess:lost',finish,{once:true});
   skip.addEventListener('click',finish);document.addEventListener('keydown',key);document.addEventListener('visibilitychange',visibility);
   skip.focus({preventScroll:true});clearPending();
@@ -80,7 +95,7 @@ async function playIntro(trigger){
   renderScene.setPageGuide(pageGuide);
   overlay.dataset.pageGuide=pageGuide?'ready':'fallback';
   overlay.classList.add('is-ready');started=true;
-  clearTimeout(watchdog);watchdog=setTimeout(finish,INTRO_DURATION+5000);
+  cancelWatchdog();cancelWatchdog=visibleTimeout(finish,INTRO_DURATION+5000);
   function frame(now){
     if(finished||document.hidden)return;
     if(last)elapsed+=Math.min(now-last,250);last=now;
@@ -98,8 +113,11 @@ async function playIntro(trigger){
 if(home){
   reducedMotion.addEventListener('change',event=>{if(event.matches)active?.finish();});
   controls.forEach(button=>button.addEventListener('click',()=>playIntro(button)));
-  if(forced||((['','#top','#home'].includes(location.hash)||reloading)&&!disabled))playIntro();
-  else clearPending();
+  // History navigation returns to a page already seen (restored or reloaded by the
+// browser); intro-boot.js applies the same rule so the curtain never mismatches.
+  const visit=navigation!=='back_forward'&&(['','#top','#home'].includes(location.hash)||reloading);
+  if(forced||(visit&&!disabled))playIntro();
+  else{clearPending();document.documentElement.classList.add('hero-enter');}
   window.addEventListener('pagehide',event=>{
     active?.finish();
     if(!event.persisted)disposed=true;
