@@ -12,4 +12,4 @@ Full attribution: /assets/space/ATTRIBUTION.txt
 
 Three.js 0.180.0: MIT, /assets/vendor/THREE-LICENSE.txt
 Instrument Sans: OFL, /assets/fonts/InstrumentSans-OFL.txt
-Instrument Serif: OFL, /assets/fonts/InstrumentSerif-OFL.txt
+Newsreader: OFL, /assets/fonts/Newsreader-OFL.txt

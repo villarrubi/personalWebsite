@@ -95,3 +95,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
  .site-header{background:#061327e0}
  .experience-atmosphere:before{top:38%;aspect-ratio:1}
 }
+
+/* Newsreader is wider than the previous condensed serif: keep the display sizes in proportion. */
+@media(min-width:761px){.experience-name{font-size:clamp(60px,7.4vw,140px);letter-spacing:-.035em}}
+.contact-heading h2{font-size:clamp(64px,11vw,180px);letter-spacing:-.035em}
+@media(max-width:600px){.contact-heading h2{font-size:clamp(48px,16vw,72px)}.contact-heading>span{font-size:clamp(40px,12vw,60px)}}
