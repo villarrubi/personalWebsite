@@ -31,7 +31,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .experience-atmosphere:before{content:'';position:absolute;left:50%;top:46%;width:min(1100px,95vw);aspect-ratio:2.2;transform:translate(-50%,-50%);background:radial-gradient(closest-side,#5f86a826,transparent);filter:blur(10px);pointer-events:none}
 .experience-name{text-shadow:0 4px 55px #06132760,0 0 120px #6f97b31f}
 .experience-name em{color:#bcd2dd}
-.experience-eyebrow>span:first-child{animation:pulse-dot 3.2s ease-in-out infinite}
 .experience-contact{transition:color .2s,border-color .2s}
 .experience-contact:hover{color:#f1eee4;border-color:#d3dde4}
 .experience-footer>a,.experience-footer button{transition:color .2s}
@@ -77,14 +76,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 
 @keyframes hero-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes hero-fade{from{opacity:0}to{opacity:1}}
-@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 #bfcdbb55}50%{box-shadow:0 0 0 6px #bfcdbb00}}
 @keyframes scroll-cue{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
 
 /* The entrance overlay captures the page; keep everything still underneath it. */
-.intro-pending .experience-copy>*,.intro-playing .experience-copy>*,.intro-playing .experience-scroll,.intro-playing .experience-eyebrow>span:first-child{animation:none!important}
+.intro-pending .experience-copy>*,.intro-playing .experience-copy>*,.intro-playing .experience-scroll{animation:none!important}
 
 @media(prefers-reduced-motion:reduce){
- .hero-enter .experience-copy>*,.hero-enter .experience-footer,.experience-scroll,.experience-eyebrow>span:first-child{animation:none!important}
+ .hero-enter .experience-copy>*,.hero-enter .experience-footer,.experience-scroll{animation:none!important}
  .button:hover,.engineering-toolbox dl>div:hover{transform:none}
 }
 @media(hover:none){.engineering-toolbox dl>div:hover{transform:none}}
