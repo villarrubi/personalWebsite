@@ -92,12 +92,13 @@ export function careerSection(lang) {
   <header class="career-heading">
    <p class="eyebrow">02 / ${es?'TRAYECTORIA':'CAREER'}</p>
    <div><h2 id="career-title">${es?'La curiosidad, en el tiempo.':'Curiosity, over time.'}</h2><p>2018 <span aria-hidden="true">⟶</span> ${es?'hoy':'today'}</p></div>
+   <p class="career-scroll-hint">${es?'Sigue bajando para pasar de etapa':'Scroll to turn the next page'} <span aria-hidden="true">↓</span></p>
   </header>
   <ol class="career-timeline">
-   ${milestones.map(job=>{
+   ${milestones.map((job,index)=>{
     const isLearning = learning.includes(job);
-    return `<li class="career-entry${job.current?' is-current':''}${isLearning?' is-learning':''}">
-     <div class="career-date"><time datetime="${job.start}">${job.start.slice(0,4)}</time>${job.current?`<span class="career-current">${es?'Ahora':'Now'}</span>`:''}</div>
+    return `<li class="career-entry${job.current?' is-current':''}${isLearning?' is-learning':''}" style="--card-index:${index}">
+     <div class="career-date"><time datetime="${job.start}">${job.start.slice(0,4)}</time><span class="career-page" aria-hidden="true">${String(index+1).padStart(2,'0')} / ${String(milestones.length).padStart(2,'0')}</span>${job.current?`<span class="career-current">${es?'Ahora':'Now'}</span>`:''}</div>
      <article class="career-content">
       <div class="career-identity">
        <p class="career-company">${typeof job.company==='string'?job.company:job.company[lang]}${job.client?` <span> / ${es?'para':'for'} ${job.client}</span>`:''}</p>
