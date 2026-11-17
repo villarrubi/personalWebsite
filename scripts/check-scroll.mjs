@@ -44,3 +44,40 @@ assert.equal(preference.frames.size,0);assert(!preference.wheel().defaultPrevent
 assert(!visit({reduced:true}).wheel().defaultPrevented);
 assert(!visit({search:'?motion=off'}).wheel().defaultPrevented);
 console.log('PASS: slower wheel travel, reverse/cancel, finite settling, nested scroll, native gestures, boundaries and reduced motion.');
+
+// Entrances must stay in progress when the visitor pauses, then replay on return.
+const revealSource=(await readFile(new URL('../public/scroll-reveal.js',import.meta.url),'utf8')).replace('export function','function');
+const revealEvents=new Map(),revealFrames=new Map(),revealPreference=new EventTarget();
+revealPreference.matches=false;
+const values=new Map(),classes=new Set();
+let naturalTop=750,focused=false,inDeck=false,sequence=0;
+const block={hidden:false,
+ classList:{add:name=>classes.add(name),remove:name=>classes.delete(name)},
+ style:{setProperty:(key,value)=>values.set(key,value),removeProperty:key=>values.delete(key)},
+ matches:()=>inDeck,contains:()=>focused,
+ getBoundingClientRect:()=>({top:naturalTop+(parseFloat(values.get('--reveal-y'))||0)}),
+};
+const revealContext={URLSearchParams,location:{search:''},innerHeight:1000,scrollY:0,
+ document:{hidden:false,documentElement:{scrollHeight:5000},activeElement:null,querySelectorAll:()=>[block],addEventListener:(name,fn)=>revealEvents.set(name,fn)},
+ matchMedia:()=>revealPreference,addEventListener:(name,fn)=>revealEvents.set(name,fn),
+ requestAnimationFrame:fn=>{revealFrames.set(++sequence,fn);return sequence;},cancelAnimationFrame:id=>revealFrames.delete(id),
+};
+runInNewContext(revealSource,revealContext);
+function revealTick(event='scroll'){
+ revealEvents.get(event)();const pending=[...revealFrames.values()];revealFrames.clear();pending.forEach(fn=>fn());
+ assert.equal(revealFrames.size,0,'No animation loop while scroll is stationary');
+}
+const middle=Number(values.get('--reveal-opacity'));
+assert(middle>.4&&middle<.8,'An already visible block still animates');
+for(let i=0;i<20;i++)revealTick();
+assert.equal(Number(values.get('--reveal-opacity')),middle,'Elapsed time and transformed rects do not finish or jitter the entrance');
+naturalTop=500;revealTick();assert.equal(Number(values.get('--reveal-opacity')),1);
+naturalTop=1100;revealTick();naturalTop=750;revealTick();assert.equal(Number(values.get('--reveal-opacity')),middle,'Revisiting a section replays its entrance');
+focused=true;revealTick('focusin');assert.equal(Number(values.get('--reveal-opacity')),1,'Keyboard focus immediately reveals the block');
+focused=false;revealTick('focusout');
+inDeck=true;revealTick();assert(!classes.has('scroll-reveal'),'The card viewer owns its transforms');
+inDeck=false;naturalTop=750;revealContext.scrollY=4000;revealTick();
+assert.equal(Number(values.get('--reveal-opacity')),1,'Contact remains fully readable at the bottom even on tall screens');
+revealPreference.matches=true;revealPreference.dispatchEvent(new Event('change'));
+assert(!classes.has('scroll-reveal'));assert.equal(values.size,0,'Reduced motion restores unmodified content');
+console.log('PASS: visible scroll-linked entrances, stable pause, re-entry, keyboard focus, card isolation and full visibility at page end.');

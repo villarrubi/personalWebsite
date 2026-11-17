@@ -67,7 +67,7 @@
 .career-continuation>button span{margin-left:12px}
 @media(max-width:760px){.career-deck{height:calc(var(--viewer-height) + var(--career-travel) + 58px)}.career-deck .career-heading>div{display:flex;gap:14px}.career-deck .career-heading>div>p{display:none}.career-deck .career-heading h2{font-size:28px}.career-deck .career-scroll-hint{margin-top:8px}.career-continuation{gap:10px;flex-wrap:wrap}.career-continuation>p{font-size:11px;min-width:130px}.career-continuation>button{padding-inline:10px}.career-steps{gap:5px}}
 
-.career-deck.is-measuring .career-entry{height:auto}
+.career-deck.is-measuring .career-entry{height:auto;align-self:start}
 
 /* Both pages share the stage during the transition; only one is interactive. */
 .career-deck .career-entry:not(.is-active){pointer-events:none}
