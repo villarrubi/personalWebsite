@@ -1,5 +1,6 @@
-/* A personal note and a horizontal tool strip contrast with the chronology. */
-.about-section.about-journal{padding-block:36px 26px;background:#10283b;border-block:1px solid #a0b8d329}
+/* Biography and contact share one continuous background and native scroll flow. */
+.profile-outro{position:relative;isolation:isolate;background:linear-gradient(180deg,var(--paper),#10283b 24%,#0c2035 65%,var(--paper))}
+.about-section.about-journal{padding-block:44px 30px;background:transparent;border:0}
 .about-note{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,6vw,96px);align-items:start}
 .about-introduction>.eyebrow{margin-bottom:22px;color:var(--accent)}
 .about-journal .about-introduction h2{font:400 clamp(32px,3.3vw,51px)/1.12 var(--serif);letter-spacing:-.025em}
@@ -23,7 +24,9 @@
 .about-tools dt>span{font-size:10px;color:var(--accent);margin-right:9px}
 .about-tools dd{margin:7px 0 0;font-size:13px;color:#c7d6e3}
 .about-tools dd small{display:block;margin-top:5px;font-size:11px;color:#9fb5c7}
-.contact-section.contact-compact{padding-block:28px 24px;background:var(--paper);border-top:0;border-bottom:1px solid var(--line)}
+.contact-section.contact-compact{padding-block:0 32px;background:transparent;border:0}
+.contact-compact>.container{padding-top:30px}
+.contact-compact>.container:before{content:'';position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,#a0b8d329 20%,#a0b8d329 80%,transparent)}
 .contact-compact .contact-top{display:flex;justify-content:space-between;align-items:baseline;gap:32px}
 .contact-compact .contact-top>p:last-child{max-width:480px;font-size:13px;line-height:1.7}
 .contact-compact .contact-heading{margin-block:22px 20px;align-items:center}
@@ -40,7 +43,7 @@
 @media(max-width:760px){.experience-layout{padding-block:30px 36px}}
 
 /* Drifting light fields use only transform/opacity; text stays on a separate layer. */
-.about-section.about-journal,.contact-section.contact-compact{position:relative;isolation:isolate}
+.about-section.about-journal,.contact-section.contact-compact{position:relative}
 .about-journal>.container,.contact-compact>.container{position:relative;z-index:1}
 .ambient-field{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;opacity:1;contain:paint}
 .ambient-field>i{position:absolute;display:block;width:75%;height:180%;left:-20%;top:-45%;border-radius:50%;background:radial-gradient(ellipse,#42a5ae70 0%,#34758838 35%,transparent 68%);animation:ambient-drift 10s ease-in-out infinite alternate;animation-play-state:paused}
@@ -48,15 +51,11 @@
 .ambient-field>i:nth-child(3){left:20%;top:-80%;width:60%;background:radial-gradient(ellipse,#8bc9cf45 0%,transparent 65%);animation-duration:9s;animation-delay:-4s}
 .ambient-field>span{position:absolute;width:90%;height:140%;left:12%;top:-25%;border:1px solid #8bc9cf40;border-radius:50%;transform:rotate(-22deg);animation:ambient-orbit 16s ease-in-out infinite alternate;animation-play-state:paused}
 .ambient-enabled .ambient-in-view>i,.ambient-enabled .ambient-in-view>span{animation-play-state:running}
-.about-journal>.ambient-field{opacity:.85}
-.contact-compact>.ambient-field{opacity:.9}
+.profile-outro>.ambient-field{opacity:.65;mask-image:linear-gradient(transparent,#000 18%,#000 75%,transparent)}
 .ambient-toggle{position:absolute;right:24px;bottom:6px;z-index:4;border:0;background:none;color:#9eb4c7;font-size:10px;min-height:32px;padding:6px 10px;cursor:pointer}
 .ambient-toggle:hover{color:var(--accent)}
 .about-tools dl>div{border-radius:4px;transition:background .25s ease,color .25s ease}
 .about-tools dl>div:hover{background:#8bc9cf0a}
-.about-tools dl>div.reveal-ready{transition:opacity .65s ease,transform .65s ease,background .25s ease}
-.about-tools dl>div.reveal-ready:nth-child(2){transition-delay:.09s}
-.about-tools dl>div.reveal-ready:nth-child(3){transition-delay:.18s}
 .contact-compact .contact-bottom{flex-wrap:wrap;gap:16px 24px}
 .contact-phone{display:flex;align-items:center;gap:9px;min-height:44px;font-size:14px;white-space:nowrap;color:#d0dce7}
 .contact-phone>span:first-child{font-size:10px;color:#a1b6c8}
