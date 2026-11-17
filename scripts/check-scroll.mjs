@@ -7,7 +7,8 @@ function visit({reduced=false,search=''}={}){
  const events=new Map(),frames=new Map(),preference=new EventTarget();
  preference.matches=reduced;
  class Element{matches(){return false;}}
- const doc={documentElement:{scrollHeight:4000},body:{},hidden:false,addEventListener:(type,fn)=>events.set(type,fn)};
+ const classes=new Set();
+ const doc={documentElement:{scrollHeight:4000,classList:{contains:name=>classes.has(name),add:name=>classes.add(name),remove:name=>classes.delete(name)}},body:{},hidden:false,addEventListener:(type,fn)=>events.set(type,fn)};
  let sequence=0,time=0;
  const context={document:doc,Element,URLSearchParams,location:{search},innerHeight:800,scrollY:200,
   matchMedia:()=>preference,getComputedStyle:node=>node.style,
@@ -43,6 +44,21 @@ const preference=visit();preference.wheel();preference.preference.matches=true;p
 assert.equal(preference.frames.size,0);assert(!preference.wheel().defaultPrevented);
 assert(!visit({reduced:true}).wheel().defaultPrevented);
 assert(!visit({search:'?motion=off'}).wheel().defaultPrevented);
+for(const lock of ['intro-pending','intro-playing'])for(const options of [{},{reduced:true},{search:'?motion=off'}]){
+ const intro=visit(options),root=intro.context.document.documentElement;
+ root.classList.add(lock);
+ assert(intro.wheel().defaultPrevented,'The intro prevents wheel movement even when native motion is selected');
+ assert.equal(intro.frames.size,0,'No programmatic scroll may bypass the intro lock');
+ assert.equal(intro.context.scrollY,200);
+ assert(!intro.wheel({ctrlKey:true}).defaultPrevented,'Browser zoom stays available');
+ root.classList.remove(lock);
+ intro.wheel();intro.flush();
+ assert.equal(intro.context.scrollY,options.reduced||options.search?200:300,'Paced scrolling works normally after the intro');
+}
+const interrupted=visit();interrupted.wheel();
+interrupted.context.document.documentElement.classList.add('intro-playing');interrupted.flush();
+assert.equal(interrupted.context.scrollY,200,'Opening an intro cancels already queued wheel momentum');
+assert.equal(interrupted.frames.size,0);
 console.log('PASS: slower wheel travel, reverse/cancel, finite settling, nested scroll, native gestures, boundaries and reduced motion.');
 
 // Entrances must stay in progress when the visitor pauses, then replay on return.

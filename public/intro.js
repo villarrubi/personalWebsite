@@ -41,7 +41,8 @@ function playIntro(trigger){
   const finish=()=>{
     if(finished)return;finished=true;
     cancelAnimationFrame(raf);clearTimeout(watchdog);
-    document.removeEventListener('keydown',key);document.removeEventListener('visibilitychange',visibility);
+    document.removeEventListener('keydown',key,true);document.removeEventListener('visibilitychange',visibility);
+    window.removeEventListener('wheel',preventScroll,true);window.removeEventListener('touchmove',preventScroll,true);
     scene?.dispose();overlay.remove();document.body.style.overflow=previousOverflow;
     underlying.forEach((el,i)=>el.inert=inertStates[i]);
     root.classList.remove('intro-playing');
@@ -53,6 +54,13 @@ function playIntro(trigger){
   const key=event=>{
     if(event.key==='Escape')finish();
     if(event.key==='Tab'){event.preventDefault();skip.focus({preventScroll:true});}
+    if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End'].includes(event.key)||
+      ([' ','Spacebar'].includes(event.key)&&event.target!==skip))event.preventDefault();
+  };
+  const preventScroll=event=>{
+    // Keep browser zoom and the skip button available; block page travel only.
+    if(event.ctrlKey||event.metaKey||event.touches?.length>1)return;
+    if(event.cancelable)event.preventDefault();
   };
   const armWatchdog=()=>{clearTimeout(watchdog);if(!document.hidden)watchdog=setTimeout(finish,8000);};
   const visibility=()=>{
@@ -75,7 +83,9 @@ function playIntro(trigger){
     if(elapsed>=(simple?1650:DURATION))finish();else raf=requestAnimationFrame(frame);
   }
   active={finish};
-  skip.addEventListener('click',finish);document.addEventListener('keydown',key);
+  skip.addEventListener('click',finish);document.addEventListener('keydown',key,true);
+  window.addEventListener('wheel',preventScroll,{capture:true,passive:false});
+  window.addEventListener('touchmove',preventScroll,{capture:true,passive:false});
   document.addEventListener('visibilitychange',visibility);
   skip.focus({preventScroll:true});clearPending();
   armWatchdog();if(!document.hidden)raf=requestAnimationFrame(frame);

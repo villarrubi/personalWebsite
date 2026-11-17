@@ -19,18 +19,19 @@ function visit({search='',lang='es',reduced=false,home=true,hidden=false,canvas=
   addEventListener:(name,fn)=>events.set(name,fn),removeEventListener:name=>events.delete(name),
   dispatchEvent:event=>{if(event.type==='intro:end')ended++;},
  };
- const window={addEventListener:(name,fn)=>windowEvents.set(name,fn),cancelIntroBoot(){root.classList.remove('intro-pending');}};
+ const window={addEventListener:(name,fn)=>windowEvents.set(name,fn),removeEventListener:name=>windowEvents.delete(name),cancelIntroBoot(){root.classList.remove('intro-pending');}};
  runInNewContext(source,{createCircuit:(_,targets)=>{assert.deepEqual(Array.from(targets),[name,phrase],'The renderer targets the existing hero nodes');return canvas?{render(time,reduced){if(offscreen)return false;if(renderFails)throw new Error('Canvas lost');renders.push({time,reduced});},dispose(){disposed++;}}:null;},document,window,location:{search},URLSearchParams,matchMedia:()=>({matches:reduced}),Event,scrollY:0,
   requestAnimationFrame:fn=>{frames.set(++id,fn);return id;},cancelAnimationFrame:key=>frames.delete(key),
   setTimeout:fn=>{timers.set(++id,fn);return id;},clearTimeout:key=>timers.delete(key),
  });
  let time=0;
- return {document,page,alreadyInert,previous,root,body,events,frames,timers,renders,
+ return {document,page,alreadyInert,previous,root,body,events,windowEvents,frames,timers,renders,
   get disposed(){return disposed;},
   get overlay(){return overlay;},get focus(){return focus;},get ended(){return ended;},
   tick(ms=100){time+=ms;const callbacks=[...frames.values()];frames.clear();callbacks.forEach(fn=>fn(time));},
   visibility(value){document.hidden=value;events.get('visibilitychange')?.();},
-  key(key){let prevented=false;events.get('keydown')?.({key,preventDefault(){prevented=true;}});return prevented;},
+  key(key,target){let prevented=false;events.get('keydown')?.({key,target,preventDefault(){prevented=true;}});return prevented;},
+  scrollInput(type,overrides={}){const event={cancelable:true,defaultPrevented:false,preventDefault(){this.defaultPrevented=true;},...overrides};windowEvents.get(type)?.(event);return event;},
   history(name){windowEvents.get(name)?.({persisted:true});},
  };
 }
@@ -39,6 +40,7 @@ function released(v){
  assert(!v.root.classList.contains('intro-pending'));assert.equal(v.body.style.overflow,'auto');
  assert(!v.page.inert);assert(v.alreadyInert.inert);assert.equal(v.frames.size,0);assert.equal(v.timers.size,0);
  assert.equal(v.events.size,0);assert.equal(v.focus,v.previous);
+ assert(!v.windowEvents.has('wheel'));assert(!v.windowEvents.has('touchmove'));
  assert.equal(v.root.style['--intro-text'],undefined);assert.equal(v.root.style['--intro-rest'],undefined);
 }
 for(const lang of ['es','en']){
@@ -84,6 +86,21 @@ for(let i=0;i<10;i++){
 assert(Number(continuous.root.style['--intro-rest'])>0);
 continuous.key('Escape');released(continuous);
 const anchored=visit({offscreen:true});anchored.tick();released(anchored);
+const locked=visit();
+for(const ticks of [1,23,22]){
+ for(let i=0;i<ticks;i++)locked.tick();
+ assert(locked.overlay.isConnected);
+ assert(locked.scrollInput('wheel').defaultPrevented,'Wheel is blocked throughout the intro, including the final fade');
+ assert(locked.scrollInput('touchmove',{touches:[{}]}).defaultPrevented,'Single-finger page gestures are blocked');
+ for(const key of ['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '])assert(locked.key(key));
+ assert(!locked.key(' ',locked.overlay.querySelector('.intro-skip')),'Space can still activate the skip button');
+ assert(!locked.scrollInput('wheel',{ctrlKey:true}).defaultPrevented,'Trackpad zoom stays available');
+ assert(!locked.scrollInput('touchmove',{touches:[{},{}]}).defaultPrevented,'Pinch zoom stays available');
+}
+locked.key('Escape');released(locked);
+assert(!locked.scrollInput('wheel').defaultPrevented,'Scrolling is released immediately after skipping');
+assert(!locked.scrollInput('touchmove',{touches:[{}]}).defaultPrevented);
+assert(!locked.key('PageDown'));
 for(const [width,height] of [[320,568],[390,844],[844,390],[1440,900]]){
  const targets=Array.from({length:96},(_,i)=>({x:width*(.15+.7*(i%12)/11),y:height*(.2+.3*Math.floor(i/12)/7)}));
  const paths=circuitPaths(width,height,targets);

@@ -8,9 +8,12 @@ if(typeof document!=='undefined'){
  const preference=matchMedia('(prefers-reduced-motion: reduce)');
  const disabled=new URLSearchParams(location.search).get('motion')==='off';
  let frame=0,target=0,lastTime=0,direction=0;
+ const introLocked=()=>document.documentElement.classList.contains('intro-pending')||document.documentElement.classList.contains('intro-playing');
  const maxScroll=()=>Math.max(0,document.documentElement.scrollHeight-innerHeight);
  function stop(){cancelAnimationFrame(frame);frame=0;lastTime=0;direction=0;}
  function tick(time){
+  // overflow:hidden cannot stop scrollTo(), including already queued momentum.
+  if(introLocked()){stop();return;}
   const elapsed=lastTime?Math.min(64,time-lastTime):16;
   lastTime=time;
   target=Math.max(0,Math.min(maxScroll(),target));
@@ -32,6 +35,11 @@ if(typeof document!=='undefined'){
   return false;
  }
  addEventListener('wheel',event=>{
+  if(introLocked()){
+   stop();
+   if(event.cancelable&&!event.ctrlKey&&!event.metaKey)event.preventDefault();
+   return;
+  }
   if(disabled||preference.matches||event.defaultPrevented||!event.cancelable||event.ctrlKey||event.metaKey||event.shiftKey||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;
   const delta=pacedWheelDelta(event.deltaY,event.deltaMode,innerHeight);
   if(!delta)return;

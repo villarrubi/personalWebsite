@@ -1,4 +1,5 @@
 html{scrollbar-gutter:stable}
+html.intro-pending,html.intro-playing{overflow:hidden;overscroll-behavior:none}
 .intro-pending:after{content:'';position:fixed;inset:0;background:#061327;z-index:200}
 /* Opacity preserves all layout boxes. The real heading stays in its final place. */
 .intro-playing .site-header,.intro-playing .site-footer,
@@ -12,7 +13,7 @@ html{scrollbar-gutter:stable}
 .intro-playing .experience-copy>.experience-description{opacity:clamp(0,calc(var(--intro-rest,0)*1.6 - .15),1)!important}
 .intro-playing .experience-copy>.experience-actions{opacity:clamp(0,calc(var(--intro-rest,0)*1.8 - .35),1)!important}
 .intro-playing #main>:not(.experience-hero){opacity:clamp(0,calc(var(--intro-rest,0)*1.9 - .55),1)!important}
-.code-intro{position:fixed;inset:0;z-index:200;color:#eee9dd;overflow:hidden;isolation:isolate}
+.code-intro{position:fixed;inset:0;z-index:200;color:#eee9dd;overflow:hidden;isolation:isolate;touch-action:pinch-zoom}
 .intro-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
 .intro-skip{position:absolute;bottom:45px;right:4%;background:#061327a6;color:#c0cfd9;border:1px solid #c1d1e42b;border-radius:30px;padding:12px 20px;font-size:11px;min-height:44px;display:flex;gap:35px;align-items:center;z-index:4}
 .intro-skip:hover{background:#1b2e46;border-color:#c1d1e470}.intro-skip:focus-visible{outline:2px solid #c9d7e9;outline-offset:5px}
