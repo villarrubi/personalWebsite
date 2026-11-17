@@ -1,4 +1,4 @@
-import {copy, publishedProjects} from './content.mjs';
+import {publishedProjects} from './content.mjs';
 
 // Early milestones and the master's year follow the author's corrections.
 // Professional dates and responsibilities are taken from the CV sources in cv/.
@@ -108,42 +108,36 @@ const experience = [
 ];
 
 export function careerSection(lang) {
- const es = lang === 'es', c = copy[lang];
+ const es = lang === 'es';
  const thesisPublished = publishedProjects.some(project => project.id === 'phishing');
  const milestones = [...learning, ...experience].sort((a,b)=>a.start.localeCompare(b.start));
  return `<section id="career" class="career-section container" aria-labelledby="career-title">
-  <div class="section-heading career-heading">
-   <div><p class="eyebrow">02 / ${es?'TRAYECTORIA':'CAREER'}</p><h2 id="career-title">${es?'Todo empezó<br>con curiosidad.':'It all started<br>with curiosity.'}</h2></div>
-   <p>${es?'De mis primeros programas en 2018 a la ingeniería de software y los sistemas físicos. Un recorrido de aprendizaje, paso a paso.':'From my first programs in 2018 to software engineering and physical systems. A learning journey, one step at a time.'}</p>
-  </div>
-  <div class="career-layout">
-   <div class="career-experience">
-    <h3 class="eyebrow career-label">${es?'APRENDIZAJE Y EXPERIENCIA':'LEARNING AND EXPERIENCE'}</h3>
-    <ol class="career-timeline">
-     ${milestones.map(job=>`<li class="career-entry${job.current?' is-current':''}">
-      <article>
-       <div class="career-meta"><p class="career-period"><time datetime="${job.start}">${job.period[lang].split(' — ')[0]}</time>${job.end?` — <time datetime="${job.end}">${job.period[lang].split(' — ')[1]}</time>`:job.current?` — ${es?'actualidad':'present'}`:''}</p>${job.current?`<span class="career-current">${es?'Ahora':'Now'}</span>`:''}</div>
+  <header class="career-heading">
+   <p class="eyebrow">02 / ${es?'TRAYECTORIA':'CAREER'}</p>
+   <div><h2 id="career-title">${es?'La curiosidad, en el tiempo.':'Curiosity, over time.'}</h2><p>2018 <span aria-hidden="true">⟶</span> ${es?'hoy':'today'}</p></div>
+  </header>
+  <ol class="career-timeline">
+   ${milestones.map(job=>{
+    const isLearning = learning.includes(job);
+    return `<li class="career-entry${job.current?' is-current':''}${isLearning?' is-learning':''}">
+     <div class="career-date"><time datetime="${job.start}">${job.start.slice(0,4)}</time>${job.current?`<span class="career-current">${es?'Ahora':'Now'}</span>`:''}</div>
+     <article class="career-content">
+      <div class="career-identity">
        <p class="career-company">${typeof job.company==='string'?job.company:job.company[lang]}${job.client?` <span> / ${es?'para':'for'} ${job.client}</span>`:''}</p>
-       <h4>${job.role[lang]}</h4>
-       <p class="career-summary">${job.summary[lang]}</p>
-       <ul class="career-points">${job.points[lang].map(point=>`<li>${point}</li>`).join('')}</ul>
+       <h3>${job.role[lang]}</h3>
+       ${job.end||job.current?`<p class="career-period">${job.period[lang]}</p>`:''}
        ${job.tags.length?`<ul class="career-tags" aria-label="${es?'Áreas y herramientas':'Areas and tools'}">${job.tags.map(tag=>`<li>${tag}</li>`).join('')}</ul>`:''}
-      </article>
-     </li>`).join('')}
-    </ol>
-   </div>
-   <aside class="career-education" aria-labelledby="education-title">
-    <h3 class="eyebrow career-label" id="education-title">${es?'DEL APRENDIZAJE A LA PRÁCTICA':'PUTTING LEARNING INTO PRACTICE'}</h3>
-    <div class="education-entry">
-     <h4>${es?'Detectar el engaño con código.':'Detecting deception with code.'}</h4>
-     <p>${es?'Mi Trabajo de Fin de Grado reúne programación, análisis de datos e inteligencia artificial en un detector de phishing para correo electrónico.':'My final-year project brings together programming, data analysis, and artificial intelligence in an email phishing detector.'}</p>
-     <p class="education-note">${es?'Heurísticas y aprendizaje automático aplicados a un problema real.':'Heuristics and machine learning applied to a real problem.'}</p>
-     ${thesisPublished?`<a class="career-text-link" href="/${lang}/projects/phishing/">${es?'Explorar el TFG':'Explore the final-year project'} <span aria-hidden="true">↗</span></a>`:''}
-    </div>
-    <div class="career-languages"><h4>${es?'Idiomas':'Languages'}</h4><p>${es?'Español nativo · Inglés B2':'Native Spanish · English B2'}<br><span>Cambridge B2 First</span></p></div>
-    <a class="button secondary career-cv" href="${c.cvPath}" target="_blank" rel="noopener">${c.cv}<span aria-hidden="true">↓</span></a>
-    <small class="career-cv-note">${c.cvNote}</small>
-   </aside>
-  </div>
+      </div>
+      <div class="career-story">
+       <p class="career-summary">${job.summary[lang]}</p>
+       ${isLearning?`<details class="career-detail"><summary>${es?'Qué aprendí':'What I learned'}<span aria-hidden="true">+</span></summary>`:''}
+       <ul class="career-points">${job.points[lang].map(point=>`<li>${point}</li>`).join('')}</ul>
+       ${isLearning?'</details>':''}
+       ${job.start==='2021'?`<div class="career-thesis"><span class="eyebrow">TFG / 2026</span><p>${es?'Detección de phishing con heurísticas y aprendizaje automático.':'Phishing detection with heuristics and machine learning.'}</p>${thesisPublished?`<a class="career-text-link" href="/${lang}/projects/phishing/">${es?'Ver proyecto':'View project'} <span aria-hidden="true">↗</span></a>`:''}</div>`:''}
+      </div>
+     </article>
+    </li>`;
+   }).join('')}
+  </ol>
  </section>`;
 }
