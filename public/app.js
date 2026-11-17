@@ -25,7 +25,7 @@ if('IntersectionObserver'in window&&!reduceMotion.matches){
  const revealObserver=new IntersectionObserver(entries=>{
   for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('is-visible');revealObserver.unobserve(entry.target);}
  },{threshold:.06});
- for(const element of document.querySelectorAll('.project-card,.about-layout,.section-heading,.about-introduction,.about-profile,.about-tools,.contact-heading')){
+ for(const element of document.querySelectorAll('.project-card,.about-layout,.section-heading,.about-introduction,.about-profile,.about-tools dl>div,.contact-top,.contact-heading,.contact-bottom')){
   if(element.getBoundingClientRect().top>innerHeight){element.classList.add('reveal-ready');revealObserver.observe(element);}
  }
  reduceMotion.addEventListener('change',()=>{if(reduceMotion.matches){document.querySelectorAll('.reveal-ready').forEach(el=>el.classList.add('is-visible'));revealObserver.disconnect();}});
@@ -35,3 +35,4 @@ import './intro.js';
 
 import './project-map.js';
 import './career-motion.js';
+import './ambient-motion.js';

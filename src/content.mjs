@@ -3,6 +3,8 @@ import { loadProjectCatalog } from './project-catalog.mjs';
 export const profile = {
   name: 'Alejandro Villarrubia',
   email: 'avillarrubia2@gmail.com',
+  phone: '+34 633 586 060',
+  phoneHref: 'tel:+34633586060',
   github: 'https://github.com/villarrubi',
   linkedin: 'https://www.linkedin.com/in/alejandro-villarrubia-garc%C3%ADa-3078892b9/',
   location: 'Palencia, España',

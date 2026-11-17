@@ -35,3 +35,25 @@ optOut.motion.setEnabled(true);optOut.restore();
 assert.equal(optOut.motion.matches,true,'Restoring an explicit opt-out preserves that URL');
 assert.equal(visit({reduced:true,search:'?motion=on'}).motion.matches,false,'motion=on still works');
 console.log('PASS: project motion on by default for every visit, reload, history return and OS preference; manual pause and ?motion=off.');
+
+// Decorative backgrounds have an independent, accessible pause control.
+const ambientSource=await readFile(new URL('../public/ambient-motion.js',import.meta.url),'utf8');
+function ambientVisit({reduced=false,search=''}={}){
+ const classes=new Set(),events=new Map(),preference=new EventTarget();preference.matches=reduced;
+ const control={dataset:{pause:'Pause background',resume:'Animate background'},addEventListener:(_,fn)=>{control.click=fn;}};
+ const root={classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}};
+ const doc={documentElement:root,hidden:false,querySelectorAll:()=>[{classList:{add(){}}}],querySelector:()=>control,addEventListener:(name,fn)=>events.set(name,fn)};
+ runInNewContext(ambientSource,{document:doc,window:{},location:{search},URLSearchParams,matchMedia:()=>preference,addEventListener:(name,fn)=>events.set(name,fn)});
+ return {classes,control,preference,doc,events};
+}
+const ambient=ambientVisit();
+assert(ambient.classes.has('ambient-enabled'));
+ambient.control.click();assert(!ambient.classes.has('ambient-enabled'));assert.equal(ambient.control.textContent,'Animate background');
+ambient.control.click();assert(ambient.classes.has('ambient-enabled'));
+ambient.doc.hidden=true;ambient.events.get('visibilitychange')();assert(!ambient.classes.has('ambient-enabled'));
+ambient.doc.hidden=false;ambient.events.get('visibilitychange')();assert(ambient.classes.has('ambient-enabled'));
+ambient.preference.matches=true;ambient.preference.dispatchEvent(new Event('change'));
+assert(!ambient.classes.has('ambient-enabled'));assert(ambient.control.hidden);
+assert(!ambientVisit({reduced:true}).classes.has('ambient-enabled'));
+assert(!ambientVisit({search:'?motion=off'}).classes.has('ambient-enabled'));
+console.log('PASS: background pause/resume, hidden-tab suspension, reduced motion, and explicit motion opt-out.');

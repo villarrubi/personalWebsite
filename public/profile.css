@@ -38,3 +38,33 @@
 .experience-actions{flex-wrap:wrap;row-gap:12px}
 .experience-actions>a{white-space:nowrap}
 @media(max-width:760px){.experience-layout{padding-block:30px 36px}}
+
+/* Drifting light fields use only transform/opacity; text stays on a separate layer. */
+.about-section.about-journal,.contact-section.contact-compact{position:relative;isolation:isolate}
+.about-journal>.container,.contact-compact>.container{position:relative;z-index:1}
+.ambient-field{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;opacity:.8;contain:paint}
+.ambient-field>i{position:absolute;display:block;width:75%;height:180%;left:-20%;top:-45%;border-radius:50%;background:radial-gradient(ellipse,#42a5ae48 0%,#34758824 35%,transparent 68%);animation:ambient-drift 14s ease-in-out infinite alternate;animation-play-state:paused}
+.ambient-field>i:nth-child(2){left:45%;top:-35%;width:85%;background:radial-gradient(ellipse,#477fd85c 0%,#234b9529 37%,transparent 68%);animation-name:ambient-return;animation-duration:19s;animation-delay:-7s}
+.ambient-field>i:nth-child(3){left:20%;top:-80%;width:60%;background:radial-gradient(ellipse,#8bc9cf2b 0%,transparent 65%);animation-duration:11s;animation-delay:-4s}
+.ambient-field>span{position:absolute;width:90%;height:140%;left:12%;top:-25%;border:1px solid #8bc9cf22;border-radius:50%;transform:rotate(-22deg);animation:ambient-orbit 22s ease-in-out infinite alternate;animation-play-state:paused}
+.ambient-enabled .ambient-in-view>i,.ambient-enabled .ambient-in-view>span{animation-play-state:running}
+.about-journal>.ambient-field{opacity:.45}
+.contact-compact>.ambient-field{opacity:.7}
+.ambient-toggle{position:absolute;right:24px;bottom:6px;z-index:4;border:0;background:none;color:#9eb4c7;font-size:10px;min-height:32px;padding:6px 10px;cursor:pointer}
+.ambient-toggle:hover{color:var(--accent)}
+.about-tools dl>div{border-radius:4px;transition:background .25s ease,color .25s ease}
+.about-tools dl>div:hover{background:#8bc9cf0a}
+.about-tools dl>div.reveal-ready{transition:opacity .65s ease,transform .65s ease,background .25s ease}
+.about-tools dl>div.reveal-ready:nth-child(2){transition-delay:.09s}
+.about-tools dl>div.reveal-ready:nth-child(3){transition-delay:.18s}
+.contact-compact .contact-bottom{flex-wrap:wrap;gap:16px 24px}
+.contact-phone{display:flex;align-items:center;gap:9px;min-height:44px;font-size:14px;white-space:nowrap;color:#d0dce7}
+.contact-phone>span:first-child{font-size:10px;color:#a1b6c8}
+.contact-phone>span:last-child{color:var(--accent);transition:transform .2s}
+.contact-phone:hover{color:var(--accent)}
+.contact-phone:hover>span:last-child{transform:translate(2px,-2px)}
+@keyframes ambient-drift{from{transform:translate3d(-6%,-3%,0) rotate(-12deg) scale(.9);opacity:.6}to{transform:translate3d(35%,12%,0) rotate(18deg) scale(1.15);opacity:1}}
+@keyframes ambient-return{from{transform:translate3d(12%,8%,0) rotate(15deg) scale(1.1);opacity:.7}to{transform:translate3d(-30%,-9%,0) rotate(-15deg) scale(.9);opacity:1}}
+@keyframes ambient-orbit{from{transform:translate3d(-5%,0,0) rotate(-22deg)}to{transform:translate3d(6%,6%,0) rotate(-5deg)}}
+@media(max-width:600px){.ambient-field{opacity:.65}.ambient-toggle{right:8px;bottom:0;font-size:9px}.contact-phone{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.ambient-field>i,.ambient-field>span{animation:none!important}.ambient-toggle{display:none}.about-tools dl>div.reveal-ready{transition:none}}

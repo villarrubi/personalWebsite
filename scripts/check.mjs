@@ -44,7 +44,7 @@ for(const path of pages){
   assert(!html.includes(`id="project-info-${p.id}"`),`Unpublished project dialog: ${p.id} in ${path}`);
  }
  for(const [,href] of html.matchAll(/(?:href|src)="([^"#]+)(?:#[^"]*)?"/g)){
-  if(/^(https?:|mailto:|data:)/.test(href))continue;
+  if(/^(https?:|mailto:|tel:|data:)/.test(href))continue;
   if(basePath&&href.startsWith('/'))assert(href.startsWith(`/${basePath}/`),`URL must include deployment prefix: ${href}`);
   const pathname=href.split('?')[0];
   const local=basePath&&pathname.startsWith(`/${basePath}/`)?pathname.slice(basePath.length+1):pathname;
