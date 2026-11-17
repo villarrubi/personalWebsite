@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {contourPoint} from '../public/hero-contours.js';
+import {metalLight} from '../public/hero-metal.js';
 
 const source=(await readFile(new URL('../public/scene-motion.js',import.meta.url),'utf8'))
  .replace('export const sceneMotion=', 'const sceneMotion=globalThis.motion=');
@@ -59,18 +59,15 @@ assert(!ambientVisit({reduced:true}).classes.has('ambient-enabled'));
 assert(!ambientVisit({search:'?motion=off'}).classes.has('ambient-enabled'));
 console.log('PASS: background pause/resume, hidden-tab suspension, reduced motion, and explicit motion opt-out.');
 
-// Contour deformation is local, continuous, and bounded at every screen size.
-for(const [width,height] of [[320,560],[768,470],[1600,420]])for(const time of [0,1,30,1000]){
- for(const u of [0,.4,1])for(const band of [0,.5,1]){
-  const result=contourPoint(u,band,time,width,height,{active:true,x:width*.4,y:height*.5});
-  assert(Number.isFinite(result.x)&&Number.isFinite(result.y));
-  assert(result.x>=0&&result.x<=width&&result.y>=3&&result.y<=height-3);
- }
+// Reflections follow the pointer while ambient drift stays inside safe bounds.
+for(const time of [0,1,30,1000])for(const x of [-100,-1,0,1,100,NaN])for(const y of [-100,-1,0,1,100,NaN]){
+ const light=metalLight(x,y,time);
+ assert(Number.isFinite(light.x)&&Number.isFinite(light.y));
+ assert(Math.abs(light.x)<=.98&&Math.abs(light.y)<=.74);
 }
-const still=contourPoint(.4,.5,0,1000,500,{active:false});
-const nearby=contourPoint(.4,.5,0,1000,500,{active:true,x:still.x,y:still.y});
-assert(still.y-nearby.y>35,'The pointer visibly bends the local contour');
-assert.equal(nearby.x,still.x,'The curves remain continuous horizontally');
-assert.deepEqual(contourPoint(.4,.5,0,1000,500,{active:true,x:-1000,y:-1000}),still,'Distant pointers have no effect');
-assert.deepEqual(contourPoint(.4,.5,0,1000,500,{active:true,x:still.x,y:still.y,strength:0}),still,'A faded pointer restores the original contour');
-console.log('PASS: flowing contours deform locally, recover smoothly, and stay inside the canvas.');
+const left=metalLight(-1,0,0),right=metalLight(1,0,0);
+assert(right.x-left.x>1.6,'Moving across the hero sweeps the reflected light across the metal');
+assert(metalLight(0,-1,0).y>metalLight(0,1,0).y,'Screen Y maps to the shader lighting axis');
+assert.deepEqual(metalLight(100,100,0),metalLight(1,1,0),'Out-of-bounds pointers cannot overshoot');
+assert.notDeepEqual(metalLight(0,0,0),metalLight(0,0,5),'Reflections also drift without pointer input');
+console.log('PASS: metal reflections follow the pointer, drift over time, and remain bounded.');
