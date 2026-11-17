@@ -75,6 +75,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .detail-visual .project-art{box-shadow:0 40px 90px -50px #000}
 
 @keyframes hero-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+/* Short entrances leave layout and the shared closing background stationary. */
+@media(prefers-reduced-motion:no-preference){
+ .scroll-enter{animation:section-arrive .65s cubic-bezier(.22,1,.36,1) both}
+ .scroll-enter:focus-within{animation:none}
+ .career-deck .career-entry.scroll-enter{animation:none}
+}
+@keyframes section-arrive{from{opacity:.25;transform:translateY(24px)}to{opacity:1;transform:none}}
 @keyframes hero-fade{from{opacity:0}to{opacity:1}}
 @keyframes scroll-cue{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
 

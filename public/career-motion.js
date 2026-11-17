@@ -21,6 +21,8 @@ if(timeline){
  const nextButton=controls.querySelector('[data-career-next]');
  const heading=section.querySelector('.career-heading');
  const preference=matchMedia('(prefers-reduced-motion: reduce)');
+ const motionOff=new URLSearchParams(location.search).get('motion')==='off';
+ section.classList.toggle('career-motion-off',motionOff);
  const es=document.documentElement.lang==='es';
  const titles=cards.map(card=>`${card.querySelector('time').textContent} · ${card.querySelector('h3').textContent}`);
  let enabled=false,active=-1,frame=0,visible=true,top=98,step=130,start=0,measuring=false;
@@ -28,6 +30,7 @@ if(timeline){
  function select(index){
   if(index===active)return;
   const previous=cards[active];
+  cards[index].style.setProperty('--card-enter-y',index<active?'-24px':'24px');
   if(previous?.contains(document.activeElement))document.activeElement.blur();
   cards.forEach((card,i)=>{card.hidden=i!==index;card.classList.toggle('is-active',i===index);});
   steps.forEach((button,i)=>{if(i===index)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');});
@@ -66,7 +69,7 @@ if(timeline){
   section.classList.add('career-deck','is-measuring');
   const cardHeight=Math.max(...cards.map(card=>card.offsetHeight));
   const required=heading.offsetHeight+cardHeight+controls.offsetHeight+24;
-  enabled=canUseViewer({height:required,availableHeight:available,reducedMotion:preference.matches});
+  enabled=canUseViewer({height:required,availableHeight:available,reducedMotion:preference.matches||motionOff});
   section.classList.remove('is-measuring');
   section.style.setProperty('--card-height',`${cardHeight}px`);
   section.style.setProperty('--career-travel',`${step*(cards.length-1)}px`);

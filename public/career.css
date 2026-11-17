@@ -68,3 +68,11 @@
 @media(max-width:760px){.career-deck{height:calc(var(--viewer-height) + var(--career-travel) + 58px)}.career-deck .career-heading>div{display:flex;gap:14px}.career-deck .career-heading>div>p{display:none}.career-deck .career-heading h2{font-size:28px}.career-deck .career-scroll-hint{margin-top:8px}.career-continuation{gap:10px;flex-wrap:wrap}.career-continuation>p{font-size:11px;min-width:130px}.career-continuation>button{padding-inline:10px}.career-steps{gap:5px}}
 
 .career-deck.is-measuring .career-entry{height:auto}
+
+/* Animate each selected page independently of its scroll-linked transform. */
+@media(prefers-reduced-motion:no-preference){
+ .career-deck:not(.is-measuring):not(.career-motion-off) .career-entry.is-active{animation:career-card-arrive .42s cubic-bezier(.22,1,.36,1) both}
+ .career-deck:not(.is-measuring):not(.career-motion-off) .career-entry.is-active .career-content{animation:career-copy-arrive .42s ease-out both}
+}
+@keyframes career-card-arrive{from{translate:0 var(--card-enter-y,24px)}to{translate:0 0}}
+@keyframes career-copy-arrive{from{opacity:.55}to{opacity:1}}

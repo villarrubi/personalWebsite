@@ -21,15 +21,21 @@ const languageLink=document.querySelector('.language-switch');
 languageLink?.addEventListener('click',()=>{if(!location.pathname.includes('/projects/')&&location.hash)languageLink.hash=location.hash;});
 
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
-if('IntersectionObserver'in window&&!reduceMotion.matches){
+if('IntersectionObserver'in window&&!reduceMotion.matches&&new URLSearchParams(location.search).get('motion')!=='off'){
  const revealObserver=new IntersectionObserver(entries=>{
-  for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('is-visible');revealObserver.unobserve(entry.target);}
- },{threshold:.06});
- // Keep the closing biography and contact visible throughout the scroll.
- for(const element of document.querySelectorAll('.project-card,.about-layout,.section-heading')){
-  if(element.getBoundingClientRect().top>innerHeight){element.classList.add('reveal-ready');revealObserver.observe(element);}
+  for(const entry of entries){
+   if(!entry.isIntersecting||entry.target.matches('.career-deck .career-entry'))continue;
+   entry.target.classList.add('scroll-enter');
+   revealObserver.unobserve(entry.target);
+  }
+ },{threshold:0,rootMargin:'0px 0px -24px 0px'});
+ // Animate coherent blocks once. Content stays readable before observation,
+ // on direct anchor visits, and if enhancement is unavailable.
+ for(const element of document.querySelectorAll('.project-card,.about-layout,.section-heading,.career-heading,.career-entry,.about-note,.about-tools,.contact-compact>.container')){
+  if(element.hidden||element.getBoundingClientRect().top>=innerHeight)revealObserver.observe(element);
  }
- reduceMotion.addEventListener('change',()=>{if(reduceMotion.matches){document.querySelectorAll('.reveal-ready').forEach(el=>el.classList.add('is-visible'));revealObserver.disconnect();}});
+ document.addEventListener('animationend',event=>{if(event.animationName==='section-arrive')event.target.classList.remove('scroll-enter');});
+ reduceMotion.addEventListener('change',()=>{if(reduceMotion.matches){document.querySelectorAll('.scroll-enter').forEach(el=>el.classList.remove('scroll-enter'));revealObserver.disconnect();}});
 }
 
 import './intro.js';
