@@ -6,8 +6,10 @@ export function experienceHero(lang) {
  return `<section id="home" class="hero experience-hero" aria-labelledby="hero-name">
   <div class="experience-atmosphere" aria-hidden="true"></div>
   ${ambientBackground()}
+  <canvas class="hero-network" aria-hidden="true"></canvas>
   <div class="experience-layout container">
    <div class="experience-copy">
+    <a class="hero-language-banner" href="/${es?'en':'es'}/" hreflang="${es?'en':'es'}" lang="${es?'en':'es'}"><span>${es?'English version available':'También disponible en español'}</span><strong>${es?'View in English':'Ver en español'} <span aria-hidden="true">↗</span></strong></a>
     <p class="experience-eyebrow">${es?'INGENIERO INFORMÁTICO':'SOFTWARE ENGINEER'} <span class="eyebrow-rule"></span> PALENCIA, ES</p>
     <h1 id="hero-name" class="experience-name">Alejandro <em>Villarrubia.</em></h1>
     <p class="experience-intro">${es?'La curiosidad toma forma.':'Curiosity takes shape.'}</p>
