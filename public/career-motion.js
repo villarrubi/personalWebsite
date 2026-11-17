@@ -1,12 +1,13 @@
-// Passive scroll enhancement: native document scrolling, with a readable list fallback.
-export function cardCover(nextTop, pinnedTop, height) {
- if (![nextTop,pinnedTop,height].every(Number.isFinite) || height <= 0) return 0;
- return Math.min(1,Math.max(0,1-(nextTop-pinnedTop)/height));
+// Native scrolling selects a single visible card; the list remains the fallback.
+export function activeCardIndex(offsets, progress) {
+ if (!offsets.length || !Number.isFinite(progress)) return 0;
+ let index=0;
+ while(index+1<offsets.length && progress>=offsets[index+1])index++;
+ return index;
 }
 
-export function canStackCards({heights,top,gap,viewportHeight,reducedMotion,focused,expanded}) {
- return heights.length>1&&!reducedMotion&&!focused&&!expanded&&
-  heights.every((height,index)=>height>0&&height+top+gap*index+24<viewportHeight);
+export function canStackCards({heights,top,viewportHeight,reducedMotion}) {
+ return heights.length>1&&!reducedMotion&&heights.every(height=>height>0&&height+top+24<viewportHeight);
 }
 
 const timeline=typeof document!=='undefined' ? document.querySelector('.career-timeline') : null;
@@ -14,30 +15,36 @@ if(timeline){
  const cards=[...timeline.children];
  const section=timeline.closest('.career-section');
  const preference=matchMedia('(prefers-reduced-motion: reduce)');
- let frame=0,visible=true,enabled=false,pinTop=100,gap=7;
- const reset=()=>cards.forEach(card=>card.style.removeProperty('--card-cover'));
+ let frame=0,visible=true,enabled=false,pinTop=100,offsets=[],active=-1;
+ function select(index){
+  if(index===active)return;
+  cards.forEach((card,i)=>card.classList.toggle('is-active',i===index));
+  active=index;
+ }
  function paint(){
   frame=0;
   if(!enabled||!visible||document.hidden)return;
-  const positions=cards.map(card=>card.getBoundingClientRect().top);
-  cards.forEach((card,index)=>{
-   const cover=index===cards.length-1?0:cardCover(positions[index+1],pinTop+gap*(index+1),card.offsetHeight);
-   card.style.setProperty('--card-cover',cover.toFixed(3));
-  });
+  // Use natural row positions, independent of their sticky rendered positions.
+  const index=activeCardIndex(offsets,pinTop-timeline.getBoundingClientRect().top);
+  if(index!==active && cards[active]?.contains(document.activeElement))document.activeElement.blur();
+  select(index);
  }
  function schedule(){if(enabled&&visible&&!document.hidden&&!frame)frame=requestAnimationFrame(paint);}
  function measure(){
   pinTop=(document.querySelector('.site-header')?.offsetHeight||70)+14;
-  gap=innerWidth<=600?5:7;
   timeline.style.setProperty('--stack-top',`${pinTop}px`);
-  timeline.style.setProperty('--stack-gap',`${gap}px`);
-  const focused=timeline.contains(document.activeElement);
-  enabled=canStackCards({heights:cards.map(card=>card.offsetHeight),top:pinTop,gap,viewportHeight:innerHeight,
-   reducedMotion:preference.matches,focused,expanded:!!timeline.querySelector('details[open]')});
-  timeline.classList.toggle('career-stacked',enabled);
+  // Removing the enhancement briefly gives the true flow offsets, even on resize.
+  timeline.classList.remove('career-stacked');
+  offsets=cards.map(card=>card.offsetTop);
+  enabled=canStackCards({heights:cards.map(card=>card.offsetHeight),top:pinTop,viewportHeight:innerHeight,reducedMotion:preference.matches});
+  if(enabled){
+   select(activeCardIndex(offsets,pinTop-timeline.getBoundingClientRect().top));
+   timeline.classList.add('career-stacked');
+  }else{
+   cancelAnimationFrame(frame);frame=0;
+   cards.forEach(card=>card.classList.remove('is-active'));active=-1;
+  }
   section.classList.toggle('has-card-stack',enabled);
-  if(!enabled){cancelAnimationFrame(frame);frame=0;reset();}
-  else schedule();
  }
  addEventListener('scroll',schedule,{passive:true});
  addEventListener('resize',measure,{passive:true});
@@ -46,11 +53,13 @@ if(timeline){
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else measure();});
  timeline.addEventListener('toggle',measure,true);
  timeline.addEventListener('focusin',event=>{
-  measure();
-  // Unstack before reading a focused disclosure, including keyboard navigation.
-  event.target.scrollIntoView({block:'nearest',behavior:'instant'});
+  if(!enabled)return;
+  const index=cards.findIndex(card=>card.contains(event.target));
+  if(index<0 || index===active)return;
+  // Keyboard focus reveals the requested card without exposing its neighbours.
+  select(index);
+  scrollTo({top:scrollY+timeline.getBoundingClientRect().top+offsets[index]-pinTop,behavior:'instant'});
  });
- timeline.addEventListener('focusout',()=>queueMicrotask(measure));
  if('IntersectionObserver'in window){
   new IntersectionObserver(entries=>{
    visible=entries[0].isIntersecting;
