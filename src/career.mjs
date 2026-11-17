@@ -1,6 +1,66 @@
 import {copy, publishedProjects} from './content.mjs';
 
-// Dates and responsibilities are taken from the CV sources in cv/.
+// Early milestones and the master's year follow the author's corrections.
+// Professional dates and responsibilities are taken from the CV sources in cv/.
+const learning = [
+ {
+  company: {es: 'Primeros pasos', en: 'First steps'}, start: '2018',
+  period: {es: '2018', en: '2018'},
+  role: {es: 'Descubrir la lógica de programar', en: 'Discovering programming logic'},
+  summary: {
+   es: 'Empecé a programar con herramientas como Scratch y RoboMind. Entre bloques, instrucciones y pequeños retos, descubrí cómo convertir una idea en una secuencia de pasos.',
+   en: 'I started programming with tools such as Scratch and RoboMind. Through blocks, instructions, and small challenges, I discovered how to turn an idea into a sequence of steps.',
+  },
+  points: {
+   es: ['Los bucles, las condiciones y el ensayo y error me ayudaron a entender la lógica de la programación: dividir un problema, probar una solución y aprender de lo que no funcionaba.'],
+   en: ['Loops, conditions, and trial and error helped me understand programming logic: breaking down a problem, testing a solution, and learning from what did not work.'],
+  },
+  tags: ['Scratch', 'RoboMind'],
+ },
+ {
+  company: {es: 'Aprendizaje autodidacta', en: 'Self-directed learning'}, start: '2019',
+  period: {es: '2019', en: '2019'},
+  role: {es: 'De los bloques a C++', en: 'From blocks to C++'},
+  summary: {
+   es: 'Di el salto a C++ por mi cuenta, escribiendo programas sencillos y familiarizándome con variables, funciones y estructuras de control.',
+   en: 'I moved on to C++ on my own, writing simple programs and getting familiar with variables, functions, and control flow.',
+  },
+  points: {
+   es: ['Empecé a conectar el código con las matemáticas y la programación lineal: expresar un problema mediante variables y restricciones, y pensar cómo buscar una solución.'],
+   en: ['I began connecting code with mathematics and linear programming: expressing a problem through variables and constraints, and thinking about how to find a solution.'],
+  },
+  tags: ['C++'],
+ },
+ {
+  company: 'Universidad Europea Miguel de Cervantes · UEMC', start: '2021', end: '2026',
+  period: {es: '2021 — 2026', en: '2021 — 2026'},
+  role: {es: 'Grado en Ingeniería Informática', en: 'Degree in Computer Engineering'},
+  summary: {
+   es: 'En 2021 entré en la carrera de Informática. Lo que había empezado como curiosidad fue tomando forma con una base más amplia y una manera más estructurada de abordar los problemas.',
+   en: 'In 2021, I started my Computer Engineering degree. What began as curiosity took shape through broader foundations and a more structured approach to solving problems.',
+  },
+  points: {
+   es: ['Profundicé en bases de datos, estructuras de datos y algoritmos, aprendiendo a organizar la información y a elegir cómo procesarla.', 'El diseño de software, los diagramas y el modelado me ayudaron a planificar antes de programar y a construir soluciones más claras, mantenibles y conectadas entre sí.'],
+   en: ['I explored databases, data structures, and algorithms, learning how to organise information and choose how to process it.', 'Software design, diagrams, and modelling helped me plan before coding and build clearer, more maintainable, interconnected solutions.'],
+  },
+  tags: ['SQL', 'UML'],
+ },
+ {
+  company: 'Microsoft · Founderz', start: '2024',
+  period: {es: '2024', en: '2024'},
+  role: {es: 'Máster en Inteligencia Artificial e Innovación', en: 'Master’s in Artificial Intelligence and Innovation'},
+  summary: {
+   es: 'Amplié mi formación con el máster en Inteligencia Artificial e Innovación, acercando mi interés por la tecnología a las posibilidades de la IA.',
+   en: 'I expanded my education with a master’s programme in Artificial Intelligence and Innovation, connecting my interest in technology with the possibilities of AI.',
+  },
+  points: {
+   es: ['Una oportunidad para explorar cómo aplicar estas herramientas a problemas concretos y pensar en nuevas formas de desarrollar ideas y proyectos.'],
+   en: ['An opportunity to explore how these tools can address practical problems and open up new ways of developing ideas and projects.'],
+  },
+  tags: [],
+ },
+];
+
 const experience = [
  {
   company: 'ALTEN Spain', client: 'MAHLE', current: true,
@@ -50,41 +110,35 @@ const experience = [
 export function careerSection(lang) {
  const es = lang === 'es', c = copy[lang];
  const thesisPublished = publishedProjects.some(project => project.id === 'phishing');
+ const milestones = [...learning, ...experience].sort((a,b)=>a.start.localeCompare(b.start));
  return `<section id="career" class="career-section container" aria-labelledby="career-title">
   <div class="section-heading career-heading">
-   <div><p class="eyebrow">02 / ${es?'TRAYECTORIA':'CAREER'}</p><h2 id="career-title">${es?'Del software<br>al mundo físico.':'From software<br>to the physical world.'}</h2></div>
-   <p>${es?'Mi recorrido entre desarrollo, integración de sistemas e ingeniería aplicada.':'My path through software development, systems integration, and applied engineering.'}</p>
+   <div><p class="eyebrow">02 / ${es?'TRAYECTORIA':'CAREER'}</p><h2 id="career-title">${es?'Todo empezó<br>con curiosidad.':'It all started<br>with curiosity.'}</h2></div>
+   <p>${es?'De mis primeros programas en 2018 a la ingeniería de software y los sistemas físicos. Un recorrido de aprendizaje, paso a paso.':'From my first programs in 2018 to software engineering and physical systems. A learning journey, one step at a time.'}</p>
   </div>
   <div class="career-layout">
    <div class="career-experience">
-    <h3 class="eyebrow career-label">${es?'EXPERIENCIA PROFESIONAL':'PROFESSIONAL EXPERIENCE'}</h3>
-    <ol class="career-timeline" reversed>
-     ${experience.map(job=>`<li class="career-entry${job.current?' is-current':''}">
+    <h3 class="eyebrow career-label">${es?'APRENDIZAJE Y EXPERIENCIA':'LEARNING AND EXPERIENCE'}</h3>
+    <ol class="career-timeline">
+     ${milestones.map(job=>`<li class="career-entry${job.current?' is-current':''}">
       <article>
-       <div class="career-meta"><p class="career-period"><time datetime="${job.start}">${job.period[lang].split(' — ')[0]}</time> — ${job.end?`<time datetime="${job.end}">${job.period[lang].split(' — ')[1]}</time>`:es?'actualidad':'present'}</p>${job.current?`<span class="career-current">${es?'Ahora':'Now'}</span>`:''}</div>
-       <p class="career-company">${job.company}${job.client?` <span> / ${es?'para':'for'} ${job.client}</span>`:''}</p>
+       <div class="career-meta"><p class="career-period"><time datetime="${job.start}">${job.period[lang].split(' — ')[0]}</time>${job.end?` — <time datetime="${job.end}">${job.period[lang].split(' — ')[1]}</time>`:job.current?` — ${es?'actualidad':'present'}`:''}</p>${job.current?`<span class="career-current">${es?'Ahora':'Now'}</span>`:''}</div>
+       <p class="career-company">${typeof job.company==='string'?job.company:job.company[lang]}${job.client?` <span> / ${es?'para':'for'} ${job.client}</span>`:''}</p>
        <h4>${job.role[lang]}</h4>
        <p class="career-summary">${job.summary[lang]}</p>
        <ul class="career-points">${job.points[lang].map(point=>`<li>${point}</li>`).join('')}</ul>
-       <ul class="career-tags" aria-label="${es?'Áreas y herramientas':'Areas and tools'}">${job.tags.map(tag=>`<li>${tag}</li>`).join('')}</ul>
+       ${job.tags.length?`<ul class="career-tags" aria-label="${es?'Áreas y herramientas':'Areas and tools'}">${job.tags.map(tag=>`<li>${tag}</li>`).join('')}</ul>`:''}
       </article>
      </li>`).join('')}
     </ol>
    </div>
    <aside class="career-education" aria-labelledby="education-title">
-    <h3 class="eyebrow career-label" id="education-title">${es?'FORMACIÓN':'EDUCATION'}</h3>
+    <h3 class="eyebrow career-label" id="education-title">${es?'DEL APRENDIZAJE A LA PRÁCTICA':'PUTTING LEARNING INTO PRACTICE'}</h3>
     <div class="education-entry">
-     <p class="career-period"><time datetime="2021">2021</time> — <time datetime="2026">2026</time></p>
-     <h4>${es?'Grado en Ingeniería Informática':'Degree in Computer Engineering'}</h4>
-     <p>Universidad Europea Miguel de Cervantes <span>(UEMC)</span></p>
-     <p class="education-note">${es?'TFG sobre detección de phishing en correo electrónico con heurísticas y aprendizaje automático.':'Final-year project on email phishing detection using heuristics and machine learning.'}</p>
+     <h4>${es?'Detectar el engaño con código.':'Detecting deception with code.'}</h4>
+     <p>${es?'Mi Trabajo de Fin de Grado reúne programación, análisis de datos e inteligencia artificial en un detector de phishing para correo electrónico.':'My final-year project brings together programming, data analysis, and artificial intelligence in an email phishing detector.'}</p>
+     <p class="education-note">${es?'Heurísticas y aprendizaje automático aplicados a un problema real.':'Heuristics and machine learning applied to a real problem.'}</p>
      ${thesisPublished?`<a class="career-text-link" href="/${lang}/projects/phishing/">${es?'Explorar el TFG':'Explore the final-year project'} <span aria-hidden="true">↗</span></a>`:''}
-    </div>
-    <div class="education-entry">
-     <p class="career-period"><time datetime="2025">2025</time></p>
-     <h4>${es?'Máster en Inteligencia Artificial e Innovación':'Master’s in Artificial Intelligence and Innovation'}</h4>
-     <p>Microsoft · Founderz</p>
-     <p class="education-note">${es?'Formación de posgrado.':'Postgraduate training.'}</p>
     </div>
     <div class="career-languages"><h4>${es?'Idiomas':'Languages'}</h4><p>${es?'Español nativo · Inglés B2':'Native Spanish · English B2'}<br><span>Cambridge B2 First</span></p></div>
     <a class="button secondary career-cv" href="${c.cvPath}" target="_blank" rel="noopener">${c.cv}<span aria-hidden="true">↓</span></a>
