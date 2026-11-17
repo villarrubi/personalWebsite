@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {circuitPaths} from '../public/intro-circuit.js';
+import {circuitPaths,circuitDetails} from '../public/intro-circuit.js';
 
 const source=(await readFile(new URL('../public/intro.js',import.meta.url),'utf8')).replace("import {createCircuit} from './intro-circuit.js';",'');
 function visit({search='',lang='es',reduced=false,home=true,hidden=false,canvas=true,renderFails=false,offscreen=false}={}){
@@ -87,6 +87,9 @@ const anchored=visit({offscreen:true});anchored.tick();released(anchored);
 for(const [width,height] of [[320,568],[390,844],[844,390],[1440,900]]){
  const targets=Array.from({length:96},(_,i)=>({x:width*(.15+.7*(i%12)/11),y:height*(.2+.3*Math.floor(i/12)/7)}));
  const paths=circuitPaths(width,height,targets);
+ const details=circuitDetails(paths,width,height);
+ assert.equal(details.length,96,'Each main trace has two secondary branches');
+ assert(details.every(detail=>detail.points.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y))));
  assert.equal(paths.length,48);
  assert(new Set(paths.map(p=>`${p.points.at(-1).x},${p.points.at(-1).y}`)).size>24,'Traces end at distributed letters, not a shared hub');
  for(const path of paths){

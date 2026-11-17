@@ -6,6 +6,12 @@ html{scrollbar-gutter:stable}
 .intro-playing .experience-hero>:not(.experience-layout),
 .intro-playing .experience-copy>:not(.experience-name):not(.experience-intro){opacity:var(--intro-rest,0)!important;transition:none!important}
 .intro-playing .experience-name,.intro-playing .experience-intro{opacity:var(--intro-text,0)!important;transition:none!important}
+/* Unfold the surrounding interface in layers, without translating the heading. */
+.intro-playing .site-header{opacity:clamp(0,calc(var(--intro-rest,0)*1.7),1)!important}
+.intro-playing .experience-copy>.experience-eyebrow{opacity:clamp(0,calc(var(--intro-rest,0)*1.6),1)!important}
+.intro-playing .experience-copy>.experience-description{opacity:clamp(0,calc(var(--intro-rest,0)*1.6 - .15),1)!important}
+.intro-playing .experience-copy>.experience-actions{opacity:clamp(0,calc(var(--intro-rest,0)*1.8 - .35),1)!important}
+.intro-playing #main>:not(.experience-hero){opacity:clamp(0,calc(var(--intro-rest,0)*1.9 - .55),1)!important}
 .code-intro{position:fixed;inset:0;z-index:200;color:#eee9dd;overflow:hidden;isolation:isolate}
 .intro-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
 .intro-skip{position:absolute;bottom:45px;right:4%;background:#061327a6;color:#c0cfd9;border:1px solid #c1d1e42b;border-radius:30px;padding:12px 20px;font-size:11px;min-height:44px;display:flex;gap:35px;align-items:center;z-index:4}
