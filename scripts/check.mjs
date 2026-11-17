@@ -105,12 +105,14 @@ for(const count of [1,20,50,100])for(const [width,height,capacity] of [[338,443,
  assert.deepEqual(seen,items.map(item=>item.id),'Every project appears in a constellation');
 }
 // Follow several complete turns, including the loop seams and tight mobile layouts.
-for(const [width,height,count] of [[338,443,4],[640,443,6],[1324,650,9],[1324,650,6]]){
+for(const [width,height,count] of [[338,443,4],[640,443,6],[1324,650,9],[1324,650,6],[300,478,3],[366,478,3],[752,465,4],[595,635,3],[893,635,4],[1190,860,6]]){
  const paths=createOrbitPaths(layoutPlanets(Array.from({length:count},(_,id)=>({id})),width,height),width,height);
  for(const path of paths){
   const points=Array.from({length:120},(_,i)=>orbitPoint(path,path.period*i/120));
   assert(Math.min(...points.map(p=>p.x))<width/2&&Math.max(...points.map(p=>p.x))>width/2,'Each project orbits across both sides of the centre');
   assert(Math.min(...points.map(p=>p.y))<height/2&&Math.max(...points.map(p=>p.y))>height/2,'Each project completes the upper and lower orbit');
+  assert(Math.max(...points.map(p=>p.depth))-Math.min(...points.map(p=>p.depth))>9,'The object travels through depth instead of a flat plane');
+  assert(Math.max(...points.map(p=>p.size))/Math.min(...points.map(p=>p.size))>1.2,'Foreground objects gain visual scale');
  }
  const velocities=paths.map(p=>{const a=orbitPoint(p,0),b=orbitPoint(p,.1);return {x:b.x-a.x,y:b.y-a.y};});
  assert(velocities.some(v=>v.x>0)&&velocities.some(v=>v.x<0),'Objects follow different directions around the centre instead of translating together');

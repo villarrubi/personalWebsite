@@ -1,0 +1,77 @@
+/* A gallery within the orbital scene: a readable project and a spacious constellation. */
+.orbit-gallery{--focus-color:#a9c8e0;--solar-height:clamp(880px,100svh,1080px);height:var(--solar-height);border-top:0;isolation:isolate}
+.orbit-gallery:after{background:linear-gradient(90deg,#061327 0%,#061327ed 22%,#06132755 41%,transparent 68%),linear-gradient(0deg,#061327,transparent 18%,transparent 82%,#061327);z-index:1}
+.orbit-gallery:before{content:'';position:absolute;width:56%;height:60%;right:2%;top:20%;border-radius:50%;background:radial-gradient(ellipse,color-mix(in srgb,var(--focus-color) 12%,transparent),transparent 65%);filter:blur(35px);z-index:1;pointer-events:none;transition:background .6s}
+.orbit-gallery .solar-heading{left:5%;right:auto;top:46px;width:27%;z-index:3}
+.orbit-gallery .solar-heading .eyebrow{font-size:9px;margin-bottom:20px;color:#b6c9d4;letter-spacing:.16em}
+.orbit-gallery .solar-heading h2{font-size:clamp(52px,5.2vw,80px);line-height:.96;max-width:340px;letter-spacing:-.045em}
+.orbit-gallery .solar-heading h2 em{display:block;color:#b9d4dd}
+.orbit-gallery .solar-description{font-size:12px;line-height:1.6;max-width:270px;margin-top:17px;color:#91a7bb}
+.orbit-gallery .solar-groups{top:53px;right:5%;gap:27px;z-index:4}
+.orbit-gallery .solar-groups button{font-size:12px}.orbit-gallery .solar-groups button span{font-size:9px}
+.orbit-gallery .solar-space{left:35%;right:3%;top:145px;bottom:100px;z-index:2}
+.orbit-gallery .cinematic-canvas{filter:saturate(.95)}
+.orbit-gallery .solar-footer{left:37%;right:5%;bottom:35px;min-height:42px}
+.orbit-gallery .solar-explore-hint{position:absolute;left:37%;top:116px;color:#839db2;z-index:3;font-size:9px;letter-spacing:.08em;pointer-events:none}
+.orbit-gallery .solar-core{display:none}
+.orbit-gallery .solar-orbits ellipse{stroke:#9fc1da;stroke-opacity:.21}
+.orbit-gallery .solar-orbits ellipse:nth-child(2){stroke-opacity:.1}
+.orbit-gallery .planet-label{margin-top:7px;gap:6px;text-shadow:0 2px 15px #020b1e;opacity:calc(.72 + var(--orbit-depth,.5)*.28)}
+.orbit-gallery .is-featured .planet-label{opacity:1}
+.orbit-gallery .planet-title{font-size:24px;line-height:1.12;color:#d2dce4;transition:color .3s}
+.orbit-gallery .planet-title>span{opacity:.55}
+.orbit-gallery .planet-category{font-size:10px;color:#8da6b9;line-height:1.4}
+.orbit-gallery .planet-node.is-featured{z-index:5}
+.orbit-gallery .planet-node.is-featured .planet-title{color:#fff6e6}
+.orbit-gallery .planet-node.is-featured .planet-title>span{opacity:1;color:var(--focus-color)}
+.orbit-gallery .planet-selection{display:inline-block;width:5px;height:5px;background:var(--focus-color);border-radius:50%;margin:0 7px 3px 0;box-shadow:0 0 10px var(--focus-color);opacity:0;transition:opacity .3s}
+.orbit-gallery .is-featured .planet-selection{opacity:1}
+.orbit-gallery:not(.cinematic-ready) .planet-node.is-featured .project-planet{scale:1.07;filter:drop-shadow(0 0 16px #9fd1e52b)}
+.solar-preview{position:absolute;top:310px;left:5%;width:27%;z-index:4;color:#e3e8e8}
+.solar-preview-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #a1bcc62b;padding-top:13px;margin-bottom:16px}
+.solar-preview-bar>span{display:flex;align-items:center;gap:8px;font-size:8px;letter-spacing:.16em;color:#a7bfc9;white-space:nowrap}
+.solar-preview-bar i{width:4px;height:4px;background:var(--focus-color);border-radius:50%;box-shadow:0 0 12px var(--focus-color)}
+.solar-preview-controls{display:flex;align-items:center;gap:3px}.solar-preview-controls[hidden]{display:none}
+.solar-preview-count{font-size:9px;color:#7994a8;font-variant-numeric:tabular-nums;margin-right:6px}
+.solar-preview-controls button{width:32px;height:32px;border:1px solid #9bb6c22b;background:#10263b75;border-radius:50%;font-size:17px;color:#b7cbd7}
+.solar-preview-controls button:hover{border-color:var(--focus-color);color:#fff}.solar-preview-controls button:disabled{opacity:.3;cursor:default}
+.solar-preview-image{position:relative;display:block;aspect-ratio:1.9;overflow:hidden;border:1px solid #b2d0dc30;border-radius:8px;background:#0b1f33;box-shadow:0 18px 55px -24px #0009;margin-bottom:21px}
+.solar-preview-image img{width:100%;height:100%;object-fit:cover;object-position:top;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.solar-preview-image:hover img{transform:scale(1.035)}
+.solar-preview-symbol{width:100%;height:100%;display:grid;place-items:center;color:var(--focus-color);background:radial-gradient(ellipse at 50% 60%,#96b5d41c,transparent 65%),linear-gradient(#a3bfd108 1px,transparent 1px),linear-gradient(90deg,#a3bfd108 1px,transparent 1px);background-size:auto,24px 24px,24px 24px}
+.solar-preview-symbol svg{width:70px;height:70px;filter:drop-shadow(0 8px 20px #83b5d52b)}
+.solar-preview-category{font-size:9px;line-height:1.5;color:var(--focus-color);letter-spacing:.04em;margin:0 0 8px}
+.solar-preview h3{font:400 clamp(28px,2.7vw,43px)/1.05 var(--serif);letter-spacing:-.025em;margin:0 0 12px;overflow-wrap:anywhere;color:#eeeee3}
+.solar-preview-summary{font-size:12px;line-height:1.7;color:#a5b5c3;margin:0;max-width:360px}
+.solar-preview-tags{display:flex;flex-wrap:wrap;gap:5px 12px;color:#7f9cad;font-size:9px;margin-top:15px}
+.solar-preview-link{display:flex;justify-content:space-between;align-items:center;gap:20px;border-bottom:1px solid #a4c4d042;padding:14px 0 10px;min-height:44px;font-size:12px;margin-top:10px;color:#e3e9e6}
+.solar-preview-link>span{font-size:21px;color:var(--focus-color);transition:transform .2s}
+.solar-preview-link:hover>span{transform:translate(3px,-3px)}
+@media(min-width:1700px){.orbit-gallery .solar-heading{top:65px}.solar-preview{top:345px;max-width:410px}.orbit-gallery .solar-space{top:120px;bottom:100px}.solar-preview-summary{font-size:14px}.solar-preview-image{aspect-ratio:1.8}}
+@media(max-width:1100px) and (min-width:901px){.orbit-gallery .solar-heading{width:29%;left:4%}.solar-preview{left:4%;width:29%;top:300px}.orbit-gallery .solar-space{left:35%;right:2%}.orbit-gallery .planet-title{font-size:20px}.solar-preview-summary{font-size:11px}.solar-preview-count{margin-right:0}.solar-preview-controls button{width:30px;height:30px}}
+@media(max-width:900px){
+ .orbit-gallery{--solar-height:1080px}
+ .orbit-gallery:after{background:linear-gradient(0deg,#061327,transparent 24%,transparent 75%,#061327),linear-gradient(90deg,#06132744,transparent 45%)}
+ .orbit-gallery .solar-heading{top:35px;left:6%;right:6%;width:auto}.orbit-gallery .solar-heading h2{font-size:58px;max-width:none}.orbit-gallery .solar-heading h2 em{display:inline}
+ .orbit-gallery .solar-heading .eyebrow{margin-bottom:15px}.orbit-gallery .solar-description{margin-top:12px;max-width:none;font-size:12px}
+ .orbit-gallery .solar-groups{top:211px;left:6%;right:auto;gap:30px}.orbit-gallery .solar-groups button{font-size:12px}
+ .orbit-gallery .solar-space{left:3%;right:3%;top:275px;bottom:340px}
+ .orbit-gallery .solar-explore-hint{display:none}
+ .solar-preview{top:auto;bottom:90px;left:6%;width:88%;max-width:none}
+ .solar-preview-bar{margin-bottom:12px;padding-top:9px}
+ .solar-preview-body{display:grid;grid-template-columns:115px minmax(0,1fr);gap:18px;align-items:start}
+ .solar-preview-image{aspect-ratio:1;margin:0;border-radius:6px}.solar-preview-image img{object-fit:cover;object-position:top left}.solar-preview-symbol svg{width:54px;height:54px}
+ .solar-preview h3{font-size:30px;margin-bottom:8px}.solar-preview-category{font-size:8px;margin-bottom:6px}
+ .solar-preview-summary{font-size:12px;line-height:1.5;max-width:none}.solar-preview-tags{display:none}.solar-preview-link{font-size:11px;padding:8px 0 5px;margin-top:6px;min-height:36px}
+ .orbit-gallery .solar-footer{left:6%;right:6%;bottom:25px}.orbit-gallery .solar-footer .space-motion-toggle{width:auto;padding:6px 12px}.orbit-gallery .motion-toggle-label{display:inline}
+ .orbit-gallery .planet-title{font-size:20px}.orbit-gallery .planet-label{margin-top:4px;gap:4px}.orbit-gallery .planet-category{font-size:9px}
+}
+@media(max-width:500px){
+ .orbit-gallery .solar-heading h2,html[lang=es] .orbit-gallery .solar-heading h2{font-size:clamp(42px,11.8vw,57px)}
+ .orbit-gallery .solar-heading .eyebrow{font-size:8px}.orbit-gallery .solar-description{max-width:270px;font-size:11px}
+ .orbit-gallery .solar-groups{top:191px}.orbit-gallery .solar-space{top:252px;bottom:350px}
+ .solar-preview-body{grid-template-columns:82px minmax(0,1fr);gap:13px}.solar-preview h3{font-size:27px}.solar-preview-summary{font-size:11px}
+ .solar-preview{bottom:90px}.solar-preview-image{margin-top:3px}.solar-preview-symbol svg{width:43px;height:43px}
+ .orbit-gallery .planet-title{font-size:18px}.orbit-gallery .planet-category{display:none}.orbit-gallery .planet-selection{width:4px;height:4px;margin-right:5px}
+}
+@media(prefers-reduced-motion:reduce){.solar-preview-image img,.solar-preview-link>span{transition:none}.solar-preview-image:hover img{transform:none}}

@@ -1,5 +1,6 @@
 import {layoutPlanets} from './solar-layout.js';
 import {sceneMotion} from './scene-motion.js';
+import {createOrbitFocus,orbitCapacity} from './solar-focus.js';
 
 const root=document.querySelector('.solar-system');
 if(root){
@@ -12,6 +13,7 @@ if(root){
  const pages=root.querySelector('.solar-pages');
  const status=root.querySelector('.solar-status');
  const allNodes=[...root.querySelectorAll('[data-project]')];
+ const focus=createOrbitFocus(root,motion);
  const indices={featured:0,side:0};
  let active=location.hash==='#complementary'?'side':'featured';
  let capacity=10,pageCount=1,visible=false,timer,arrivalTimer;
@@ -21,7 +23,7 @@ if(root){
  function schedule(){
   clearTimeout(timer);
   if(pageCount>1&&visible&&!motion.matches&&!document.hidden)timer=setTimeout(()=>{
-   const busy=root.querySelector('.planet-node:hover,.planet-node:focus-visible')||pages.contains(document.activeElement)||document.documentElement.classList.contains('project-dialog-open');
+   const busy=root.querySelector('.planet-node:hover,.planet-node:focus-visible,.solar-preview:hover')||root.querySelector('.solar-preview').contains(document.activeElement)||pages.contains(document.activeElement)||document.documentElement.classList.contains('project-dialog-open');
    if(!busy){indices[active]=(indices[active]+1)%pageCount;draw(true,false);}
    else schedule();
   },16000);
@@ -43,7 +45,7 @@ if(root){
   const width=space.clientWidth,height=space.clientHeight;
   if(width<1||height<1)return;
   const nodes=[...world().querySelectorAll('[data-project]')];
-  capacity=width<600?4:width<1000?6:10;
+  capacity=orbitCapacity(width);
   let arrangement,shown;
   while(capacity>0){
    pageCount=Math.max(1,Math.ceil(nodes.length/capacity));
@@ -66,6 +68,7 @@ if(root){
   buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mapGroup===active)));
   description.textContent=description.dataset[active==='featured'?'featuredCopy':'sideCopy'];
   root.dispatchEvent(new CustomEvent('solar:layout',{detail:{nodes:shown.map((node,i)=>({node,layout:arrangement[i]}))}}));
+  focus.update(shown);
   world().classList.remove('is-arriving');clearTimeout(arrivalTimer);
   if(animate&&!motion.matches){void world().offsetWidth;world().classList.add('is-arriving');arrivalTimer=setTimeout(()=>world().classList.remove('is-arriving'),750);}
   pageButtons();

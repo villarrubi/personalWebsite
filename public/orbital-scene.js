@@ -12,14 +12,14 @@ export async function mountCinematicSpace(root){
  let renderer;
  try{renderer=new THREE.WebGLRenderer({canvas,antialias:!mobile,alpha:true,powerPreference:'high-performance'});}catch{root.dataset.cinematic='fallback';return;}
  renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.25));
- renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+ renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;
  renderer.shadowMap.enabled=!mobile;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  root.prepend(canvas);
  const scene=new THREE.Scene();
  const camera=new THREE.PerspectiveCamera(38,1,.1,500);camera.position.set(0,0,32);
  const sun=new THREE.DirectionalLight(0xe6efff,3);sun.position.set(15,8,25);sun.castShadow=!mobile;
  sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-35,right:35,top:30,bottom:-30,near:.1,far:100});sun.shadow.bias=-.0005;
- scene.add(sun,new THREE.AmbientLight(0x8296cb,.16),new THREE.HemisphereLight(0x99b8ff,0x0a0718,.4));
+ scene.add(sun,new THREE.AmbientLight(0x8296cb,.22),new THREE.HemisphereLight(0x99b8ff,0x0a0718,.4));
  const rim=new THREE.DirectionalLight(0xc3a1ff,2.5);rim.position.set(-12,5,-8);scene.add(rim);
  // Large softboxes form realistic highlights on polished materials, without a room in view.
  const studio=new THREE.Scene();studio.background=new THREE.Color(0x1b2237);
@@ -36,11 +36,11 @@ export async function mountCinematicSpace(root){
  const spaceBackdrop=createSpaceBackdrop(THREE,mobile);scene.add(spaceBackdrop.group);
  const dynamicObjects=[];
  function body(id){const object=createProjectModel(THREE,id,{mobile});dynamicObjects.push({globe:object,base:object.userData.baseRotation,phase:dynamicObjects.length*1.3});return object;}
- // Faint orbital ribbons establish depth; none of these are planets or solar horizons.
+ // Tracks follow the same ellipse and depth as the objects, rather than the screen centre.
  const tracks=new THREE.Group();
  for(let i=0;i<3;i++){
-  const points=[];for(let j=0;j<=180;j++){const a=j/180*Math.PI*2;points.push(new THREE.Vector3(Math.cos(a)*(14+i*3),Math.sin(a)*(4.2+i*2),0));}
-  const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:0x819aca,transparent:true,opacity:.07,depthWrite:false}));line.rotation.set(.2+i*.15,-.2,i*.23-.15);line.position.set(0,-3,-9-i*3);tracks.add(line);
+  const material=i===1?new THREE.LineDashedMaterial({color:0x8cafc5,transparent:true,opacity:.12,dashSize:.14,gapSize:.23,depthWrite:false}):new THREE.LineBasicMaterial({color:0xa3cbd9,transparent:true,opacity:i===0?.2:.07,depthWrite:false});
+  const line=new THREE.Line(new THREE.BufferGeometry(),material);tracks.add(line);
  }scene.add(tracks);
  function glowTexture(){
   const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d'),g=ctx.createRadialGradient(128,128,0,128,128,128);
@@ -79,7 +79,13 @@ export async function mountCinematicSpace(root){
    const source=node._cinematicLayout||{x:parseFloat(node.style.getPropertyValue('--planet-x')),y:parseFloat(node.style.getPropertyValue('--planet-y')),size:parseFloat(node.style.getPropertyValue('--planet-size')),height:parseFloat(node.style.getPropertyValue('--planet-height'))};
    if(!Number.isFinite(source.x))continue;
    let model=models.get(node.dataset.project);
-   if(!model){const object=body(node.dataset.project);scene.add(object);model={object,node,target:new THREE.Vector3(),source,depth:[1.5,-2,3,-1,2,-3][i%6],phase:i*2.1};models.set(node.dataset.project,model);}
+   if(!model){
+    const object=body(node.dataset.project);scene.add(object);
+    const accent=new THREE.Color(node.dataset.accent||'#a9c8e0');
+    const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:flareMap,color:accent,transparent:true,opacity:.12,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));scene.add(halo);
+    const ring=new THREE.Mesh(new THREE.RingGeometry(1.12,1.13,64),new THREE.MeshBasicMaterial({color:accent,transparent:true,opacity:.12,side:THREE.DoubleSide,depthWrite:false}));scene.add(ring);
+    model={object,halo,ring,node,target:new THREE.Vector3(),source,depth:0,phase:i*2.1};models.set(node.dataset.project,model);
+   }
    model.source=source;model.node=node;node.dataset.modelKind=model.object.userData.kind;
    const x=space.left-box.left+source.x,y=space.top-box.top+source.y-source.height/2+source.size/2;
    model.target.copy(screenToWorld(x,y,model.depth));
@@ -88,22 +94,34 @@ export async function mountCinematicSpace(root){
    if(!model.visualRadius)model.visualRadius=model.radius;
    model.object.scale.setScalar(model.radius);model.object.position.copy(model.target);model.object.visible=true;
   }
-  for(const [id,m]of models)m.object.visible=activeIds.includes(id);
+  for(const [id,m]of models)m.object.visible=m.halo.visible=m.ring.visible=activeIds.includes(id);
+  const guide=orbitPaths[0];
+  tracks.visible=Boolean(guide);
+  if(guide)tracks.children.forEach((line,index)=>{
+   const points=[],factor=[1,1.13,.87][index];
+   for(let j=0;j<=160;j++){
+    const p=orbitPoint(guide,guide.period*j/160);
+    points.push(screenToWorld(spaceBox.left+guide.cx+(p.x-guide.cx)*factor,spaceBox.top+guide.cy+(p.y-guide.cy)*factor-(p.height-p.size)/2,p.depth-index*1.5));
+   }
+   line.geometry.dispose();line.geometry=new THREE.BufferGeometry().setFromPoints(points);
+   if(index===1)line.computeLineDistances();
+  });
   requestRender();
  }
  function layoutEvent(event){for(const item of event.detail.nodes)item.node._cinematicLayout={...item.layout};updateLayout();}
  root.addEventListener('solar:layout',layoutEvent);
+ root.addEventListener('solar:focus',requestRender);
  root.addEventListener('pointermove',event=>{const r=root.getBoundingClientRect();pointer.x=(event.clientX-r.left)/r.width-.5;pointer.y=(event.clientY-r.top)/r.height-.5;requestRender();},{passive:true});
  root.addEventListener('pointerleave',()=>{pointer.x=pointer.y=0;});
  function render(now){
   frame=0;if(!visible||contextLost||document.hidden||!width||!height)return;
   const realDelta=Math.min(Math.max((now-(lastTime||now))/1000,0),.25),dt=Math.min(realDelta,.05);lastTime=now;
   const paused=document.documentElement.classList.contains('project-dialog-open');
-  const focusedNode=root.querySelector('.planet-node:hover,.planet-node:focus-visible');
+  const focusedId=root.dataset.focusProject;
   if(!paused&&!reduced.matches){elapsed+=realDelta;orbitTime+=realDelta;}
   root.dataset.orbitTime=String(Math.round(orbitTime*100));
-  // The chess opening owns the entrance; projects keep a quiet, steady camera.
-  cameraTarget.set(reduced.matches?0:Math.sin(elapsed*.15)*.25+pointer.x*.35,reduced.matches?0:Math.sin(elapsed*.11)*.12-pointer.y*.18,32);
+  // Near and far objects respond differently to a restrained camera parallax.
+  cameraTarget.set(reduced.matches?0:Math.sin(elapsed*.15)*.25+pointer.x*.8,reduced.matches?0:Math.sin(elapsed*.11)*.12-pointer.y*.4,32);
   camera.position.lerp(cameraTarget,1-Math.exp(-dt*5));
   // Labels are projected before renderer.render updates the camera. This must
   // also be correct on the only frame rendered with reduced motion enabled.
@@ -112,19 +130,27 @@ export async function mountCinematicSpace(root){
   const smoothing=1-Math.exp(-dt*5);
   for(const [i,id]of activeIds.entries()){
    const m=models.get(id),p=orbitPoint(orbitPaths[i],reduced.matches?0:orbitTime);if(!m)continue;
-   m.source=p;
+   m.source=p;m.depth=p.depth;
    m.target.copy(screenToWorld(space.left+p.x,space.top+p.y-p.height/2+p.size/2,m.depth));
    m.radius=p.size*.42*(2*Math.tan(THREE.MathUtils.degToRad(19))*(32-m.depth)/height);
   }
   for(const [id,m]of models){
    if(!m.object.visible)continue;
-   const focus=m.node===focusedNode;
+   const focus=id===focusedId;
    if(reduced.matches)m.orbitPosition.copy(m.target);else m.orbitPosition.lerp(m.target,smoothing);
    m.object.position.copy(m.orbitPosition);
    if(!reduced.matches){m.object.position.x+=Math.sin(elapsed*.14+m.phase)*.045;m.object.position.y+=Math.sin(elapsed*.19+m.phase)*.065;}
    m.visualRadius=reduced.matches?m.radius:m.visualRadius+(m.radius-m.visualRadius)*smoothing;
-   m.focusScale=(m.focusScale||1)+((focus?1.035:1)-(m.focusScale||1))*smoothing;
+   m.focusScale=reduced.matches?(focus?1.07:1):(m.focusScale||1)+((focus?1.07:1)-(m.focusScale||1))*smoothing;
    m.object.scale.setScalar(m.visualRadius*m.focusScale);
+   const emphasis=focus?1:0;
+   m.halo.position.copy(m.object.position);m.halo.position.z-=.6;
+   m.halo.scale.setScalar(m.visualRadius*(4+(m.focusScale-1)*20));
+   m.halo.material.opacity=reduced.matches?(focus?.3:.075):m.halo.material.opacity+((focus?.3:.075)-m.halo.material.opacity)*smoothing;
+   m.ring.position.copy(m.object.position);m.ring.position.y-=m.visualRadius*.22;
+   m.ring.rotation.set(.85,0,-.24);m.ring.scale.setScalar(m.visualRadius*(focus?1.18:1.07));
+   m.ring.material.opacity=reduced.matches?.055+emphasis*.19:m.ring.material.opacity+(.055+emphasis*.19-m.ring.material.opacity)*smoothing;
+   m.node.style.setProperty('--orbit-depth',String(m.source.foreground??.5));
    projected.copy(m.object.position).project(camera);
    const x=(projected.x*.5+.5)*width-space.left,y=(-projected.y*.5+.5)*height-space.top;
    const diameter=m.visualRadius/(2*Math.tan(THREE.MathUtils.degToRad(19))*(camera.position.z-m.object.position.z))*height*2/.84;

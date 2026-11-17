@@ -2,7 +2,9 @@
 // Packing is checked once for the whole revolution, never during animation.
 export function createOrbitPaths(layout,width,height,major=true){
  const compact=width<600,labelWidth=compact?92:130,labelHeight=compact?47:75;
- const cx=width/2,cy=height/2,rx=Math.min(width*.36,width/2-labelWidth/2-10),ry=height*.32;
+ // Leave space outside the ellipse for the sculptures, not just their labels.
+ const spacious=layout.length<=(compact?3:4);
+ const cx=width/2,cy=height/2,rx=Math.min(width*(spacious?(compact?.25:.29):.36),width/2-labelWidth/2-10),ry=height*(spacious?.27:.32);
  const samples=4096,arc=[0];let length=0,lastX=rx,lastY=0;
  for(let i=1;i<=samples;i++){
   const a=i/samples*Math.PI*2,x=Math.cos(a)*rx,y=Math.sin(a)*ry;
@@ -40,5 +42,8 @@ export function orbitPoint(path,time){
  const turn=((time/path.period+path.phase)%1+1)%1;
  const sample=turn*(path.angles.length-1),i=Math.floor(sample),f=sample-i;
  const angle=path.angles[i]+(path.angles[i+1]-path.angles[i])*f;
- return {...path,x:path.cx+Math.cos(angle)*path.rx,y:path.cy+Math.sin(angle)*path.ry};
+ const foreground=(Math.sin(angle)+1)/2,scale=.84+foreground*.24;
+ const size=path.size*scale,labelHeight=path.height-path.size;
+ return {...path,x:path.cx+Math.cos(angle)*path.rx,y:path.cy+Math.sin(angle)*path.ry,
+  size,width:Math.max(path.width,size*1.17),height:size+labelHeight,depth:-5+foreground*10,foreground};
 }
