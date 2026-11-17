@@ -2,28 +2,46 @@ export function pointerInfluence(x,y,pointer,radius=150){
  if(!pointer?.active||radius<=0)return 0;
  return Math.max(0,1-Math.hypot(x-pointer.x,y-pointer.y)/radius)*(pointer.strength??1);
 }
+export const codeSnippets=[
+ 'engine.search(depth);','score = evaluate(position);','sensor.read();','distance = lidar.measure();',
+ 'model.predict(input)','map.render(viewport);','for (auto move : moves)','return bestMove;',
+ 'auto moves = legalMoves();','board.makeMove(move);','alpha = max(alpha, score);','cache.find(position);',
+ 'samples = sensor.read();','point = scan.next();','device.connect();','Serial.println(value);',
+ 'X_train, X_test = split(X)','model.fit(X_train, y_train)','loss.backward()','optimizer.step()',
+ 'with torch.no_grad():','embeddings = encode(text)','for batch in dataset:','features = normalize(data)',
+ 'terrain.generate(seed);','height = noise(x, y);','mesh.computeNormals();','camera.lookAt(target);',
+ 'await fetchProjects();','return response.json();','SELECT * FROM projects;','git commit -m "Keep building"'
+];
+export function codeFrame(time,index,snippets=codeSnippets){
+ const progress=time/7+index/8,cycle=Math.floor(progress),phase=progress-cycle;
+ // An odd stride visits every snippet; staggered rows stay distinct.
+ const snippet=snippets[(index+cycle*9)%snippets.length];
+ const portion=phase<.45?phase/.45:phase<.72?1:Math.max(0,1-(phase-.72)/.22);
+ return {snippet,text:snippet.slice(0,Math.floor(snippet.length*portion))};
+}
 const canvas=typeof document!=='undefined'?document.querySelector('.hero-effects'):null;
 if(canvas){
  const ctx=canvas.getContext('2d');
  if(ctx){
   const hero=canvas.closest('.experience-hero'),root=document.documentElement;
   const pointer={x:0,y:0,tx:0,ty:0,active:false,strength:0};
+  const snippets=[...codeSnippets];
+  for(let i=snippets.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[snippets[i],snippets[j]]=[snippets[j],snippets[i]];}
   let width=0,height=0,time=0,frame=0,last=0,visible=true;
   const running=()=>visible&&!document.hidden&&root.classList.contains('ambient-enabled');
   const rgba=(opacity,warm=false)=>warm?`rgba(191,169,132,${opacity})`:`rgba(139,211,222,${opacity})`;
   function code(){
-   const snippets=['engine.search(depth);','score = evaluate(position);','sensor.read();','distance = lidar.measure();','model.predict(input)','map.render(viewport);','for (auto move : moves)','return bestMove;'];
    ctx.font=`${width<600?12:14}px monospace`;
-   snippets.forEach((snippet,index)=>{
+   for(let index=0;index<8;index++){
     const column=index%2,row=Math.floor(index/2);
     const x=width<600?(column?width*.43:14):(column?width*.69:28);
     const y=height*(.16+row*.22)+Math.sin(time*.45+index)*6;
-    const phase=(time*.2+index*.17)%1,count=Math.max(2,Math.min(snippet.length,Math.floor(phase*snippet.length*1.5)));
+    const {text}=codeFrame(time,index,snippets);
     const influence=pointerInfluence(x+70,y,pointer,180);
     ctx.fillStyle=rgba(.2+influence*.55,index%3===0);
-    ctx.fillText(snippet.slice(0,count),x,y);
-    if(Math.sin(time*5+index)>0){ctx.fillStyle=rgba(.4+influence*.4);ctx.fillRect(x+ctx.measureText(snippet.slice(0,count)).width+4,y-10,5,12);}
-   });
+    ctx.fillText(text,x,y);
+    if(Math.sin(time*5+index)>0){ctx.fillStyle=rgba(.4+influence*.4);ctx.fillRect(x+ctx.measureText(text).width+4,y-10,5,12);}
+   }
   }
   function draw(dt=0){
    time+=dt;

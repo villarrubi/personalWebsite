@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {pointerInfluence} from '../public/hero-effects.js';
+import {pointerInfluence,codeSnippets,codeFrame} from '../public/hero-effects.js';
 
 const source=(await readFile(new URL('../public/scene-motion.js',import.meta.url),'utf8'))
  .replace('export const sceneMotion=', 'const sceneMotion=globalThis.motion=');
@@ -65,6 +65,21 @@ assert.equal(pointerInfluence(100,100,{active:true,x:100,y:100}),1);
 assert.equal(pointerInfluence(500,500,{active:true,x:100,y:100}),0);
 assert.equal(pointerInfluence(100,100,{active:true,x:100,y:100,strength:.5}),.5);
 console.log('PASS: local pointer response.');
+
+for(let index=0;index<8;index++){
+ const seen=new Set(Array.from({length:32},(_,cycle)=>codeFrame(cycle*7,index).snippet));
+ assert.equal(seen.size,codeSnippets.length,'Every row rotates through the full repertoire');
+}
+for(let time=0;time<230;time+=.25){
+ const frames=Array.from({length:8},(_,index)=>codeFrame(time,index));
+ assert.equal(new Set(frames.map(frame=>frame.snippet)).size,8,'Visible rows do not repeat snippets');
+ assert(frames.every(frame=>frame.snippet.startsWith(frame.text)));
+}
+assert.equal(codeFrame(0,0).text,'');
+assert.equal(codeFrame(3.5,0).text,codeSnippets[0]);
+assert.equal(codeFrame(6.9,0).text,'','Erase the previous snippet before replacing it');
+assert.notEqual(codeFrame(7,0).snippet,codeFrame(0,0).snippet);
+console.log('PASS: varied code cycles, distinct rows, and typing/erasing transitions.');
 
 // The code field renders on load even when motion is paused.
 const effectSource=(await readFile(new URL('../public/hero-effects.js',import.meta.url),'utf8')).replaceAll('export ','');
