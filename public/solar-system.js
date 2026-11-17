@@ -11,8 +11,11 @@ if(root){
  const description=root.querySelector('.solar-description'),focus=createOrbitFocus(root,motion);
  const controls=[...root.querySelectorAll('[data-carousel-step]')];
  const groups=Object.fromEntries(worlds.map(world=>[world.dataset.mapWorld,{world,nodes:[...world.querySelectorAll('[data-project]')],carousel:new OrbitCarousel(world.querySelectorAll('[data-project]').length)}]));
- let active=location.hash==='#complementary'?'side':'featured';
- let visible=!('IntersectionObserver'in window),frame=0,last=null;
+ const allNodes=Object.values(groups).flatMap(group=>group.nodes);
+ groups.all={nodes:allNodes,carousel:new OrbitCarousel(allNodes.length)};
+ let active=location.hash==='#complementary'?'side':'all';
+ let visible=!('IntersectionObserver'in window),frame=0,last=null,ambientTime=0;
+ const pointer={x:0,y:0},pointerTarget={x:0,y:0};
  const current=()=>groups[active];
  const animate=()=>!preference.matches&&!motion.matches;
  const blocked=()=>document.hidden||!visible||document.documentElement.classList.contains('intro-playing')||document.documentElement.classList.contains('intro-pending')||document.documentElement.classList.contains('project-dialog-open');
@@ -20,17 +23,19 @@ if(root){
  function paint(announce=false){
   const {nodes,carousel}=current(),width=space.clientWidth,height=space.clientHeight;
   if(!width||!height)return;
-  const layouts=carouselLayout(nodes.map(node=>({id:node.dataset.project})),width,height,carousel.position);
+  const layouts=carouselLayout(nodes.map(node=>({id:node.dataset.project})),width,height,carousel.position,preference.matches?null:{time:ambientTime,pointer});
   const items=nodes.map((node,index)=>{
    const layout=layouts[index];node.hidden=!layout.visible;
    node.style.setProperty('--planet-x',`${layout.x}px`);node.style.setProperty('--planet-y',`${layout.y}px`);
    node.style.setProperty('--planet-size',`${layout.size}px`);node.style.setProperty('--planet-height',`${layout.height}px`);
    node.style.setProperty('--orbit-depth',String(layout.foreground));node.style.setProperty('--orbit-opacity',String(layout.opacity));
+   node.style.setProperty('--planet-roll',`${layout.roll}deg`);
    node.style.zIndex=String(Math.round(layout.foreground*100));
    node.dataset.orbitFront=String(index===carousel.index);
    return {node,layout};
   });
   root._orbitFrame={width,height,items};
+  root.dataset.dense=String(layouts.filter(item=>item.visible).length>7);
   root.dataset.orbitPosition=String(carousel.position);
   focus.update(nodes,carousel.index,animate());
   controls.forEach(button=>button.disabled=nodes.length<2);
@@ -42,32 +47,46 @@ if(root){
   frame=0;if(blocked()){last=null;return;}
   const delta=last===null?0:Math.min(now-last,100);last=now;
   const {carousel}=current();
-  if(carousel.tick(delta,{auto:autoAllowed(),animate:animate()}))paint();
-  if(carousel.moving||(autoAllowed()&&carousel.count>1))frame=requestAnimationFrame(tick);else last=null;
+  const ambient=animate()&&autoAllowed()&&carousel.count>0;
+  if(ambient){
+   ambientTime+=delta/1000;
+   const smoothing=1-Math.exp(-delta/180);
+   pointer.x+=(pointerTarget.x-pointer.x)*smoothing;pointer.y+=(pointerTarget.y-pointer.y)*smoothing;
+  }
+  if(carousel.tick(delta,{auto:autoAllowed(),animate:animate()})||ambient)paint();
+  if(carousel.moving||(autoAllowed()&&(carousel.count>1||ambient)))frame=requestAnimationFrame(tick);else last=null;
  }
  function sync(){
   cancelAnimationFrame(frame);frame=0;last=null;current().carousel.resetTimer();
-  if(!blocked()&&(current().carousel.moving||(autoAllowed()&&current().nodes.length>1)))frame=requestAnimationFrame(tick);
+  if(!blocked()&&(current().carousel.moving||(autoAllowed()&&(current().nodes.length>1||(animate()&&current().nodes.length)))))frame=requestAnimationFrame(tick);
  }
  function step(direction){current().carousel.step(direction,animate());paint(true);sync();}
  function selectGroup(group){
   if(!groups[group])return;
   current().carousel.settle();active=group;root.dataset.activeGroup=active;
-  worlds.forEach(world=>world.hidden=world.dataset.mapWorld!==active);
+  worlds.forEach(world=>world.hidden=active!=='all'&&world.dataset.mapWorld!==active);
   buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mapGroup===active)));
-  description.textContent=description.dataset[active==='featured'?'featuredCopy':'sideCopy'];
+  description.textContent=description.dataset[active==='side'?'sideCopy':'featuredCopy'];
   paint();sync();
  }
  controls.forEach(button=>button.addEventListener('click',()=>step(Number(button.dataset.carouselStep))));
  root.querySelector('.solar-carousel-controls').hidden=false;
  buttons.forEach(button=>button.addEventListener('click',()=>selectGroup(button.dataset.mapGroup)));
- for(const {nodes,carousel} of Object.values(groups))nodes.forEach((node,index)=>{
+ allNodes.forEach(node=>{
   node.addEventListener('click',event=>{
    if(event.defaultPrevented||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button!==0)return;
+   const {nodes,carousel}=current(),index=nodes.indexOf(node);if(index<0)return;
    if(index===carousel.index&&!carousel.moving)return;
    event.preventDefault();carousel.select(index,animate());paint(true);sync();
   });
  });
+ root.addEventListener('pointermove',event=>{
+  if(event.pointerType==='touch')return;
+  const box=space.getBoundingClientRect();
+  pointerTarget.x=Math.max(-.5,Math.min(.5,(event.clientX-box.left)/box.width-.5));
+  pointerTarget.y=Math.max(-.5,Math.min(.5,(event.clientY-box.top)/box.height-.5));
+ },{passive:true});
+ root.addEventListener('pointerleave',()=>{pointerTarget.x=pointerTarget.y=0;});
  root.addEventListener('keydown',event=>{
   if(event.altKey||event.ctrlKey||event.metaKey||!['ArrowLeft','ArrowRight'].includes(event.key))return;
   event.preventDefault();step(event.key==='ArrowLeft'?-1:1);

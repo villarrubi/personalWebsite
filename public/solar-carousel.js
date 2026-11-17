@@ -36,10 +36,22 @@ export class OrbitCarousel{
  }
 }
 
-export function orbitSlot(angle,width,height){
+export const orbitCapacity=width=>Math.max(7,Math.min(19,2*Math.floor((width/80-1)/2)+1));
+
+// Stable per-project phases keep the scene alive between carousel turns.
+export function orbitDrift(id,time,pointer={x:0,y:0},foreground=1){
+ let seed=0;for(const char of id)seed=(seed*31+char.charCodeAt(0))>>>0;
+ const phase=seed%628/100;
+ return {x:Math.sin(time*.43+phase)*3+pointer.x*(6+foreground*12),
+  y:Math.sin(time*.58+phase)*5+pointer.y*(3+foreground*9),
+  roll:Math.sin(time*.37+phase)*1.4,tilt:Math.sin(time*.46+phase)*.14};
+}
+
+export function orbitSlot(angle,width,height,slots=7){
  const foreground=(Math.cos(angle)+1)/2,compact=width<600;
  const frontSize=Math.min(compact?width*.66:width*.35,height*.59,340);
- const size=frontSize*(.24+.76*Math.pow(foreground,4));
+ const rearScale=Math.max(.14,.24*7/Math.max(7,slots));
+ const size=frontSize*(rearScale+(1-rearScale)*Math.pow(foreground,4));
  const x=width*.5+Math.sin(angle)*width*.34;
  const bodyY=height*(.34+.22*Math.cos(angle)+.055*Math.sin(angle));
  const labelHeight=compact?42:58;
@@ -47,16 +59,19 @@ export function orbitSlot(angle,width,height){
   depth:-10+foreground*18,foreground,opacity:.38+.62*Math.pow(foreground,2)};
 }
 
-export function carouselLayout(items,width,height,position){
- const count=items.length,slots=Math.min(7,count);
+export function carouselLayout(items,width,height,position,ambient=null){
+ const count=items.length,slots=Math.min(orbitCapacity(width),count);
  if(!count)return [];
  return items.map((item,index)=>{
   let offset=wrapIndex(index-position+count/2,count)-count/2;
-  const visible=count<=7||Math.abs(offset)<3.5;
-  const angle=slots===1?0:offset*Math.PI*2/slots;
-  const layout=orbitSlot(angle,width,height);
-  // Dense catalogs keep a small moving window; every project still comes forward.
-  const edge=count<=7?1:Math.max(0,Math.min(1,(3.5-Math.abs(offset))*2));
-  return {...layout,id:item.id,index,offset,visible,opacity:layout.opacity*edge};
+  const visible=count<=slots||Math.abs(offset)<slots/2;
+  const baseAngle=slots===1?0:offset*Math.PI*2/slots;
+  // Open space around the protagonist; smaller projects share the rear arc.
+  const angle=slots>7?2*Math.atan(Math.tan(baseAngle/2)*slots/7):baseAngle;
+  const layout=orbitSlot(angle,width,height,slots);
+  const drift=ambient?orbitDrift(item.id,ambient.time,ambient.pointer,layout.foreground):{x:0,y:0,roll:0,tilt:0};
+  const edge=count<=slots?1:Math.max(0,Math.min(1,(slots/2-Math.abs(offset))*2));
+  return {...layout,x:layout.x+drift.x,y:layout.y+drift.y,bodyY:layout.bodyY+drift.y,
+   roll:drift.roll,tilt:drift.tilt,id:item.id,index,offset,visible,opacity:layout.opacity*edge};
  });
 }

@@ -7,8 +7,8 @@
 .orbit-carousel .solar-heading h2{font-size:clamp(50px,5.5vw,80px);line-height:1;letter-spacing:-.04em;max-width:none}
 .orbit-carousel .solar-heading h2 em{display:inline;color:#b9d4dd}
 .orbit-carousel .solar-description{font-size:12px;margin-top:14px;color:#91a7bb;max-width:450px}
-.orbit-carousel .solar-groups{top:75px;right:6%;left:auto;gap:28px;z-index:4}
-.orbit-carousel .solar-groups button{font-size:12px}.orbit-carousel .solar-groups button span{font-size:9px}
+.orbit-carousel .solar-groups{top:75px;right:6%;left:auto;gap:18px;z-index:4}
+.orbit-carousel .solar-groups button{font-size:11px}.orbit-carousel .solar-groups button span{font-size:9px}
 .orbit-carousel .solar-space{left:6%;right:6%;top:205px;bottom:245px;z-index:2}
 .orbit-carousel .solar-explore-hint{display:none}.orbit-carousel .solar-core{display:none}
 .orbit-carousel .cinematic-canvas{filter:saturate(.95)}
@@ -16,11 +16,13 @@
 .orbit-carousel .solar-orbits path{stroke:#a3cbd9;stroke-width:1;stroke-opacity:.3;vector-effect:non-scaling-stroke}
 .orbit-carousel .planet-node{left:0;top:0;transform:translate3d(calc(var(--planet-x) - 50%),calc(var(--planet-y) - 50%),0);will-change:transform;opacity:var(--orbit-opacity,1);transition:none;border-radius:12px}
 .orbit-carousel .planet-visual{animation:none!important;transition:none;filter:drop-shadow(0 12px 22px #0006)}
-.orbit-carousel .project-planet{transition:none;scale:1!important}
+.orbit-carousel .project-planet{transition:none;scale:1!important;transform:rotate(var(--planet-roll,0deg))}
 .orbit-carousel .planet-label{margin-top:6px;gap:4px;text-shadow:0 2px 15px #020b1e;opacity:1;transition:opacity .25s}
 .orbit-carousel .planet-title{font-size:16px;line-height:1.12;color:#b8c8d5}
 .orbit-carousel .planet-title>span{display:none}.orbit-carousel .planet-category{display:none}.orbit-carousel .planet-selection{display:none}
 .orbit-carousel .is-featured .planet-label{opacity:0;pointer-events:none}
+.orbit-carousel[data-dense=true] .planet-label{opacity:0}
+.orbit-carousel[data-dense=true] .planet-node:not(.is-featured):is(:hover,:focus-visible) .planet-label{opacity:1}
 .orbit-carousel .planet-node:focus-visible{outline:2px solid #c2dce8!important;outline-offset:5px!important}
 .solar-carousel-controls{position:absolute;inset:0;z-index:200;pointer-events:none}
 .solar-carousel-controls[hidden]{display:none}
@@ -44,7 +46,7 @@
 @media(max-width:900px){
  .orbit-carousel{--solar-height:1030px}
  .orbit-carousel .solar-heading{top:32px;left:6%;width:88%}.orbit-carousel .solar-heading h2{font-size:60px}
- .orbit-carousel .solar-groups{top:197px;left:6%;right:auto;gap:28px}.orbit-carousel .solar-space{top:265px;bottom:255px;left:4%;right:4%}
+ .orbit-carousel .solar-groups{top:197px;left:6%;right:6%;gap:20px}.orbit-carousel .solar-space{top:265px;bottom:255px;left:4%;right:4%}
  .orbit-carousel .solar-preview{left:10%;right:10%;bottom:72px}.solar-preview h3{font-size:37px}
  .orbit-previous{left:2%}.orbit-next{right:2%}.orbit-arrow{width:54px;height:54px}
  .orbit-carousel .motion-toggle-label{display:inline}.orbit-carousel .space-motion-toggle{width:auto;padding:6px 12px}
@@ -53,7 +55,7 @@
  .orbit-carousel{--solar-height:1000px}
  .orbit-carousel .solar-heading h2,html[lang=es] .orbit-carousel .solar-heading h2{font-size:clamp(42px,11.8vw,57px)}
  .orbit-carousel .solar-heading .eyebrow{font-size:8px}.orbit-carousel .solar-description{font-size:11px;max-width:270px}
- .orbit-carousel .solar-groups{top:180px}.orbit-carousel .solar-space{top:245px;bottom:290px;left:4%;right:4%}
+ .orbit-carousel .solar-groups{top:180px;gap:14px;justify-content:space-between}.orbit-carousel .solar-groups button{font-size:10px}.orbit-carousel .solar-groups button span{font-size:8px;margin-left:5px}.orbit-carousel .solar-space{top:245px;bottom:290px;left:4%;right:4%}
  .orbit-carousel .planet-title{font-size:12px}.orbit-carousel .planet-label{width:max(100%,76px);max-width:95px;margin-top:3px}
  .orbit-arrow{width:44px;height:44px}.orbit-arrow>span:first-child{font-size:27px}.orbit-previous{left:0}.orbit-next{right:0}.orbit-arrow-label{font-size:9px}
  .orbit-carousel .solar-preview{left:7%;right:7%;bottom:86px}.solar-preview h3{font-size:32px}.solar-preview-summary{font-size:12px;line-height:1.6}.solar-preview-category{font-size:9px}

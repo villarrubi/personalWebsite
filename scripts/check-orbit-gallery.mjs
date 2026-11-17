@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
 import {publishedProjects} from '../src/content.mjs';
-import {OrbitCarousel,carouselLayout,wrapIndex,ORBIT_INTERVAL,ORBIT_TURN_DURATION} from '../public/solar-carousel.js';
+import {OrbitCarousel,carouselLayout,orbitCapacity,orbitDrift,wrapIndex,ORBIT_INTERVAL,ORBIT_TURN_DURATION} from '../public/solar-carousel.js';
 
 for(const lang of ['es','en']){
  const html=await readFile(new URL(`../dist/${lang}/index.html`,import.meta.url),'utf8');
@@ -15,6 +15,7 @@ for(const lang of ['es','en']){
  assert(html.includes('class="solar-carousel-controls" hidden'),'Controls are enhanced only with JS');
  for(const direction of [-1,1])assert(html.includes(`data-carousel-step="${direction}" aria-label="`));
  assert(!html.includes('data-preview-step'));
+ assert(html.includes('data-map-group="all" aria-pressed="true"'),'The entire catalog is the default view');
 }
 
 assert.equal(ORBIT_INTERVAL,3500);assert.equal(ORBIT_TURN_DURATION,900);
@@ -38,12 +39,12 @@ carousel.tick(3000,{auto:true});carousel.tick(100,{auto:false});
 carousel.tick(1000,{auto:true});assert.equal(carousel.index,2,'Resume does not inherit an expired timer');
 for(const count of [0,1]){const c=new OrbitCarousel(count);c.step(1);c.tick(10000,{auto:true});assert.equal(c.position,0);assert(!c.moving);}
 
-for(const count of [1,2,3,6,7,20,100])for(const [width,height] of [[294,465],[366,465],[752,510],[1267,490]]){
+for(const count of [1,2,3,6,7,13,20,100])for(const [width,height] of [[294,465],[366,465],[752,510],[1267,490]]){
  const items=Array.from({length:count},(_,i)=>({id:String(i)}));
  for(let position=0;position<count;position++){
   const layout=carouselLayout(items,width,height,position),front=layout[position],visible=layout.filter(p=>p.visible);
   assert.equal(front.x,width/2);assert.equal(front.foreground,1);
-  assert.equal(visible.length,Math.min(count,7));
+  assert.equal(visible.length,Math.min(count,orbitCapacity(width)));
   for(const p of visible){
    assert(p.x-p.size/2>=0&&p.x+p.size/2<=width,'Bodies stay in horizontal bounds');
    assert(p.bodyY-p.size/2>=0&&p.y+p.height/2<=height,'Bodies and labels fit in the stage');
@@ -70,13 +71,13 @@ function visit({paused=false,reduced=false}={}){
  const nodes=Array.from({length:6},(_,i)=>element({project:`project-${i}`,name:`Project ${i}`,accent:'#abcdef'}));
  const sideNodes=[element({project:'side',name:'Side',accent:'#abcdef'})];
  const worlds=['featured','side'].map((group,i)=>{const world=element({mapWorld:group});world.querySelectorAll=()=>i?sideNodes:nodes;return world;});
- const buttons=['featured','side'].map(mapGroup=>element({mapGroup}));
+ const buttons=['featured','side','all'].map(mapGroup=>element({mapGroup}));
  const controls=[-1,1].map(carouselStep=>element({carouselStep}));
  const motion=new EventTarget();motion.matches=paused;motion.setEnabled=value=>{motion.matches=!value;motion.dispatchEvent(new Event('change'));};
  const preference=new EventTarget();preference.matches=reduced;
  let rendered=null,animations=0,observer,visibility;
  const body={replaceChildren(value){rendered=value??null;},animate(){animations++;return {cancel(){}};}};
- const counter={},status={},controlBox={hidden:true},motionButton=element(),space={clientWidth:1100,clientHeight:490};
+ const counter={},status={},controlBox={hidden:true},motionButton=element(),space={clientWidth:1100,clientHeight:490,getBoundingClientRect:()=>({width:1100,height:490,left:0,top:0})};
  motionButton.querySelector=()=>({});
  const root=element({cinematic:'fallback'}),description={dataset:{featuredCopy:'Featured',sideCopy:'Side'}};
  const selectors={'.solar-space':space,'.solar-status':status,'.solar-description':description,'.solar-preview-body':body,'.solar-carousel-count':counter,'.solar-carousel-controls':controlBox,'.space-motion-toggle':motionButton};
@@ -94,9 +95,9 @@ function visit({paused=false,reduced=false}={}){
  function advance(ms){for(let elapsed=0;elapsed<ms;elapsed+=50){now+=Math.min(50,ms-elapsed);const pending=[...frames.values()];frames.clear();pending.forEach(fn=>fn(now));}}
  function click(element){const event={button:0,defaultPrevented:false,preventDefault(){this.defaultPrevented=true;}};element.events.get('click')(event);return event;}
  function show(value=true){visibility([{isIntersecting:value}]);}
- return {root,nodes,sideNodes,buttons,controls,motion,doc,status,counter,controlBox,advance,click,show,mutate:()=>observer(),get rendered(){return rendered;},get animations(){return animations;}};
+ return {root,nodes,sideNodes,worlds,buttons,controls,motion,doc,status,counter,controlBox,advance,click,show,mutate:()=>observer(),get rendered(){return rendered;},get animations(){return animations;}};
 }
-const v=visit();assert(!v.controlBox.hidden);assert.equal(v.root.dataset.focusProject,'project-0');
+const v=visit();assert.equal(v.counter.textContent,'01 / 07');assert(v.worlds.every(world=>!world.hidden),'Both groups share the default orbit');v.click(v.buttons[0]);assert(!v.controlBox.hidden);assert.equal(v.root.dataset.focusProject,'project-0');
 v.advance(6000);assert.equal(v.root.dataset.focusProject,'project-0','Offscreen scenes do not rotate');
 v.show();v.advance(4500);assert.equal(v.root.dataset.focusProject,'project-1');
 v.click(v.controls[1]);assert(v.status.textContent.startsWith('Project 2'));v.advance(1000);
@@ -115,9 +116,31 @@ v.doc.activeElement=null;v.root.dispatchEvent(new Event('focusin'));v.advance(45
 v.click(v.buttons[1]);assert.equal(v.root.dataset.focusProject,'side');assert(v.controls.every(b=>b.disabled));
 v.advance(8000);assert.equal(v.root.dataset.focusProject,'side');
 v.click(v.buttons[0]);assert.equal(v.root.dataset.focusProject,'project-0');
+v.click(v.buttons[2]);assert.equal(v.counter.textContent,'01 / 07');v.click(v.sideNodes[0]);v.advance(1000);assert.equal(v.counter.textContent,'07 / 07');v.click(v.controls[1]);v.advance(1000);assert.equal(v.root.dataset.focusProject,'project-0','All-project navigation wraps across both groups');
 for(const options of [{paused:true},{reduced:true}]){
  const calm=visit(options);calm.show();calm.click(calm.controls[1]);
  assert.equal(calm.root.dataset.focusProject,'project-1','Manual navigation works without animation');assert.equal(calm.animations,0);
  if(options.paused){calm.advance(8000);assert.equal(calm.root.dataset.focusProject,'project-1');}
 }
 console.log('PASS: orbital timing, reversible turns, wraparound, single foreground, responsive bounds, bilingual previews, arrows, background selection, modal/visibility/focus pauses and reduced-motion controls.');
+
+const allProjects=publishedProjects.map(p=>({id:p.id}));
+for(const width of [1040,1126,1267,1600]){
+ const layout=carouselLayout(allProjects,width,490,0);
+ assert.equal(layout.filter(p=>p.visible).length,13,'All thirteen projects fit on a wide orbit');
+ for(let i=0;i<layout.length;i++)for(let j=i+1;j<layout.length;j++)
+  assert(Math.hypot(layout[i].x-layout[j].x,layout[i].bodyY-layout[j].bodyY)>(layout[i].size+layout[j].size)*.42,'Resting models remain separated');
+}
+for(let time=0;time<60;time+=.25){
+ const drift=orbitDrift('chessbot',time,{x:.5,y:-.5},1);
+ assert(Math.abs(drift.x)<=12&&Math.abs(drift.y)<=11&&Math.abs(drift.roll)<=1.4,'Ambient motion stays subtle and bounded');
+}
+const floating=visit();floating.show();floating.advance(100);
+const firstPose=floating.root._orbitFrame.items[0].layout;
+floating.advance(900);const secondPose=floating.root._orbitFrame.items[0].layout;
+assert.equal(floating.root.dataset.focusProject,'project-0');assert.notEqual(firstPose.y,secondPose.y,'Projects float between carousel turns');
+floating.motion.setEnabled(false);const frozen=floating.root._orbitFrame;
+floating.advance(5000);assert.equal(floating.root._orbitFrame,frozen,'Pausing freezes ambient motion too');
+const calm=visit({reduced:true});calm.show();calm.advance(1000);
+assert.equal(calm.root._orbitFrame.items[0].layout.roll,0,'Reduced motion disables ambient tilt');
+console.log('PASS: full-catalog view, capacity by viewport, separated models, cross-group navigation, subtle floating and paused/reduced-motion poses.');

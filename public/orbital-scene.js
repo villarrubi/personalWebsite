@@ -6,7 +6,7 @@ import {sceneMotion} from './scene-motion.js';
 // Sculptural objects in a shared orbit. HTML anchors follow their 3D projections.
 export async function mountCinematicSpace(root){
  const THREE=await import('./assets/vendor/three.module.js');
- const reduced=sceneMotion;
+ const reduced=sceneMotion,preference=matchMedia('(prefers-reduced-motion: reduce)');
  const mobile=matchMedia('(max-width:700px)').matches;
  const canvas=document.createElement('canvas');canvas.className='cinematic-canvas';canvas.setAttribute('aria-hidden','true');
  let renderer;
@@ -34,8 +34,7 @@ export async function mountCinematicSpace(root){
  const stars=await loader.loadAsync('/assets/space/stars_milky_way.webp').catch(error=>{renderer.dispose();canvas.remove();throw error;});stars.colorSpace=THREE.SRGBColorSpace;
  const sky=new THREE.Mesh(new THREE.SphereGeometry(190,48,24),new THREE.MeshBasicMaterial({map:stars,side:THREE.BackSide,color:0x65728d,depthWrite:false}));sky.rotation.set(.65,-.8,.25);sky.renderOrder=-100;scene.add(sky);
  const spaceBackdrop=createSpaceBackdrop(THREE,mobile);scene.add(spaceBackdrop.group);
- const dynamicObjects=[];
- function body(id){const object=createProjectModel(THREE,id,{mobile});dynamicObjects.push({globe:object,base:object.userData.baseRotation,phase:dynamicObjects.length*1.3});return object;}
+ function body(id){return createProjectModel(THREE,id,{mobile});}
  // Tracks follow the same ellipse and depth as the objects, rather than the screen centre.
  const tracks=new THREE.Group();
  for(let i=0;i<3;i++){
@@ -78,6 +77,8 @@ export async function mountCinematicSpace(root){
    const radius=p.size*.42*(2*Math.tan(THREE.MathUtils.degToRad(19))*(32-p.depth)/height);
    m.object.position.copy(screenToWorld(spaceBox.left+p.x,spaceBox.top+p.bodyY,p.depth));
    m.object.scale.setScalar(radius);m.object.visible=m.halo.visible=true;
+   const base=m.object.userData.baseRotation;
+   m.object.rotation.set(base.x+p.tilt*.4,base.y+p.tilt,base.z+THREE.MathUtils.degToRad(p.roll));
    const light=.42+.58*Math.pow(p.foreground,2);
    m.materials.forEach((original,material)=>material.color.copy(original).multiplyScalar(light));
    m.halo.position.copy(m.object.position);m.halo.position.z-=.6;m.halo.scale.setScalar(radius*5);
@@ -108,21 +109,22 @@ export async function mountCinematicSpace(root){
   frame=0;if(!visible||contextLost||document.hidden||!width||!height)return;
   const dt=Math.min(Math.max((now-(lastTime||now))/1000,0),.05);lastTime=now;
   const paused=document.documentElement.classList.contains('project-dialog-open');
-  if(!paused&&!reduced.matches)elapsed+=dt;
+  const moving=!paused&&!reduced.matches&&!preference.matches;
+  if(moving)elapsed+=dt;
   syncModels();
-  if(!paused&&!reduced.matches)for(const object of dynamicObjects){object.globe.rotation.x=object.base.x+Math.sin(elapsed*.22+object.phase)*.035;object.globe.rotation.y=object.base.y+Math.sin(elapsed*.18+object.phase)*.1;object.globe.rotation.z=object.base.z+Math.sin(elapsed*.14+object.phase)*.025;}
-  spaceBackdrop.update(elapsed,pointer,root.dataset.activeGroup==='side',width/height,!reduced.matches,dt);
+
+  spaceBackdrop.update(elapsed,pointer,root.dataset.activeGroup==='side',width/height,moving,dt);
   spaceBackdrop.renderFog(renderer,width,height);starMaterial.uniforms.time.value=reduced.matches?0:elapsed;
   sky.rotation.y=-.8+(reduced.matches?0:elapsed*.003);starField.rotation.y=reduced.matches?0:elapsed*.004;
   renderer.render(scene,camera);root.dataset.cinematicFrame=String(Math.round(elapsed*100));
-  if(!reduced.matches&&!paused)frame=requestAnimationFrame(render);
+  if(moving)frame=requestAnimationFrame(render);
  }
  function requestRender(){if(ready&&!frame&&visible&&!contextLost&&!document.hidden)frame=requestAnimationFrame(render);}
  new ResizeObserver(measure).observe(root);
  new ResizeObserver(measure).observe(root.querySelector('.solar-space'));
  const visibility=new IntersectionObserver(entries=>{visible=entries.some(entry=>entry.isIntersecting);lastTime=0;if(visible)requestRender();else{cancelAnimationFrame(frame);frame=0;}},{threshold:.08});visibility.observe(root);
  document.addEventListener('visibilitychange',()=>{lastTime=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;}else requestRender();});
- reduced.addEventListener('change',requestRender);
+ reduced.addEventListener('change',requestRender);preference.addEventListener('change',requestRender);
  new MutationObserver(requestRender).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
  canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();contextLost=true;cancelAnimationFrame(frame);frame=0;root.classList.remove('cinematic-ready');root.dataset.cinematic='fallback';root.dispatchEvent(new Event('solar:restore-layout'));});
  canvas.addEventListener('webglcontextrestored',()=>{contextLost=false;root.classList.add('cinematic-ready');root.dataset.cinematic='ready';requestRender();});
