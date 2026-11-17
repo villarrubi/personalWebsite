@@ -120,13 +120,13 @@ async function mountWorld(root){
  const motionButton=root.querySelector('[data-world-motion]');
  function syncMotion(){motionButton.setAttribute('aria-pressed',String(!sceneMotion.matches));motionButton.textContent=sceneMotion.matches?(es?'Animar ▷':'Animate ▷'):(es?'Pausar Ⅱ':'Pause Ⅱ');start();}
  motionButton.addEventListener('click',()=>sceneMotion.setEnabled(sceneMotion.matches));
- document.addEventListener('visibilitychange',onVisibility);document.addEventListener('chess:intro-end',start);sceneMotion.addEventListener('change',syncMotion);syncMotion();
+ document.addEventListener('visibilitychange',onVisibility);document.addEventListener('intro:end',start);sceneMotion.addEventListener('change',syncMotion);syncMotion();
  root.classList.add('world-ready');root.querySelector('.world-interface').hidden=false;root.dataset.edition=edition;updateCoordinates();
  viewport.tabIndex=0;viewport.setAttribute('role','group');viewport.setAttribute('aria-describedby','world-instructions');
  viewport.setAttribute('aria-label',es?'Paisaje 3D. Arrastra para girar o usa las flechas del teclado.':'3D landscape. Drag to rotate or use the arrow keys.');
  function dispose(){
   if(disposed)return;disposed=true;cancelAnimationFrame(raf);observer.disconnect();resizeObserver.disconnect();
-  document.removeEventListener('visibilitychange',onVisibility);document.removeEventListener('chess:intro-end',start);sceneMotion.removeEventListener('change',syncMotion);
+  document.removeEventListener('visibilitychange',onVisibility);document.removeEventListener('intro:end',start);sceneMotion.removeEventListener('change',syncMotion);
   scene.traverse(object=>{object.geometry?.dispose();object.material?.dispose();});renderer.dispose();canvas.remove();capture=()=>{};
  }
  canvas.addEventListener('webglcontextlost',event=>{

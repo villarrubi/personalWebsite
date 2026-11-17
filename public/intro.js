@@ -1,123 +1,111 @@
-import {introPose, INTRO_DURATION} from './chess-timeline.js';
-import {captureIntroPage} from './intro-page.js';
-
 const home=document.querySelector('.experience-hero');
 const es=document.documentElement.lang==='es';
 const query=new URLSearchParams(location.search);
-// The entrance plays on every open and refresh; only explicit links opt out.
 const disabled=query.get('intro')==='off'||query.get('motion')==='off';
-const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
-const controls=[...document.querySelectorAll('[data-intro]')];
-let scene,active,disposed=false;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const DURATION=4600;
+let active=null,disposed=false;
 
-// Count only time the page is visible: a tab opened in the background must not
-// spend the entrance's safety budget before the visitor has seen it.
-function visibleTimeout(callback,delay){
-  let remaining=delay,since=0,timer=0;
-  const sync=()=>{
-    if(document.hidden){if(timer){clearTimeout(timer);timer=0;remaining-=performance.now()-since;}}
-    else if(!timer){since=performance.now();timer=setTimeout(()=>{cancel();callback();},Math.max(0,remaining));}
-  };
-  const cancel=()=>{clearTimeout(timer);timer=0;document.removeEventListener('visibilitychange',sync);};
-  document.addEventListener('visibilitychange',sync);sync();
-  return cancel;
+function clearPending(){
+  document.documentElement.classList.remove('intro-pending');
+  window.cancelIntroBoot?.();
 }
-function clearPending(){document.documentElement.classList.remove('intro-pending');clearTimeout(window.chessIntroWatchdog);}
-async function getScene(mount,isFinished){
-  return import('./chess-scene.js').then(module=>module.createChessScene(mount)).then(result=>{
-    if(disposed||isFinished()){result.dispose();return null;}
-    scene=result;
-    return scene;
-  }).catch(error=>{
-    console.warn('Chess intro unavailable; showing the page.',error);
-    return null;
-  });
-}
-async function playIntro(trigger){
+
+function playIntro(trigger){
   if(active||!home||disposed)return;
-  const overlay=document.createElement('div');overlay.className='chess-intro';
-  overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
-  overlay.setAttribute('aria-label',es?'Del ajedrez al código. Animación de entrada.':'From chess to code. Entrance animation.');
-  overlay.innerHTML=`<div class="intro-curtain"></div><div class="intro-meta"><span>av.</span><span>SOFTWARE / ${es?'IA LOCAL':'LOCAL AI'} / HARDWARE</span></div><div class="intro-caption"><span>ALEJANDRO VILLARRUBIA</span><p>${es?'Curiosidad para construir.':'Curiosity to build.'}</p></div><div class="intro-progress" aria-hidden="true"><i></i></div><button class="intro-skip" type="button">${es?'Saltar intro':'Skip intro'} <span aria-hidden="true">↗</span></button>`;
-  const mount=document.createElement('div');mount.className='chess-canvas';
+  const overlay=document.createElement('div');
+  overlay.className='code-intro';
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-label',es?'Del código a las ideas. Animación de entrada.':'From code to ideas. Entrance animation.');
+  overlay.innerHTML=`
+    <div class="intro-grid" aria-hidden="true"></div>
+    <div class="intro-meta" aria-hidden="true"><span>av.</span><span>SOFTWARE / ${es?'IA LOCAL':'LOCAL AI'} / HARDWARE</span></div>
+    <div class="intro-workspace" aria-hidden="true">
+      <div class="intro-file"><span><i></i> curiosity.ts</span><span>01 — 03</span></div>
+      <div class="intro-source">
+        <div><span class="intro-line-number">01</span><code data-code-line></code></div>
+        <div><span class="intro-line-number">02</span><code data-code-line></code></div>
+        <div><span class="intro-line-number">03</span><code data-code-line></code></div>
+      </div>
+      <div class="intro-circuit">
+        <svg viewBox="0 0 600 76" preserveAspectRatio="none"><path d="M300 0V32M100 76V42Q100 32 110 32H490Q500 32 500 42V76M300 32V76"/></svg>
+        <div class="intro-nodes"><span><b>&lt;/&gt;</b>software</span><span><b>✳</b>${es?'ia local':'local ai'}</span><span><b>⌘</b>hardware</span></div>
+      </div>
+      <div class="intro-output"><span>↳</span> ${es?'La curiosidad toma forma.':'Curiosity takes shape.'}<i></i></div>
+    </div>
+    <div class="intro-signature" aria-hidden="true"><span>${es?'DE LA IDEA A LO REAL':'FROM IDEA TO REALITY'}</span><p>Alejandro <em>Villarrubia</em></p></div>
+    <div class="intro-caption" aria-hidden="true"><span>ALEJANDRO VILLARRUBIA</span><p>${es?'Todo empieza con una idea.':'It starts with an idea.'}</p></div>
+    <div class="intro-progress" aria-hidden="true"><i></i></div>
+    <button class="intro-skip" type="button">${es?'Saltar intro':'Skip intro'} <span aria-hidden="true">↗</span></button>`;
   const previousFocus=document.activeElement,previousOverflow=document.body.style.overflow;
-  const previousScroll=scrollY;
   const underlying=[...document.body.children].filter(el=>el.tagName!=='SCRIPT');
   const inertStates=underlying.map(el=>el.inert);
+  const root=document.documentElement;
+  root.classList.remove('hero-enter');root.classList.add('intro-playing');
   document.body.style.overflow='hidden';
-  // The live page is revealed by the entrance itself; never stage it a second time.
-  document.documentElement.classList.remove('hero-enter');
-  document.documentElement.classList.add('intro-playing');
-  // The code is rebuilt into the layout below before handing it back to HTML.
-  document.body.append(overlay);overlay.append(mount);
-  underlying.forEach(el=>el.inert=true);
-  Object.assign(mount.style,{position:'fixed',left:'0px',top:'0px',width:'100vw',height:'100dvh',opacity:'0'});
+  document.body.append(overlay);underlying.forEach(el=>el.inert=true);
   const skip=overlay.querySelector('.intro-skip');
-  const curtain=overlay.querySelector('.intro-curtain'),meta=overlay.querySelector('.intro-meta'),caption=overlay.querySelector('.intro-caption'),progress=overlay.querySelector('.intro-progress i');
-  let raf=0,cancelWatchdog=()=>{},elapsed=0,last=0,started=false,finished=false;
-  const captureController=new AbortController();
+  const lines=[...overlay.querySelectorAll('[data-code-line]')];
+  const code=['const idea = curiosity();','const tools = [software, ai, hardware];','build(idea, tools);'];
+  const workspace=overlay.querySelector('.intro-workspace');
+  const signature=overlay.querySelector('.intro-signature');
+  const progress=overlay.querySelector('.intro-progress i');
+  let raf=0,elapsed=0,last=null,finished=false,watchdog=0;
   const finish=()=>{
     if(finished)return;finished=true;
-    cancelAnimationFrame(raf);cancelWatchdog();captureController.abort();
+    cancelAnimationFrame(raf);clearTimeout(watchdog);
     document.removeEventListener('keydown',key);document.removeEventListener('visibilitychange',visibility);
-    scene?.dispose();scene=null;overlay.remove();
-    document.body.style.overflow=previousOverflow;
+    overlay.remove();document.body.style.overflow=previousOverflow;
     underlying.forEach((el,i)=>el.inert=inertStates[i]);
-    document.documentElement.classList.remove('intro-playing');clearPending();
-    active=null;
-    if(trigger)previousFocus?.focus({preventScroll:true});
-    document.dispatchEvent(new Event('chess:intro-end'));
+    root.classList.remove('intro-playing');clearPending();active=null;
+    if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
+    document.dispatchEvent(new Event('intro:end'));
   };
-  const key=event=>{if(event.key==='Escape')finish();if(event.key==='Tab'){event.preventDefault();skip.focus({preventScroll:true});}};
-  const visibility=()=>{last=0;if(document.hidden){cancelAnimationFrame(raf);}else if(started&&!finished){raf=requestAnimationFrame(frame);}};
-  active={finish};cancelWatchdog=visibleTimeout(finish,20000);
-  mount.addEventListener('chess:lost',finish,{once:true});
-  skip.addEventListener('click',finish);document.addEventListener('keydown',key);document.addEventListener('visibilitychange',visibility);
-  skip.focus({preventScroll:true});clearPending();
-  if(trigger&&previousScroll>20)window.scrollTo({top:0,left:0,behavior:'instant'});
-  // Prepare the guide before animation starts, avoiding a capture stutter halfway.
-  let captureTimer;
-  // On refresh, wait for restored scroll/hash positioning before sampling HTML.
-  const pageReady=reloading&&document.readyState!=='complete'
-    ?new Promise(resolve=>window.addEventListener('load',()=>setTimeout(resolve,0),{once:true}))
-    :Promise.resolve();
-  const guidePromise=Promise.race([
-    pageReady.then(()=>captureIntroPage(captureController.signal)),
-    new Promise(resolve=>{captureTimer=setTimeout(()=>{captureController.abort();resolve(null);},3500);}),
-  ]).finally(()=>clearTimeout(captureTimer));
-  const [renderScene,pageGuide]=await Promise.all([getScene(mount,()=>finished),guidePromise]);
-  if(finished)return;
-  if(!renderScene){finish();return;}
-  renderScene.setPageGuide(pageGuide);
-  overlay.dataset.pageGuide=pageGuide?'ready':'fallback';
-  overlay.classList.add('is-ready');started=true;
-  // Slow GPUs play the entrance in slow motion (each frame advances at most 250 ms),
-  // so only give up when frames stop arriving, never because it took longer.
-  const stall=()=>{cancelWatchdog();cancelWatchdog=visibleTimeout(finish,4000);};
-  stall();
+  const key=event=>{
+    if(event.key==='Escape')finish();
+    if(event.key==='Tab'){event.preventDefault();skip.focus({preventScroll:true});}
+  };
+  const armWatchdog=()=>{clearTimeout(watchdog);if(!document.hidden)watchdog=setTimeout(finish,8000);};
+  const visibility=()=>{
+    last=null;cancelAnimationFrame(raf);armWatchdog();
+    if(!document.hidden&&!finished)raf=requestAnimationFrame(frame);
+  };
+  const clamp=value=>Math.max(0,Math.min(1,value));
   function frame(now){
     if(finished||document.hidden)return;
-    if(last)elapsed+=Math.min(now-last,250);last=now;
-    const pose=introPose(elapsed);
-    meta.style.opacity=pose.caption;caption.style.opacity=pose.caption;
-    progress.style.transform=`scaleX(${pose.progress})`;
-    progress.parentElement.style.opacity=pose.controls;skip.style.opacity=pose.controls;
-    renderScene.render(pose,innerWidth,innerHeight);mount.style.opacity='1';curtain.style.opacity='0';
-    overlay.dataset.phase=pose.reveal>0?'reveal':pose.assemble>0?'assemble':pose.matrix>0?'matrix':pose.dissolve>0?'board-code':'board';
-    stall();
-    if(elapsed>=INTRO_DURATION)finish();else raf=requestAnimationFrame(frame);
+    if(last!==null)elapsed+=Math.min(now-last,100);last=now;
+    // Reduced motion keeps the sequence, with static code and gentle fades.
+    const simple=reduced.matches;
+    for(let i=0;i<lines.length;i++){
+      const count=simple?code[i].length:Math.floor(clamp((elapsed-200-i*470)/430)*code[i].length);
+      lines[i].textContent=code[i].slice(0,count);
+      lines[i].classList.toggle('is-typing',!simple&&count>0&&count<code[i].length);
+    }
+    overlay.classList.toggle('is-connected',elapsed>=1550);
+    overlay.classList.toggle('is-built',elapsed>=2100);
+    const exit=clamp((elapsed-2750)/500),name=clamp((elapsed-3000)/550);
+    workspace.style.opacity=String(1-exit);
+    workspace.style.transform=simple?'none':`translateY(${-exit*18}px)`;
+    signature.style.opacity=String(name);
+    signature.style.transform=simple?'none':`translateY(${(1-name)*16}px)`;
+    overlay.style.opacity=String(1-clamp((elapsed-3950)/650));
+    progress.style.transform=`scaleX(${clamp(elapsed/DURATION)})`;
+    overlay.dataset.phase=elapsed<1550?'code':elapsed<2750?'connect':elapsed<3950?'signature':'reveal';
+    armWatchdog();
+    if(elapsed>=DURATION)finish();else raf=requestAnimationFrame(frame);
   }
-  raf=requestAnimationFrame(frame);
+  active={finish};
+  skip.addEventListener('click',finish);document.addEventListener('keydown',key);
+  document.addEventListener('visibilitychange',visibility);
+  skip.focus({preventScroll:true});clearPending();
+  if(trigger&&scrollY>20)window.scrollTo({top:0,left:0,behavior:'instant'});
+  armWatchdog();if(!document.hidden)raf=requestAnimationFrame(frame);
 }
 
 if(home){
-  controls.forEach(button=>button.addEventListener('click',()=>playIntro(button)));
-  if(disabled){clearPending();document.documentElement.classList.add('hero-enter');}
-  else playIntro();
-  window.addEventListener('pagehide',event=>{
-    active?.finish();
-    if(!event.persisted)disposed=true;
-  });
-  // Pages restored from the back/forward cache are visits too.
+  document.querySelectorAll('[data-intro]').forEach(button=>button.addEventListener('click',()=>playIntro(button)));
+  if(disabled){clearPending();document.documentElement.classList.add('hero-enter');}else playIntro();
+  window.addEventListener('pagehide',event=>{active?.finish();if(!event.persisted)disposed=true;});
   window.addEventListener('pageshow',event=>{if(event.persisted&&!disabled)playIntro();});
 }else clearPending();

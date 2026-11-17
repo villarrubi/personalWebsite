@@ -61,7 +61,7 @@ for(const options of [{},{persisted:true},{session:true,reload:true},{storageBlo
 {
   const preloads=[],timers=[];
   assert(entrancePending({preloads,timers}),'A fresh visit covers the page');
-  assert(preloads.some(link=>link.href==='/assets/chess/staunton.bin'&&link.as==='fetch')&&preloads.some(link=>link.href==='/chess-scene.js'),'The entrance assets start downloading with the HTML');
+  assert.equal(preloads.length,0,'The code entrance needs no 3D assets or extra preloads');
   assert.deepEqual(timers,[12000],'The curtain fails open after 12 visible seconds');
   const hiddenTimers=[];
   assert(entrancePending({hidden:true,timers:hiddenTimers}),'A background tab keeps the curtain for when it is shown');
