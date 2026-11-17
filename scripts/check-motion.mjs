@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {heroEffects,pointerInfluence,signalValue} from '../public/hero-effects.js';
+import {pointerInfluence} from '../public/hero-effects.js';
 
 const source=(await readFile(new URL('../public/scene-motion.js',import.meta.url),'utf8'))
  .replace('export const sceneMotion=', 'const sceneMotion=globalThis.motion=');
@@ -59,39 +59,22 @@ assert(!ambientVisit({reduced:true}).classes.has('ambient-enabled'));
 assert(!ambientVisit({search:'?motion=off'}).classes.has('ambient-enabled'));
 console.log('PASS: background pause/resume, hidden-tab suspension, reduced motion, and explicit motion opt-out.');
 
-// The preview modes are distinct and react locally without unbounded amplitudes.
-assert.deepEqual(heroEffects,['signals','code','pixels']);
+// The code background reacts locally to the pointer.
 assert.equal(pointerInfluence(100,100,{active:false,x:100,y:100}),0);
 assert.equal(pointerInfluence(100,100,{active:true,x:100,y:100}),1);
 assert.equal(pointerInfluence(500,500,{active:true,x:100,y:100}),0);
 assert.equal(pointerInfluence(100,100,{active:true,x:100,y:100,strength:.5}),.5);
-for(const time of [0,1,100,1000])for(const u of [0,.1,.5,1])for(const channel of [0,1,2])for(const influence of [0,.5,1]){
- const value=signalValue(u,time,channel,influence);
- assert(Number.isFinite(value)&&Math.abs(value)<=1.71);
-}
-assert.notEqual(signalValue(.1,0,0),signalValue(.1,0,1),'Analog and digital traces are different');
-assert(Math.abs(signalValue(.1,0,0,1))>Math.abs(signalValue(.1,0,0,0)),'Pointer interaction amplifies a nearby signal');
-console.log('PASS: three background choices, bounded signals, and local pointer response.');
+console.log('PASS: local pointer response.');
 
-// Exercise the real picker handlers with a canvas recorder, including while paused.
+// The code field renders on load even when motion is paused.
 const effectSource=(await readFile(new URL('../public/hero-effects.js',import.meta.url),'utf8')).replaceAll('export ','');
 const calls=[];
 const context2d=new Proxy({}, {get:(_,name)=>name==='measureText'?text=>({width:text.length*8}):name.startsWith('create')?()=>({addColorStop(){}}):(...args)=>calls.push([name,...args]),set:()=>true});
-const effectButtons=heroEffects.map(effect=>({dataset:{heroEffect:effect},attrs:{},setAttribute(name,value){this.attrs[name]=value;},addEventListener(type,handler){this[type]=handler;}}));
-const picker={hidden:true,querySelectorAll:()=>effectButtons};
-const hero={querySelector:()=>picker,getBoundingClientRect:()=>({width:1000,height:500,left:0,top:0}),addEventListener(){}};
+const hero={getBoundingClientRect:()=>({width:1000,height:500,left:0,top:0}),addEventListener(){}};
 const canvas={getContext:()=>context2d,closest:()=>hero};
 runInNewContext(effectSource,{
  document:{querySelector:()=>canvas,documentElement:{classList:{contains:()=>false}},hidden:false,addEventListener(){}},
  window:{},devicePixelRatio:1,MutationObserver:class{observe(){}},addEventListener(){},cancelAnimationFrame(){},
 });
-assert.equal(picker.hidden,false);
-assert.equal(calls.filter(call=>call[0]==='fillText').length,3,'Signals render three channels by default');
-calls.length=0;effectButtons[1].click();
-assert.equal(calls.filter(call=>call[0]==='fillText').length,8,'Code selection renders the snippet field');
-assert.equal(effectButtons[1].attrs['aria-pressed'],'true');
-calls.length=0;effectButtons[2].click();
-assert.equal(calls.filter(call=>call[0]==='fillText').length,0);
-assert(calls.filter(call=>call[0]==='fillRect').length>100,'Pixel selection replaces code with a grid');
-assert.equal(effectButtons.filter(button=>button.attrs['aria-pressed']==='true').length,1);
-console.log('PASS: background picker switches all renderers immediately, including while motion is paused.');
+assert.equal(calls.filter(call=>call[0]==='fillText').length,8,'Code background renders immediately without a selector');
+console.log('PASS: code background renders on load, including while motion is paused.');

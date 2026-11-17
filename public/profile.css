@@ -78,10 +78,3 @@
 .hero-language-banner:hover{background:#184557;border-color:#b0e7e9;transform:translateY(-2px)}
 .hero-language-banner:hover>strong>span{transform:translate(2px,-2px)}
 @media(max-width:600px){.hero-language-banner{padding:10px 16px;gap:3px 14px;margin-bottom:20px}.hero-language-banner>span{font-size:12px}.hero-language-banner>strong{font-size:17px}.hero-effects{opacity:1}}
-
-.hero-effect-picker{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:5px;margin-top:18px;pointer-events:auto}
-.hero-effect-picker>span{font-size:10px;color:#9db3c5;margin-right:8px}
-.hero-effect-picker>button{min-height:44px;padding:7px 13px;border:1px solid #8bc9cf30;border-radius:6px;background:#0a1d2de6;color:#b6c9d8;font-size:11px;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
-.hero-effect-picker>button[aria-pressed=true]{border-color:#8bc9cf95;background:#143d4b;color:#e2f4f3}
-.hero-effect-picker>button:hover{border-color:#8bc9cf;color:#fff}
-@media(max-width:480px){.hero-effect-picker{gap:5px;margin-top:14px}.hero-effect-picker>button{padding-inline:11px}.hero-effect-picker>span{margin-right:3px}}
