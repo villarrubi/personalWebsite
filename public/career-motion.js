@@ -1,11 +1,18 @@
-// One sticky viewer, with compact scroll steps rather than invisible card rows.
+// Hold each page for reading, then overlap its exit with the next page's arrival.
 export function careerFrame(progress,count) {
  const last=Math.max(0,count-1);
  const position=Math.min(last,Math.max(0,Number.isFinite(progress)?progress:0));
  const index=Math.min(last,Math.floor(position+.5));
- const distance=position-index;
- return {index,offset:-distance*24,scale:1-Math.abs(distance)*.018,opacity:1-Math.abs(distance)*.3,progress:last?position/last:1};
+ const lower=Math.floor(position),fraction=position-lower;
+ const blend=Math.max(0,Math.min(1,(fraction-.28)/.44));
+ const mix=blend*blend*(3-2*blend);
+ const pages=lower===last||mix===0?[{index:lower,offset:0,scale:1,opacity:1}]:mix===1?[{index:lower+1,offset:0,scale:1,opacity:1}]:[
+  {index:lower,offset:-72*mix,scale:1-.045*mix,opacity:1-mix},
+  {index:lower+1,offset:96*(1-mix),scale:.96+.04*mix,opacity:mix},
+ ];
+ return {index,pages,progress:last?position/last:1};
 }
+export function careerScrollStep(height){return Math.max(460,Math.min(760,height*.8));}
 export function canUseViewer({height,availableHeight,reducedMotion}) {
  return !reducedMotion&&height>0&&height<=availableHeight;
 }
@@ -25,14 +32,13 @@ if(timeline){
  section.classList.toggle('career-motion-off',motionOff);
  const es=document.documentElement.lang==='es';
  const titles=cards.map(card=>`${card.querySelector('time').textContent} · ${card.querySelector('h3').textContent}`);
- let enabled=false,active=-1,frame=0,visible=true,top=98,step=130,start=0,measuring=false;
+ let enabled=false,active=-1,frame=0,visible=true,top=98,step=600,start=0,measuring=false;
  const clampIndex=index=>Math.max(0,Math.min(cards.length-1,index));
  function select(index){
   if(index===active)return;
   const previous=cards[active];
-  cards[index].style.setProperty('--card-enter-y',index<active?'-24px':'24px');
   if(previous?.contains(document.activeElement))document.activeElement.blur();
-  cards.forEach((card,i)=>{card.hidden=i!==index;card.classList.toggle('is-active',i===index);});
+  cards.forEach((card,i)=>{card.inert=i!==index;card.setAttribute('aria-hidden',String(i!==index));card.classList.toggle('is-active',i===index);});
   steps.forEach((button,i)=>{if(i===index)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');});
   active=index;
   counter.textContent=`${String(index+1).padStart(2,'0')} / ${String(cards.length).padStart(2,'0')}`;
@@ -42,13 +48,17 @@ if(timeline){
  }
  function paint(){
   frame=0;
-  if(!enabled||!visible||document.hidden)return;
+  if(!enabled||document.hidden)return;
   const state=careerFrame((scrollY-start)/step,cards.length);
   select(state.index);
-  const card=cards[state.index];
-  card.style.setProperty('--page-offset',`${state.offset.toFixed(2)}px`);
-  card.style.setProperty('--page-scale',state.scale.toFixed(4));
-  card.style.setProperty('--page-opacity',state.opacity.toFixed(3));
+  cards.forEach((card,index)=>{
+   const page=state.pages.find(page=>page.index===index);
+   card.hidden=!page;
+   if(!page)return;
+   card.style.setProperty('--page-offset',`${page.offset.toFixed(2)}px`);
+   card.style.setProperty('--page-scale',page.scale.toFixed(4));
+   card.style.setProperty('--page-opacity',page.opacity.toFixed(3));
+  });
  }
  function schedule(){if(enabled&&visible&&!document.hidden&&!frame)frame=requestAnimationFrame(paint);}
  function measure(){
@@ -58,10 +68,10 @@ if(timeline){
   const oldProgress=wasEnabled?(scrollY-start)/step:0;
   const keepPosition=wasEnabled&&oldProgress>=0&&oldProgress<=cards.length-1;
   section.classList.remove('career-deck');
-  cards.forEach(card=>{card.hidden=false;card.classList.remove('is-active');});
+  cards.forEach(card=>{card.hidden=false;card.inert=false;card.removeAttribute('aria-hidden');card.classList.remove('is-active');});
   controls.hidden=false;
   top=(document.querySelector('.site-header')?.offsetHeight||70)+12;
-  step=Math.max(100,Math.min(150,innerHeight*.18));
+  step=careerScrollStep(innerHeight);
   const available=innerHeight-top-16;
   section.style.setProperty('--viewer-top',`${top}px`);
   section.style.setProperty('--viewer-height',`${available}px`);
@@ -91,8 +101,7 @@ if(timeline){
  }
  function go(index){
   if(!enabled)return;
-  scrollTo({top:start+clampIndex(index)*step,behavior:'instant'});
-  paint();
+  scrollTo({top:start+clampIndex(index)*step,behavior:'smooth'});
  }
  steps.forEach((button,index)=>button.addEventListener('click',()=>go(index)));
  controls.addEventListener('keydown',event=>{

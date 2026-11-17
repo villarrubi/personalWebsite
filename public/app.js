@@ -44,3 +44,4 @@ import './project-map.js';
 import './career-motion.js';
 import './ambient-motion.js';
 import './hero-effects.js';
+import './scroll-pacing.js';
