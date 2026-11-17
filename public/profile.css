@@ -35,4 +35,6 @@
 
 /* Keep the opening compact without shrinking the name or the orbital workspace. */
 .experience-layout{min-height:0;padding-block:38px 44px}
+.experience-actions{flex-wrap:wrap;row-gap:12px}
+.experience-actions>a{white-space:nowrap}
 @media(max-width:760px){.experience-layout{padding-block:30px 36px}}
