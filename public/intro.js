@@ -5,7 +5,7 @@ const es=document.documentElement.lang==='es';
 const query=new URLSearchParams(location.search);
 const disabled=query.get('intro')==='off'||query.get('motion')==='off';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const DURATION=5200;
+const DURATION=4800;
 let active=null,disposed=false;
 
 function clearPending(){
@@ -21,14 +21,7 @@ function playIntro(trigger){
   overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label',es?'Del código a las ideas. Animación de entrada.':'From code to ideas. Entrance animation.');
   overlay.innerHTML=`
-    <div class="intro-atmosphere" aria-hidden="true"></div>
     <canvas class="intro-canvas" aria-hidden="true"></canvas>
-    <div class="intro-meta" aria-hidden="true"><span>av.</span><span>SOFTWARE / ${es?'IA LOCAL':'LOCAL AI'} / HARDWARE</span></div>
-    <div class="intro-signature" aria-hidden="true">
-      <div class="intro-name"><span class="intro-name-line">Alejandro</span><em class="intro-name-line">Villarrubia</em></div>
-      <span class="intro-tagline">${es?'LA CURIOSIDAD TOMA FORMA':'CURIOSITY TAKES SHAPE'}</span>
-    </div>
-    <div class="intro-caption" aria-hidden="true"><span class="intro-status-dot"></span><span>${es?'IDEAS CONECTADAS. POSIBILIDADES REALES.':'CONNECTED IDEAS. REAL POSSIBILITIES.'}</span></div>
     <div class="intro-progress" aria-hidden="true"><i></i></div>
     <button class="intro-skip" type="button">${es?'Saltar intro':'Skip intro'} <span aria-hidden="true">↗</span></button>`;
   const previousFocus=document.activeElement,previousOverflow=document.body.style.overflow;
@@ -39,11 +32,11 @@ function playIntro(trigger){
   document.body.style.overflow='hidden';
   document.body.append(overlay);underlying.forEach(el=>el.inert=true);
   const skip=overlay.querySelector('.intro-skip');
-  const signature=overlay.querySelector('.intro-signature');
+  const targets=[home.querySelector('.experience-name'),home.querySelector('.experience-intro')].filter(Boolean);
   const progress=overlay.querySelector('.intro-progress i');
-  const tagline=overlay.querySelector('.intro-tagline');
   let scene=null;
-  try{scene=createCircuit(overlay.querySelector('.intro-canvas'),signature);}catch{ /* Static signature remains available if canvas is restricted. */ }
+  if(trigger&&scrollY>20)window.scrollTo({top:0,left:0,behavior:'instant'});
+  try{scene=createCircuit(overlay.querySelector('.intro-canvas'),targets);}catch{ /* Reveal the live heading if canvas is restricted. */ }
   let raf=0,elapsed=0,last=null,finished=false,watchdog=0;
   const finish=()=>{
     if(finished)return;finished=true;
@@ -51,7 +44,9 @@ function playIntro(trigger){
     document.removeEventListener('keydown',key);document.removeEventListener('visibilitychange',visibility);
     scene?.dispose();overlay.remove();document.body.style.overflow=previousOverflow;
     underlying.forEach((el,i)=>el.inert=inertStates[i]);
-    root.classList.remove('intro-playing');clearPending();active=null;
+    root.classList.remove('intro-playing');
+    root.style.removeProperty('--intro-text');root.style.removeProperty('--intro-rest');
+    clearPending();active=null;
     if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
     document.dispatchEvent(new Event('intro:end'));
   };
@@ -68,22 +63,21 @@ function playIntro(trigger){
   function frame(now){
     if(finished||document.hidden)return;
     if(last!==null)elapsed+=Math.min(now-last,100);last=now;
-    const simple=reduced.matches||!scene;
-    try{scene?.render(elapsed,simple);}catch{scene?.dispose();scene=null;}
-    const name=clamp((elapsed-(simple?250:3000))/(simple?700:750));
-    signature.style.opacity=String(name);
-    tagline.style.opacity=String(clamp((elapsed-(simple?450:3500))/500));
-    overlay.style.opacity=String(1-clamp((elapsed-4400)/800));
-    progress.style.transform=`scaleX(${clamp(elapsed/DURATION)})`;
-    overlay.dataset.phase=elapsed<1650?'circuit':elapsed<3350?'form':elapsed<4400?'signature':'reveal';
+    let simple=reduced.matches||!scene;
+    try{if(scene?.render(elapsed,simple)===false){finish();return;}}catch{scene?.dispose();scene=null;simple=true;}
+    // These are the actual hero nodes: reveal them once and leave them in place.
+    root.style.setProperty('--intro-text',String(clamp((elapsed-(simple?150:2750))/(simple?650:600))));
+    root.style.setProperty('--intro-rest',String(clamp((elapsed-(simple?850:3450))/(simple?700:1250))));
+    overlay.style.opacity=String(1-clamp((elapsed-(simple?1250:4400))/400));
+    progress.style.transform=`scaleX(${clamp(elapsed/(simple?1650:DURATION))})`;
+    overlay.dataset.phase=elapsed<1000?'circuit':elapsed<3350?'form':'reveal';
     armWatchdog();
-    if(elapsed>=DURATION)finish();else raf=requestAnimationFrame(frame);
+    if(elapsed>=(simple?1650:DURATION))finish();else raf=requestAnimationFrame(frame);
   }
   active={finish};
   skip.addEventListener('click',finish);document.addEventListener('keydown',key);
   document.addEventListener('visibilitychange',visibility);
   skip.focus({preventScroll:true});clearPending();
-  if(trigger&&scrollY>20)window.scrollTo({top:0,left:0,behavior:'instant'});
   armWatchdog();if(!document.hidden)raf=requestAnimationFrame(frame);
 }
 

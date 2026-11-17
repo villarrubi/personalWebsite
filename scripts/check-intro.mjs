@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
+import {circuitPaths} from '../public/intro-circuit.js';
 
 const source=(await readFile(new URL('../public/intro.js',import.meta.url),'utf8')).replace("import {createCircuit} from './intro-circuit.js';",'');
-function visit({search='',lang='es',reduced=false,home=true,hidden=false,canvas=true,renderFails=false}={}){
+function visit({search='',lang='es',reduced=false,home=true,hidden=false,canvas=true,renderFails=false,offscreen=false}={}){
  const classes=()=>{const values=new Set();return {add:(...names)=>names.forEach(n=>values.add(n)),remove:(...names)=>names.forEach(n=>values.delete(n)),contains:n=>values.has(n),toggle:(n,on)=>on?values.add(n):values.delete(n)};};
  const events=new Map(),windowEvents=new Map(),frames=new Map(),timers=new Map();
  let id=0,overlay=null,focus=null,ended=0,disposed=0;const renders=[];
- const element=()=>({style:{},dataset:{},classList:classes(),isConnected:true,inert:false,tagName:'MAIN',addEventListener(name,fn){this[name]=fn;},setAttribute(){},focus(){focus=this;},remove(){this.isConnected=false;}});
- const previous=element(),page=element(),alreadyInert=element();alreadyInert.inert=true;
+ const element=()=>({style:{setProperty(name,value){this[name]=value;},removeProperty(name){delete this[name];}},dataset:{},classList:classes(),isConnected:true,inert:false,tagName:'MAIN',addEventListener(name,fn){this[name]=fn;},setAttribute(){},focus(){focus=this;},remove(){this.isConnected=false;}});
+ const previous=element(),page=element(),alreadyInert=element(),name=element(),phrase=element();alreadyInert.inert=true;
+ page.querySelector=selector=>selector==='.experience-name'?name:phrase;
  const root=element();root.lang=lang;root.classList.add('intro-pending');
  const body={children:[page,alreadyInert],style:{overflow:'auto'},append(el){overlay=el;}};
  const document={documentElement:root,body,activeElement:previous,hidden,
@@ -18,7 +20,7 @@ function visit({search='',lang='es',reduced=false,home=true,hidden=false,canvas=
   dispatchEvent:event=>{if(event.type==='intro:end')ended++;},
  };
  const window={addEventListener:(name,fn)=>windowEvents.set(name,fn),cancelIntroBoot(){root.classList.remove('intro-pending');}};
- runInNewContext(source,{createCircuit:()=>canvas?{render(time,reduced){if(renderFails)throw new Error('Canvas lost');renders.push({time,reduced});},dispose(){disposed++;}}:null,document,window,location:{search},URLSearchParams,matchMedia:()=>({matches:reduced}),Event,scrollY:0,
+ runInNewContext(source,{createCircuit:(_,targets)=>{assert.deepEqual(Array.from(targets),[name,phrase],'The renderer targets the existing hero nodes');return canvas?{render(time,reduced){if(offscreen)return false;if(renderFails)throw new Error('Canvas lost');renders.push({time,reduced});},dispose(){disposed++;}}:null;},document,window,location:{search},URLSearchParams,matchMedia:()=>({matches:reduced}),Event,scrollY:0,
   requestAnimationFrame:fn=>{frames.set(++id,fn);return id;},cancelAnimationFrame:key=>frames.delete(key),
   setTimeout:fn=>{timers.set(++id,fn);return id;},clearTimeout:key=>timers.delete(key),
  });
@@ -37,6 +39,7 @@ function released(v){
  assert(!v.root.classList.contains('intro-pending'));assert.equal(v.body.style.overflow,'auto');
  assert(!v.page.inert);assert(v.alreadyInert.inert);assert.equal(v.frames.size,0);assert.equal(v.timers.size,0);
  assert.equal(v.events.size,0);assert.equal(v.focus,v.previous);
+ assert.equal(v.root.style['--intro-text'],undefined);assert.equal(v.root.style['--intro-rest'],undefined);
 }
 for(const lang of ['es','en']){
  const v=visit({lang});assert(v.overlay.innerHTML.includes(lang==='es'?'Saltar intro':'Skip intro'));
@@ -66,8 +69,31 @@ const calm=visit({reduced:true});calm.tick();
 assert(calm.renders.every(frame=>frame.reduced));calm.key('Escape');released(calm);
 for(const options of [{canvas:false},{renderFails:true}]){
  const fallback=visit(options);for(let i=0;i<15;i++)fallback.tick();
- assert.equal(fallback.overlay.querySelector('.intro-signature').style.opacity,'1','A restricted or lost canvas shows the static name');
+ assert.equal(fallback.root.style['--intro-text'],'1','A restricted or lost canvas reveals the original hero text');
  fallback.key('Escape');released(fallback);
 }
 
-console.log('PASS: circuit intro completion, skip, Escape, focus/inert restoration, watchdog, hidden tabs, history, URL opt-outs, reduced motion, canvas fallback/disposal and both languages.');
+const continuous=visit();
+assert(!/intro-signature|intro-name|intro-tagline|Alejandro|Villarrubia/.test(continuous.overlay.innerHTML),'The overlay contains no second heading or phrase');
+for(let i=0;i<35;i++)continuous.tick();
+assert.equal(continuous.root.style['--intro-text'],'1','The live heading finishes forming before the rest appears');
+assert.equal(continuous.root.style['--intro-rest'],'0');
+for(let i=0;i<10;i++){
+ continuous.tick();assert.equal(continuous.root.style['--intro-text'],'1','The original heading never fades away during the page reveal');
+}
+assert(Number(continuous.root.style['--intro-rest'])>0);
+continuous.key('Escape');released(continuous);
+const anchored=visit({offscreen:true});anchored.tick();released(anchored);
+for(const [width,height] of [[320,568],[390,844],[844,390],[1440,900]]){
+ const targets=Array.from({length:96},(_,i)=>({x:width*(.15+.7*(i%12)/11),y:height*(.2+.3*Math.floor(i/12)/7)}));
+ const paths=circuitPaths(width,height,targets);
+ assert.equal(paths.length,48);
+ assert(new Set(paths.map(p=>`${p.points.at(-1).x},${p.points.at(-1).y}`)).size>24,'Traces end at distributed letters, not a shared hub');
+ for(const path of paths){
+  assert(Number.isFinite(path.total)&&path.total>0);
+  assert(path.points.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)));
+  assert(targets.some(p=>p.x===path.points.at(-1).x&&p.y===path.points.at(-1).y));
+ }
+}
+assert.deepEqual(circuitPaths(320,568,[]),[]);
+console.log('PASS: circuit intro lifecycle, live heading continuity, distributed traces at four viewport sizes, anchored visits, canvas fallback, focus and reduced motion.');
