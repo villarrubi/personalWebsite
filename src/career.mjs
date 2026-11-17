@@ -1,5 +1,3 @@
-import {publishedProjects} from './content.mjs';
-
 // Early milestones and the master's year follow the author's corrections.
 // Professional dates and responsibilities are taken from the CV sources in cv/.
 const learning = [
@@ -8,56 +6,36 @@ const learning = [
   period: {es: '2018', en: '2018'},
   role: {es: 'Descubrir la lógica de programar', en: 'Discovering programming logic'},
   summary: {
-   es: 'Empecé a programar con herramientas como Scratch y RoboMind. Entre bloques, instrucciones y pequeños retos, descubrí cómo convertir una idea en una secuencia de pasos.',
-   en: 'I started programming with tools such as Scratch and RoboMind. Through blocks, instructions, and small challenges, I discovered how to turn an idea into a sequence of steps.',
+   es: 'Scratch y RoboMind me enseñaron la lógica de programar: secuencias, condiciones y bucles.',
+   en: 'Scratch and RoboMind taught me programming logic: sequences, conditions, and loops.',
   },
-  points: {
-   es: ['Los bucles, las condiciones y el ensayo y error me ayudaron a entender la lógica de la programación: dividir un problema, probar una solución y aprender de lo que no funcionaba.'],
-   en: ['Loops, conditions, and trial and error helped me understand programming logic: breaking down a problem, testing a solution, and learning from what did not work.'],
-  },
-  tags: ['Scratch', 'RoboMind'],
  },
  {
   company: {es: 'Aprendizaje autodidacta', en: 'Self-directed learning'}, start: '2019',
   period: {es: '2019', en: '2019'},
   role: {es: 'De los bloques a C++', en: 'From blocks to C++'},
   summary: {
-   es: 'Di el salto a C++ por mi cuenta, escribiendo programas sencillos y familiarizándome con variables, funciones y estructuras de control.',
-   en: 'I moved on to C++ on my own, writing simple programs and getting familiar with variables, functions, and control flow.',
+   es: 'Aprendí C++ por mi cuenta con programas sencillos, conectando el código con las matemáticas y la programación lineal.',
+   en: 'I taught myself C++ through simple programs, connecting code with mathematics and linear programming.',
   },
-  points: {
-   es: ['Empecé a conectar el código con las matemáticas y la programación lineal: expresar un problema mediante variables y restricciones, y pensar cómo buscar una solución.'],
-   en: ['I began connecting code with mathematics and linear programming: expressing a problem through variables and constraints, and thinking about how to find a solution.'],
-  },
-  tags: ['C++'],
  },
  {
   company: 'Universidad Europea Miguel de Cervantes · UEMC', start: '2021', end: '2026',
   period: {es: '2021 — 2026', en: '2021 — 2026'},
   role: {es: 'Grado en Ingeniería Informática', en: 'Degree in Computer Engineering'},
   summary: {
-   es: 'En 2021 entré en la carrera de Informática. Lo que había empezado como curiosidad fue tomando forma con una base más amplia y una manera más estructurada de abordar los problemas.',
-   en: 'In 2021, I started my Computer Engineering degree. What began as curiosity took shape through broader foundations and a more structured approach to solving problems.',
+   es: 'Bases de datos, algoritmos, estructuras de datos y diseño de software: una base para construir sistemas completos.',
+   en: 'Databases, algorithms, data structures, and software design: a foundation for building complete systems.',
   },
-  points: {
-   es: ['Profundicé en bases de datos, estructuras de datos y algoritmos, aprendiendo a organizar la información y a elegir cómo procesarla.', 'El diseño de software, los diagramas y el modelado me ayudaron a planificar antes de programar y a construir soluciones más claras, mantenibles y conectadas entre sí.'],
-   en: ['I explored databases, data structures, and algorithms, learning how to organise information and choose how to process it.', 'Software design, diagrams, and modelling helped me plan before coding and build clearer, more maintainable, interconnected solutions.'],
-  },
-  tags: ['SQL', 'UML'],
  },
  {
   company: 'Microsoft · Founderz', start: '2024',
   period: {es: '2024', en: '2024'},
   role: {es: 'Máster en Inteligencia Artificial e Innovación', en: 'Master’s in Artificial Intelligence and Innovation'},
   summary: {
-   es: 'Amplié mi formación con el máster en Inteligencia Artificial e Innovación, acercando mi interés por la tecnología a las posibilidades de la IA.',
-   en: 'I expanded my education with a master’s programme in Artificial Intelligence and Innovation, connecting my interest in technology with the possibilities of AI.',
+   es: 'Formación en inteligencia artificial e innovación para aplicar nuevas herramientas a problemas y proyectos reales.',
+   en: 'Training in artificial intelligence and innovation to apply new tools to real problems and projects.',
   },
-  points: {
-   es: ['Una oportunidad para explorar cómo aplicar estas herramientas a problemas concretos y pensar en nuevas formas de desarrollar ideas y proyectos.'],
-   en: ['An opportunity to explore how these tools can address practical problems and open up new ways of developing ideas and projects.'],
-  },
-  tags: [],
  },
 ];
 
@@ -109,7 +87,6 @@ const experience = [
 
 export function careerSection(lang) {
  const es = lang === 'es';
- const thesisPublished = publishedProjects.some(project => project.id === 'phishing');
  const milestones = [...learning, ...experience].sort((a,b)=>a.start.localeCompare(b.start));
  return `<section id="career" class="career-section container" aria-labelledby="career-title">
   <header class="career-heading">
@@ -126,14 +103,13 @@ export function careerSection(lang) {
        <p class="career-company">${typeof job.company==='string'?job.company:job.company[lang]}${job.client?` <span> / ${es?'para':'for'} ${job.client}</span>`:''}</p>
        <h3>${job.role[lang]}</h3>
        ${job.end||job.current?`<p class="career-period">${job.period[lang]}</p>`:''}
-       ${job.tags.length?`<ul class="career-tags" aria-label="${es?'Áreas y herramientas':'Areas and tools'}">${job.tags.map(tag=>`<li>${tag}</li>`).join('')}</ul>`:''}
       </div>
       <div class="career-story">
        <p class="career-summary">${job.summary[lang]}</p>
-       ${isLearning?`<details class="career-detail"><summary>${es?'Qué aprendí':'What I learned'}<span aria-hidden="true">+</span></summary>`:''}
+       ${!isLearning?`<details class="career-detail"><summary>${es?'Ver funciones':'View responsibilities'}<span aria-hidden="true">+</span></summary>
        <ul class="career-points">${job.points[lang].map(point=>`<li>${point}</li>`).join('')}</ul>
-       ${isLearning?'</details>':''}
-       ${job.start==='2021'?`<div class="career-thesis"><span class="eyebrow">TFG / 2026</span><p>${es?'Detección de phishing con heurísticas y aprendizaje automático.':'Phishing detection with heuristics and machine learning.'}</p>${thesisPublished?`<a class="career-text-link" href="/${lang}/projects/phishing/">${es?'Ver proyecto':'View project'} <span aria-hidden="true">↗</span></a>`:''}</div>`:''}
+       <ul class="career-tags" aria-label="${es?'Áreas y herramientas':'Areas and tools'}">${job.tags.map(tag=>`<li>${tag}</li>`).join('')}</ul>
+       </details>`:''}
       </div>
      </article>
     </li>`;
