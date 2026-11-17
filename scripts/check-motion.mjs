@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {networkPoint} from '../public/hero-network.js';
+import {contourPoint} from '../public/hero-contours.js';
 
 const source=(await readFile(new URL('../public/scene-motion.js',import.meta.url),'utf8'))
  .replace('export const sceneMotion=', 'const sceneMotion=globalThis.motion=');
@@ -59,17 +59,18 @@ assert(!ambientVisit({reduced:true}).classes.has('ambient-enabled'));
 assert(!ambientVisit({search:'?motion=off'}).classes.has('ambient-enabled'));
 console.log('PASS: background pause/resume, hidden-tab suspension, reduced motion, and explicit motion opt-out.');
 
-// Pointer forces and time-based drift stay within the hero at mobile/desktop sizes.
+// Contour deformation is local, continuous, and bounded at every screen size.
 for(const [width,height] of [[320,560],[768,470],[1600,420]])for(const time of [0,1,30,1000]){
- for(const point of [{u:0,v:0,phase:0},{u:.4,v:.5,phase:2},{u:1,v:1,phase:5}]){
-  const result=networkPoint(point,time,width,height,{active:true,x:width*.4,y:height*.5});
+ for(const u of [0,.4,1])for(const band of [0,.5,1]){
+  const result=contourPoint(u,band,time,width,height,{active:true,x:width*.4,y:height*.5});
   assert(Number.isFinite(result.x)&&Number.isFinite(result.y));
-  assert(result.x>=3&&result.x<=width-3&&result.y>=3&&result.y<=height-3);
+  assert(result.x>=0&&result.x<=width&&result.y>=3&&result.y<=height-3);
  }
 }
-const seed={u:.4,v:.5,phase:0};
-const still=networkPoint(seed,0,1000,500,{active:false});
-const nearby=networkPoint(seed,0,1000,500,{active:true,x:380,y:260});
-assert(Math.hypot(nearby.x-still.x,nearby.y-still.y)>10,'The cursor visibly displaces nearby points');
-assert.deepEqual(networkPoint(seed,0,1000,500,{active:true,x:-1000,y:-1000}),still,'Distant pointers have no effect');
-console.log('PASS: interactive hero particles react to nearby pointers and remain inside the canvas.');
+const still=contourPoint(.4,.5,0,1000,500,{active:false});
+const nearby=contourPoint(.4,.5,0,1000,500,{active:true,x:still.x,y:still.y});
+assert(still.y-nearby.y>35,'The pointer visibly bends the local contour');
+assert.equal(nearby.x,still.x,'The curves remain continuous horizontally');
+assert.deepEqual(contourPoint(.4,.5,0,1000,500,{active:true,x:-1000,y:-1000}),still,'Distant pointers have no effect');
+assert.deepEqual(contourPoint(.4,.5,0,1000,500,{active:true,x:still.x,y:still.y,strength:0}),still,'A faded pointer restores the original contour');
+console.log('PASS: flowing contours deform locally, recover smoothly, and stay inside the canvas.');

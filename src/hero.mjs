@@ -6,7 +6,7 @@ export function experienceHero(lang) {
  return `<section id="home" class="hero experience-hero" aria-labelledby="hero-name">
   <div class="experience-atmosphere" aria-hidden="true"></div>
   ${ambientBackground()}
-  <canvas class="hero-network" aria-hidden="true"></canvas>
+  <canvas class="hero-contours" aria-hidden="true"></canvas>
   <div class="experience-layout container">
    <div class="experience-copy">
     <a class="hero-language-banner" href="/${es?'en':'es'}/" hreflang="${es?'en':'es'}" lang="${es?'en':'es'}"><span>${es?'English version available':'También disponible en español'}</span><strong>${es?'View in English':'Ver en español'} <span aria-hidden="true">↗</span></strong></a>

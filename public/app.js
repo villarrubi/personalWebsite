@@ -36,4 +36,4 @@ import './intro.js';
 import './project-map.js';
 import './career-motion.js';
 import './ambient-motion.js';
-import './hero-network.js';
+import './hero-contours.js';

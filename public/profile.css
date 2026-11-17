@@ -69,12 +69,12 @@
 @media(max-width:600px){.ambient-field{opacity:.85}.ambient-toggle{right:8px;bottom:0;font-size:9px}.contact-phone{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.ambient-field>i,.ambient-field>span{animation:none!important}.ambient-toggle{display:none}.about-tools dl>div.reveal-ready{transition:none}}
 
-/* A reactive point field sits behind the hero copy, never above its links. */
-.hero-network{position:absolute;inset:0;z-index:1;width:100%;height:100%;pointer-events:none;opacity:.9;mask-image:linear-gradient(transparent,#000 8%,#000 84%,transparent)}
+/* Flowing contour lines sit behind the hero copy, never above its links. */
+.hero-contours{position:absolute;inset:0;z-index:1;width:100%;height:100%;pointer-events:none;opacity:.9;mask-image:linear-gradient(transparent,#000 8%,#000 84%,transparent)}
 .hero-language-banner{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 22px;width:fit-content;max-width:100%;margin:0 auto 22px;padding:12px 22px;border:1px solid #8bc9cf80;border-radius:8px;background:#103345e8;box-shadow:0 8px 30px -18px #55b9c97a;color:#c9e7ed;pointer-events:auto;transition:background .2s,border-color .2s,transform .2s}
 .hero-language-banner>span{font-size:14px}
 .hero-language-banner>strong{font-size:19px;font-weight:600;color:#f2f4ec;white-space:nowrap}
 .hero-language-banner>strong>span{display:inline-block;margin-left:8px;color:#9fe0e3;transition:transform .2s}
 .hero-language-banner:hover{background:#184557;border-color:#b0e7e9;transform:translateY(-2px)}
 .hero-language-banner:hover>strong>span{transform:translate(2px,-2px)}
-@media(max-width:600px){.hero-language-banner{padding:10px 16px;gap:3px 14px;margin-bottom:20px}.hero-language-banner>span{font-size:12px}.hero-language-banner>strong{font-size:17px}.hero-network{opacity:.8}}
+@media(max-width:600px){.hero-language-banner{padding:10px 16px;gap:3px 14px;margin-bottom:20px}.hero-language-banner>span{font-size:12px}.hero-language-banner>strong{font-size:17px}.hero-contours{opacity:.8}}
