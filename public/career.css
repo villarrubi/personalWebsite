@@ -25,6 +25,7 @@
 .career-content h3{font:500 clamp(19px,1.7vw,24px)/1.2 var(--sans);letter-spacing:-.035em;color:var(--white);text-wrap:balance}
 .career-period{font-size:11px;color:#a8bbcc;margin-top:8px}
 .career-summary{font-size:14px;line-height:1.7;color:#c6d1df;max-width:68ch}
+.career-context{margin-top:10px;font-size:13px;line-height:1.7;color:#aebfd0;max-width:68ch}
 .career-points{padding-left:17px;margin:12px 0 0;color:#aebfd0;font-size:13px;line-height:1.8}
 .career-points li+li{margin-top:6px}
 .career-points li::marker{color:var(--accent)}
