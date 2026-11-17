@@ -1,113 +1,100 @@
-import {layoutPlanets} from './solar-layout.js';
 import {sceneMotion} from './scene-motion.js';
-import {createOrbitFocus,orbitCapacity} from './solar-focus.js';
+import {createOrbitFocus} from './solar-focus.js';
+import {OrbitCarousel,carouselLayout,wrapIndex} from './solar-carousel.js';
 
 const root=document.querySelector('.solar-system');
 if(root){
- const es=document.documentElement.lang==='es';
- const motion=sceneMotion;
- const space=root.querySelector('.solar-space');
- const worlds=[...root.querySelectorAll('[data-map-world]')];
- const buttons=[...root.querySelectorAll('[data-map-group]')];
- const description=root.querySelector('.solar-description');
- const pages=root.querySelector('.solar-pages');
- const status=root.querySelector('.solar-status');
- const allNodes=[...root.querySelectorAll('[data-project]')];
- const focus=createOrbitFocus(root,motion);
- const indices={featured:0,side:0};
+ const es=document.documentElement.lang==='es',motion=sceneMotion;
+ const preference=matchMedia('(prefers-reduced-motion: reduce)');
+ const space=root.querySelector('.solar-space'),status=root.querySelector('.solar-status');
+ const worlds=[...root.querySelectorAll('[data-map-world]')],buttons=[...root.querySelectorAll('[data-map-group]')];
+ const description=root.querySelector('.solar-description'),focus=createOrbitFocus(root,motion);
+ const controls=[...root.querySelectorAll('[data-carousel-step]')];
+ const groups=Object.fromEntries(worlds.map(world=>[world.dataset.mapWorld,{world,nodes:[...world.querySelectorAll('[data-project]')],carousel:new OrbitCarousel(world.querySelectorAll('[data-project]').length)}]));
  let active=location.hash==='#complementary'?'side':'featured';
- let capacity=10,pageCount=1,visible=false,timer,arrivalTimer;
- const world=()=>worlds.find(item=>item.dataset.mapWorld===active);
- const groupName=()=>active==='featured'?(es?'Destacados':'Featured'):(es?'Complementarios':'Side projects');
-
- function schedule(){
-  clearTimeout(timer);
-  if(pageCount>1&&visible&&!motion.matches&&!document.hidden)timer=setTimeout(()=>{
-   const busy=root.querySelector('.planet-node:hover,.planet-node:focus-visible,.solar-preview:hover')||root.querySelector('.solar-preview').contains(document.activeElement)||pages.contains(document.activeElement)||document.documentElement.classList.contains('project-dialog-open');
-   if(!busy){indices[active]=(indices[active]+1)%pageCount;draw(true,false);}
-   else schedule();
-  },16000);
+ let visible=!('IntersectionObserver'in window),frame=0,last=null;
+ const current=()=>groups[active];
+ const animate=()=>!preference.matches&&!motion.matches;
+ const blocked=()=>document.hidden||!visible||document.documentElement.classList.contains('intro-playing')||document.documentElement.classList.contains('intro-pending')||document.documentElement.classList.contains('project-dialog-open');
+ const autoAllowed=()=>!blocked()&&!motion.matches&&!root.contains(document.activeElement?.closest?.('.planet-node,.solar-preview'));
+ function paint(announce=false){
+  const {nodes,carousel}=current(),width=space.clientWidth,height=space.clientHeight;
+  if(!width||!height)return;
+  const layouts=carouselLayout(nodes.map(node=>({id:node.dataset.project})),width,height,carousel.position);
+  const items=nodes.map((node,index)=>{
+   const layout=layouts[index];node.hidden=!layout.visible;
+   node.style.setProperty('--planet-x',`${layout.x}px`);node.style.setProperty('--planet-y',`${layout.y}px`);
+   node.style.setProperty('--planet-size',`${layout.size}px`);node.style.setProperty('--planet-height',`${layout.height}px`);
+   node.style.setProperty('--orbit-depth',String(layout.foreground));node.style.setProperty('--orbit-opacity',String(layout.opacity));
+   node.style.zIndex=String(Math.round(layout.foreground*100));
+   node.dataset.orbitFront=String(index===carousel.index);
+   return {node,layout};
+  });
+  root._orbitFrame={width,height,items};
+  root.dataset.orbitPosition=String(carousel.position);
+  focus.update(nodes,carousel.index,animate());
+  controls.forEach(button=>button.disabled=nodes.length<2);
+  root.dispatchEvent(new Event('solar:frame'));
+  const destination=wrapIndex(carousel.target,nodes.length);
+  if(announce)status.textContent=nodes.length?`${nodes[destination].dataset.name} · ${destination+1} / ${nodes.length}`:(es?'No hay proyectos en este grupo.':'No projects in this group.');
  }
- function pageButtons(){
-  pages.replaceChildren();pages.hidden=pageCount<=1;
-  if(pageCount<=1)return;
-  const chosen=new Set([0,pageCount-1]);
-  for(let i=Math.max(0,indices[active]-2);i<=Math.min(pageCount-1,indices[active]+2);i++)chosen.add(i);
-  for(const i of [...chosen].sort((a,b)=>a-b)){
-   const button=document.createElement('button');button.type='button';button.dataset.solarPage=i;
-   button.setAttribute('aria-label',es?`Constelación ${i+1} de ${pageCount}`:`Constellation ${i+1} of ${pageCount}`);
-   button.setAttribute('aria-pressed',String(i===indices[active]));
-   button.addEventListener('click',()=>{indices[active]=i;draw(true);pages.querySelector(`[data-solar-page="${i}"]`)?.focus({preventScroll:true});});
-   pages.append(button);
-  }
+ function tick(now){
+  frame=0;if(blocked()){last=null;return;}
+  const delta=last===null?0:Math.min(now-last,100);last=now;
+  const {carousel}=current();
+  if(carousel.tick(delta,{auto:autoAllowed(),animate:animate()}))paint();
+  if(carousel.moving||(autoAllowed()&&carousel.count>1))frame=requestAnimationFrame(tick);else last=null;
  }
- function draw(animate=false,announce=true){
-  const width=space.clientWidth,height=space.clientHeight;
-  if(width<1||height<1)return;
-  const nodes=[...world().querySelectorAll('[data-project]')];
-  capacity=orbitCapacity(width);
-  let arrangement,shown;
-  while(capacity>0){
-   pageCount=Math.max(1,Math.ceil(nodes.length/capacity));
-   indices[active]=Math.min(indices[active],pageCount-1);
-   shown=nodes.slice(indices[active]*capacity,(indices[active]+1)*capacity);
-   try{arrangement=layoutPlanets(shown.map(n=>({id:n.dataset.project})),width,height,active==='featured');break;}
-   catch{capacity--;}
-  }
-  allNodes.forEach(node=>node.hidden=!shown.includes(node));
-  for(const [i,node] of shown.entries()){
-   const p=arrangement[i];
-   node._cinematicLayout={...p};
-   node.style.setProperty('--planet-x',`${p.x}px`);
-   node.style.setProperty('--planet-y',`${p.y}px`);
-   node.style.setProperty('--planet-size',`${p.size}px`);
-   node.style.setProperty('--planet-height',`${p.height}px`);
-  }
-  root.dataset.activeGroup=active;
-  worlds.forEach(item=>item.hidden=item.dataset.mapWorld!==active);
+ function sync(){
+  cancelAnimationFrame(frame);frame=0;last=null;current().carousel.resetTimer();
+  if(!blocked()&&(current().carousel.moving||(autoAllowed()&&current().nodes.length>1)))frame=requestAnimationFrame(tick);
+ }
+ function step(direction){current().carousel.step(direction,animate());paint(true);sync();}
+ function selectGroup(group){
+  if(!groups[group])return;
+  current().carousel.settle();active=group;root.dataset.activeGroup=active;
+  worlds.forEach(world=>world.hidden=world.dataset.mapWorld!==active);
   buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mapGroup===active)));
   description.textContent=description.dataset[active==='featured'?'featuredCopy':'sideCopy'];
-  root.dispatchEvent(new CustomEvent('solar:layout',{detail:{nodes:shown.map((node,i)=>({node,layout:arrangement[i]}))}}));
-  focus.update(shown);
-  world().classList.remove('is-arriving');clearTimeout(arrivalTimer);
-  if(animate&&!motion.matches){void world().offsetWidth;world().classList.add('is-arriving');arrivalTimer=setTimeout(()=>world().classList.remove('is-arriving'),750);}
-  pageButtons();
-  if(announce)status.textContent=`${groupName()} · ${nodes.length} ${es?'proyectos':'projects'}${pageCount>1?` · ${indices[active]+1} / ${pageCount}`:''}`;
-  schedule();
+  paint();sync();
  }
- buttons.forEach(button=>button.addEventListener('click',()=>{active=button.dataset.mapGroup;draw(true);}));
- root.addEventListener('solar:restore-layout',()=>draw());
- root.addEventListener('focusin',schedule);
- root.addEventListener('focusout',schedule);
- root.addEventListener('pointerleave',schedule);
- document.addEventListener('visibilitychange',schedule);
+ controls.forEach(button=>button.addEventListener('click',()=>step(Number(button.dataset.carouselStep))));
+ root.querySelector('.solar-carousel-controls').hidden=false;
+ buttons.forEach(button=>button.addEventListener('click',()=>selectGroup(button.dataset.mapGroup)));
+ for(const {nodes,carousel} of Object.values(groups))nodes.forEach((node,index)=>{
+  node.addEventListener('click',event=>{
+   if(event.defaultPrevented||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button!==0)return;
+   if(index===carousel.index&&!carousel.moving)return;
+   event.preventDefault();carousel.select(index,animate());paint(true);sync();
+  });
+ });
+ root.addEventListener('keydown',event=>{
+  if(event.altKey||event.ctrlKey||event.metaKey||!['ArrowLeft','ArrowRight'].includes(event.key))return;
+  event.preventDefault();step(event.key==='ArrowLeft'?-1:1);
+ });
+ root.addEventListener('focusin',sync);root.addEventListener('focusout',()=>queueMicrotask(sync));
+ root.addEventListener('solar:restore-layout',()=>paint());
  const motionButton=root.querySelector('.space-motion-toggle');
  function syncMotion(){
-  const enabled=!motion.matches;
-  root.dataset.motion=enabled?'on':'off';
-  root.classList.toggle('scene-motion-on',enabled);
-  if(motionButton){
-   const label=enabled?(es?'Pausar animación':'Pause motion'):(es?'Activar movimiento':'Enable motion');
-   motionButton.title=label;
-   motionButton.setAttribute('aria-label',label);
-   motionButton.querySelector('.motion-toggle-label').textContent=label;
-   motionButton.querySelector('.motion-toggle-icon').textContent=enabled?'Ⅱ':'▷';
-  }
+  const enabled=!motion.matches;root.dataset.motion=enabled?'on':'off';root.classList.toggle('scene-motion-on',enabled);
+  const label=enabled?(es?'Pausar rotación':'Pause rotation'):(es?'Activar rotación':'Enable rotation');
+  motionButton.setAttribute('aria-label',label);motionButton.title=label;
+  motionButton.querySelector('.motion-toggle-label').textContent=label;motionButton.querySelector('.motion-toggle-icon').textContent=enabled?'Ⅱ':'▷';
+  if(!animate())current().carousel.settle();paint();sync();
  }
- motionButton?.addEventListener('click',()=>motion.setEnabled(motion.matches));
- motion.addEventListener('change',()=>{syncMotion();schedule();});
- syncMotion();
- window.addEventListener('hashchange',()=>{if(location.hash==='#complementary'){active='side';draw(true);}});
- if('ResizeObserver'in window)new ResizeObserver(()=>draw()).observe(space);else window.addEventListener('resize',()=>draw());
- if('IntersectionObserver'in window){
-  new IntersectionObserver(entries=>{
-   visible=entries.some(entry=>entry.isIntersecting);
-   if(visible&&!root.dataset.cinematic){
-    root.dataset.cinematic='loading';
-    import('./orbital-scene.js').then(module=>module.mountCinematicSpace(root)).catch(error=>{root.dataset.cinematic='fallback';root.classList.remove('cinematic-ready','cinema-opening');console.warn('Cinematic space uses its static fallback:',error.message);});
-   }
-   root.classList.toggle('is-sleeping',!visible);schedule();
-  },{threshold:.15}).observe(root);
- }else visible=true;
- draw();
+ motionButton.addEventListener('click',()=>motion.setEnabled(motion.matches));motion.addEventListener('change',syncMotion);
+ preference.addEventListener('change',syncMotion);
+ document.addEventListener('visibilitychange',sync);
+ new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+ window.addEventListener('hashchange',()=>{if(location.hash==='#complementary')selectGroup('side');});
+ if('ResizeObserver'in window)new ResizeObserver(()=>paint()).observe(space);else window.addEventListener('resize',()=>paint());
+ if('IntersectionObserver'in window)new IntersectionObserver(entries=>{
+  visible=entries.some(entry=>entry.isIntersecting);root.classList.toggle('is-sleeping',!visible);
+  if(visible&&!root.dataset.cinematic){
+   root.dataset.cinematic='loading';
+   import('./orbital-scene.js').then(module=>module.mountCinematicSpace(root)).catch(error=>{root.dataset.cinematic='fallback';root.classList.remove('cinematic-ready');console.warn('Orbital carousel uses its SVG fallback:',error.message);});
+  }
+  sync();
+ },{threshold:.12}).observe(root);
+ selectGroup(active);syncMotion();
 }

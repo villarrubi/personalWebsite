@@ -7,7 +7,7 @@ if (dialog && typeof dialog.showModal === 'function') {
   const close = () => dialog.close();
   for (const link of document.querySelectorAll('[data-project]')) {
     link.addEventListener('click', event => {
-      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
       const template = document.getElementById(`project-info-${link.dataset.project}`);
       if (!template) return;
       event.preventDefault();

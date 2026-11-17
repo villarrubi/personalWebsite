@@ -2,50 +2,122 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
 import {publishedProjects} from '../src/content.mjs';
-import {projectAccent} from '../public/project-presentation.js';
-import {orbitCapacity} from '../public/solar-focus.js';
+import {OrbitCarousel,carouselLayout,wrapIndex,ORBIT_INTERVAL,ORBIT_TURN_DURATION} from '../public/solar-carousel.js';
 
 for(const lang of ['es','en']){
  const html=await readFile(new URL(`../dist/${lang}/index.html`,import.meta.url),'utf8');
- assert(html.includes('solar-system orbit-gallery'));
- assert.deepEqual([...html.matchAll(/id="project-preview-([^"]+)"/g)].map(m=>m[1]).sort(),publishedProjects.map(p=>p.id).sort(),'Every published project has one preview');
+ assert(html.includes('solar-system orbit-gallery orbit-carousel'));
+ assert.deepEqual([...html.matchAll(/id="project-preview-([^"]+)"/g)].map(m=>m[1]).sort(),publishedProjects.map(p=>p.id).sort());
  for(const project of publishedProjects){
   const preview=html.split(`id="project-preview-${project.id}">`)[1].split('</template>')[0];
-  assert(preview.includes(`/projects/${project.id}/`),'Preview links to the full project');
-  assert(preview.includes('solar-preview-summary'));
-  if(project.cover)assert(preview.includes(project.cover));
+  assert(preview.includes(`/projects/${project.id}/`));assert(preview.includes('solar-preview-summary'));
  }
- assert(html.includes('class="solar-preview-controls" hidden'),'Nonfunctional controls stay hidden without JS');
+ assert(html.includes('class="solar-carousel-controls" hidden'),'Controls are enhanced only with JS');
+ for(const direction of [-1,1])assert(html.includes(`data-carousel-step="${direction}" aria-label="`));
+ assert(!html.includes('data-preview-step'));
 }
-assert.deepEqual([320,599,600,999,1000,1440].map(orbitCapacity),[3,3,4,4,6,6]);
-assert.equal(projectAccent('unknown'),projectAccent('constructor'));
 
-const source=(await readFile(new URL('../public/solar-focus.js',import.meta.url),'utf8')).replaceAll('export ','');
-function gallery({reduced=false,paused=false}={}){
- const node=id=>({dataset:{project:id,accent:projectAccent(id)},events:new Map(),selected:false,classList:{toggle(_,on){this.owner.selected=on;}},addEventListener(name,fn){this.events.set(name,fn);}});
- const nodes=['chessbot','pipa','mapforge','phishing'].map(node);nodes.forEach(n=>n.classList.owner=n);
- let rendered=null,animations=0,notifications=0;
- const body={replaceChildren(content){rendered=content??null;},animate(){animations++;return {cancel(){}};}};
- const control=()=>({disabled:false,events:new Map(),addEventListener(name,fn){this.events.set(name,fn);}});
- const previous=control(),next=control(),count={},controls={hidden:true};
- const selectors={'.solar-preview-body':body,'.solar-preview-count':count,'[data-preview-step="-1"]':previous,'[data-preview-step="1"]':next,'.solar-preview-controls':controls};
- const root={dataset:{},style:{setProperty(){}},querySelector:s=>selectors[s],querySelectorAll:()=>nodes,dispatchEvent(){notifications++;}};
- const context={root,motion:{matches:paused},document:{getElementById:id=>({content:{cloneNode:()=>id}})},matchMedia:()=>({matches:reduced}),Event};
- runInNewContext(source+'\nglobalThis.focus=createOrbitFocus(root,motion);',context);
- return {focus:context.focus,nodes,root,count,controls,previous,next,get rendered(){return rendered;},get animations(){return animations;},get notifications(){return notifications;}};
+assert.equal(ORBIT_INTERVAL,3500);assert.equal(ORBIT_TURN_DURATION,900);
+const carousel=new OrbitCarousel(6);
+carousel.tick(3499,{auto:true});assert.equal(carousel.position,0);assert(!carousel.moving);
+carousel.tick(1,{auto:true});assert(carousel.moving);assert.equal(carousel.target,1);
+carousel.tick(450,{auto:true});assert.equal(carousel.position,.5);
+carousel.tick(450,{auto:true});assert.equal(carousel.position,1);assert(!carousel.moving);
+carousel.tick(2600,{auto:true});assert.equal(carousel.target,2,'Turns begin every 3.5 seconds');
+carousel.tick(300);const intermediate=carousel.position;
+carousel.step(-1);assert.equal(carousel.position,intermediate,'Reversing a turn cannot jump');
+carousel.tick(900);assert.equal(carousel.position,1);
+carousel.select(5,false);assert.equal(carousel.index,5);const last=carousel.position;
+carousel.step(1);assert.equal(carousel.target,last+1,'Last to first keeps the same direction');
+carousel.tick(900);assert.equal(carousel.index,0);
+carousel.step(-1);carousel.tick(900);assert.equal(carousel.index,5);
+carousel.select(0,false);carousel.tick(3000,{auto:true});carousel.step(1,false);
+carousel.tick(3499,{auto:true,animate:false});assert.equal(carousel.index,1,'Manual navigation restarts the timer');
+carousel.tick(1,{auto:true,animate:false});assert.equal(carousel.index,2);
+carousel.tick(3000,{auto:true});carousel.tick(100,{auto:false});
+carousel.tick(1000,{auto:true});assert.equal(carousel.index,2,'Resume does not inherit an expired timer');
+for(const count of [0,1]){const c=new OrbitCarousel(count);c.step(1);c.tick(10000,{auto:true});assert.equal(c.position,0);assert(!c.moving);}
+
+for(const count of [1,2,3,6,7,20,100])for(const [width,height] of [[294,465],[366,465],[752,510],[1267,490]]){
+ const items=Array.from({length:count},(_,i)=>({id:String(i)}));
+ for(let position=0;position<count;position++){
+  const layout=carouselLayout(items,width,height,position),front=layout[position],visible=layout.filter(p=>p.visible);
+  assert.equal(front.x,width/2);assert.equal(front.foreground,1);
+  assert.equal(visible.length,Math.min(count,7));
+  for(const p of visible){
+   assert(p.x-p.size/2>=0&&p.x+p.size/2<=width,'Bodies stay in horizontal bounds');
+   assert(p.bodyY-p.size/2>=0&&p.y+p.height/2<=height,'Bodies and labels fit in the stage');
+   if(p!==front){assert(front.size>p.size*1.5,'A single project dominates the foreground');assert(front.depth>p.depth);}
+  }
+ }
+ for(let step=0;step<40;step++){
+  const layout=carouselLayout(items,width,height,step/40);
+  for(const p of layout.filter(p=>p.visible))assert(Number.isFinite(p.x)&&Number.isFinite(p.size)&&p.opacity>=0&&p.opacity<=1);
+ }
+ const a=carouselLayout(items,width,height,-.01),b=carouselLayout(items,width,height,count-.01);
+ a.forEach((p,i)=>assert(Math.abs(p.x-b[i].x)<1e-8&&Math.abs(p.size-b[i].size)<1e-8,'Wraparound positions are continuous'));
 }
-const g=gallery();g.focus.update(g.nodes.slice(0,3));
-assert.equal(g.root.dataset.focusProject,'chessbot');assert.equal(g.rendered,'project-preview-chessbot');assert.equal(g.count.textContent,'01 / 03');assert(!g.controls.hidden);
-g.nodes[1].events.get('pointerenter')({pointerType:'mouse'});assert.equal(g.root.dataset.focusProject,'pipa');assert.equal(g.animations,1);
-g.nodes[2].events.get('focus')();assert.equal(g.root.dataset.focusProject,'mapforge');assert.equal(g.count.textContent,'03 / 03');
-g.next.events.get('click')();assert.equal(g.root.dataset.focusProject,'chessbot','Next wraps through the visible orbit');
-g.previous.events.get('click')();assert.equal(g.root.dataset.focusProject,'mapforge');
-g.nodes[0].events.get('pointerenter')({pointerType:'touch'});assert.equal(g.root.dataset.focusProject,'mapforge','Touch does not unexpectedly replace a preview');
-g.nodes[3].events.get('focus')();assert.equal(g.root.dataset.focusProject,'mapforge','Hidden group cannot become selected');
-const before=g.notifications;g.focus.update(g.nodes.slice(0,3));assert.equal(g.notifications,before,'Resize preserves an unchanged selection and link focus');
-g.focus.update([g.nodes[3]]);assert.equal(g.root.dataset.focusProject,'phishing');assert(g.previous.disabled&&g.next.disabled);assert.equal(g.nodes.filter(n=>n.selected).length,1);
-g.focus.update([]);assert.equal(g.rendered,null);assert.equal(g.root.dataset.focusProject,undefined);assert.equal(g.count.textContent,'00 / 00');
-for(const options of [{reduced:true},{paused:true}]){
- const calm=gallery(options);calm.focus.update(calm.nodes);calm.next.events.get('click')();assert.equal(calm.animations,0);assert.equal(calm.root.dataset.focusProject,'pipa');
+
+// Execute the controller with deterministic frames and minimal browser surfaces.
+const controller=(await readFile(new URL('../public/solar-system.js',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,'');
+const focusSource=(await readFile(new URL('../public/solar-focus.js',import.meta.url),'utf8')).replace('export ','');
+function visit({paused=false,reduced=false}={}){
+ const element=(dataset={})=>{
+  const classes=new Set(),events=new Map();
+  return {dataset,events,hidden:false,style:{setProperty(){}},setAttribute(name,value){this[name]=value;},classList:{contains:n=>classes.has(n),add:n=>classes.add(n),remove:n=>classes.delete(n),toggle(n,on){on?classes.add(n):classes.delete(n);}},
+   addEventListener(name,fn){events.set(name,fn);},dispatchEvent(event){events.get(event.type)?.(event);},querySelector(){},querySelectorAll(){return [];}};
+ };
+ const nodes=Array.from({length:6},(_,i)=>element({project:`project-${i}`,name:`Project ${i}`,accent:'#abcdef'}));
+ const sideNodes=[element({project:'side',name:'Side',accent:'#abcdef'})];
+ const worlds=['featured','side'].map((group,i)=>{const world=element({mapWorld:group});world.querySelectorAll=()=>i?sideNodes:nodes;return world;});
+ const buttons=['featured','side'].map(mapGroup=>element({mapGroup}));
+ const controls=[-1,1].map(carouselStep=>element({carouselStep}));
+ const motion=new EventTarget();motion.matches=paused;motion.setEnabled=value=>{motion.matches=!value;motion.dispatchEvent(new Event('change'));};
+ const preference=new EventTarget();preference.matches=reduced;
+ let rendered=null,animations=0,observer,visibility;
+ const body={replaceChildren(value){rendered=value??null;},animate(){animations++;return {cancel(){}};}};
+ const counter={},status={},controlBox={hidden:true},motionButton=element(),space={clientWidth:1100,clientHeight:490};
+ motionButton.querySelector=()=>({});
+ const root=element({cinematic:'fallback'}),description={dataset:{featuredCopy:'Featured',sideCopy:'Side'}};
+ const selectors={'.solar-space':space,'.solar-status':status,'.solar-description':description,'.solar-preview-body':body,'.solar-carousel-count':counter,'.solar-carousel-controls':controlBox,'.space-motion-toggle':motionButton};
+ root.querySelector=s=>selectors[s];root.querySelectorAll=s=>s==='[data-map-world]'?worlds:s==='[data-map-group]'?buttons:s==='[data-carousel-step]'?controls:[...nodes,...sideNodes];
+ root.contains=node=>[...nodes,...sideNodes,body].includes(node);
+ const doc=element();doc.documentElement=element();doc.documentElement.lang='en';doc.hidden=false;doc.querySelector=()=>root;doc.activeElement=null;
+ doc.getElementById=id=>({content:{cloneNode:()=>id}});
+ let id=0,now=0;const frames=new Map();
+ const io=class{constructor(fn){visibility=fn;}observe(){}};
+ const context={sceneMotion:motion,OrbitCarousel,carouselLayout,wrapIndex,document:doc,location:{hash:''},matchMedia:()=>preference,Event,queueMicrotask,
+  window:{IntersectionObserver:io,addEventListener(){}},IntersectionObserver:io,
+  MutationObserver:class{constructor(fn){observer=fn;}observe(){}},
+  requestAnimationFrame(fn){frames.set(++id,fn);return id;},cancelAnimationFrame:id=>frames.delete(id)};
+ runInNewContext(focusSource+'\n'+controller,context);
+ function advance(ms){for(let elapsed=0;elapsed<ms;elapsed+=50){now+=Math.min(50,ms-elapsed);const pending=[...frames.values()];frames.clear();pending.forEach(fn=>fn(now));}}
+ function click(element){const event={button:0,defaultPrevented:false,preventDefault(){this.defaultPrevented=true;}};element.events.get('click')(event);return event;}
+ function show(value=true){visibility([{isIntersecting:value}]);}
+ return {root,nodes,sideNodes,buttons,controls,motion,doc,status,counter,controlBox,advance,click,show,mutate:()=>observer(),get rendered(){return rendered;},get animations(){return animations;}};
 }
-console.log('PASS: bilingual project previews, direct links, pointer/keyboard selection, page/group changes, wraparound, empty catalogs, and reduced-motion previews.');
+const v=visit();assert(!v.controlBox.hidden);assert.equal(v.root.dataset.focusProject,'project-0');
+v.advance(6000);assert.equal(v.root.dataset.focusProject,'project-0','Offscreen scenes do not rotate');
+v.show();v.advance(4500);assert.equal(v.root.dataset.focusProject,'project-1');
+v.click(v.controls[1]);assert(v.status.textContent.startsWith('Project 2'));v.advance(1000);
+assert.equal(v.root.dataset.focusProject,'project-2');assert.equal(v.counter.textContent,'03 / 06');
+assert.equal(v.rendered,'project-preview-project-2');
+assert.equal(v.nodes.filter(n=>n.classList.contains('is-featured')).length,1);
+assert(v.click(v.nodes[4]).defaultPrevented,'Clicking a rear project selects it before opening');v.advance(1000);
+assert.equal(v.root.dataset.focusProject,'project-4');assert(!v.click(v.nodes[4]).defaultPrevented,'Foreground click reaches the dialog');
+v.doc.documentElement.classList.add('project-dialog-open');v.mutate();v.advance(8000);
+assert.equal(v.root.dataset.focusProject,'project-4','Open dialogs suspend automatic navigation');
+v.doc.documentElement.classList.remove('project-dialog-open');v.mutate();v.advance(4500);assert.equal(v.root.dataset.focusProject,'project-5');
+v.doc.hidden=true;v.doc.dispatchEvent(new Event('visibilitychange'));v.advance(8000);assert.equal(v.root.dataset.focusProject,'project-5');
+v.doc.hidden=false;v.doc.dispatchEvent(new Event('visibilitychange'));
+v.doc.activeElement={closest:()=>v.nodes[5]};v.root.dispatchEvent(new Event('focusin'));v.advance(8000);assert.equal(v.root.dataset.focusProject,'project-5','Keyboard focus pauses the orbit');
+v.doc.activeElement=null;v.root.dispatchEvent(new Event('focusin'));v.advance(4500);assert.equal(v.root.dataset.focusProject,'project-0');
+v.click(v.buttons[1]);assert.equal(v.root.dataset.focusProject,'side');assert(v.controls.every(b=>b.disabled));
+v.advance(8000);assert.equal(v.root.dataset.focusProject,'side');
+v.click(v.buttons[0]);assert.equal(v.root.dataset.focusProject,'project-0');
+for(const options of [{paused:true},{reduced:true}]){
+ const calm=visit(options);calm.show();calm.click(calm.controls[1]);
+ assert.equal(calm.root.dataset.focusProject,'project-1','Manual navigation works without animation');assert.equal(calm.animations,0);
+ if(options.paused){calm.advance(8000);assert.equal(calm.root.dataset.focusProject,'project-1');}
+}
+console.log('PASS: orbital timing, reversible turns, wraparound, single foreground, responsive bounds, bilingual previews, arrows, background selection, modal/visibility/focus pauses and reduced-motion controls.');

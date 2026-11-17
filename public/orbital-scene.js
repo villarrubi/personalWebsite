@@ -1,4 +1,4 @@
-import {createOrbitPaths,orbitPoint} from './solar-motion.js';
+import {orbitSlot} from './solar-carousel.js';
 import {createSpaceBackdrop} from './space-backdrop.js';
 import {createProjectModel} from './project-models.js';
 import {sceneMotion} from './scene-motion.js';
@@ -59,129 +59,74 @@ export async function mountCinematicSpace(root){
  }
  const starGeometry=new THREE.BufferGeometry();starGeometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));starGeometry.setAttribute('colour',new THREE.Float32BufferAttribute(colours,3));starGeometry.setAttribute('size',new THREE.Float32BufferAttribute(sizes,1));
  const starMaterial=new THREE.ShaderMaterial({uniforms:{time:{value:0}},vertexShader:`attribute vec3 colour;attribute float size;uniform float time;varying vec3 c;void main(){float phase=dot(position,vec3(.027,.013,.039));c=colour*(.68+.32*sin(time*.45+phase));vec3 drifting=position+vec3(sin(time*.06+phase)*4.8,cos(time*.045+phase)*2.8,0.);vec4 p=modelViewMatrix*vec4(drifting,1.0);gl_Position=projectionMatrix*p;gl_PointSize=clamp(size*240.0/max(1.0,-p.z),.6,3.2);}`,fragmentShader:`varying vec3 c;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;gl_FragColor=vec4(c,pow(1.0-d*2.0,2.0)*.8);}`,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false});const starField=new THREE.Points(starGeometry,starMaterial);scene.add(starField);
- const models=new Map();let ready=false,visible=true,contextLost=false,frame=0,width=0,height=0,pointer={x:0,y:0},lastTime=0,elapsed=0,orbitTime=0,activeIds=[];
- let spaceBox={left:0,top:0,width:0,height:0},orbitPaths=[];
- const cameraTarget=new THREE.Vector3();const projected=new THREE.Vector3();
+ // The controller owns the carousel phase for both WebGL and the SVG fallback.
+ const models=new Map();let ready=false,visible=true,contextLost=false,frame=0,width=0,height=0,lastTime=0,elapsed=0;
+ const pointer={x:0,y:0};let spaceBox={left:0,top:0,width:0,height:0};
  function screenToWorld(x,y,z){const units=2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*(32-z)/height;return new THREE.Vector3((x-width/2)*units,(height/2-y)*units,z);}
- function measure(){
-  const rect=root.getBoundingClientRect();width=rect.width;height=rect.height;if(!width||!height)return;
-  renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();
-  updateLayout();
- }
- function updateLayout(){
-  if(!height)return;
-  const box=root.getBoundingClientRect(),space=root.querySelector('.solar-space').getBoundingClientRect();
-  spaceBox={left:space.left-box.left,top:space.top-box.top,width:space.width,height:space.height};
-  const nodes=[...root.querySelectorAll('.planet-node:not([hidden])')].filter(n=>!n.closest('.solar-constellation[hidden]'));
-  activeIds=nodes.map(n=>n.dataset.project);
-  orbitPaths=createOrbitPaths(nodes.map(node=>node._cinematicLayout),space.width,space.height,root.dataset.activeGroup==='featured');
-  for(const [i,node]of nodes.entries()){
-   const source=node._cinematicLayout||{x:parseFloat(node.style.getPropertyValue('--planet-x')),y:parseFloat(node.style.getPropertyValue('--planet-y')),size:parseFloat(node.style.getPropertyValue('--planet-size')),height:parseFloat(node.style.getPropertyValue('--planet-height'))};
-   if(!Number.isFinite(source.x))continue;
-   let model=models.get(node.dataset.project);
-   if(!model){
-    const object=body(node.dataset.project);scene.add(object);
-    const accent=new THREE.Color(node.dataset.accent||'#a9c8e0');
-    const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:flareMap,color:accent,transparent:true,opacity:.12,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));scene.add(halo);
-    const ring=new THREE.Mesh(new THREE.RingGeometry(1.12,1.13,64),new THREE.MeshBasicMaterial({color:accent,transparent:true,opacity:.12,side:THREE.DoubleSide,depthWrite:false}));scene.add(ring);
-    model={object,halo,ring,node,target:new THREE.Vector3(),source,depth:0,phase:i*2.1};models.set(node.dataset.project,model);
+ function syncModels(){
+  const orbit=root._orbitFrame;if(!orbit||!height)return;
+  const shown=new Set();
+  for(const {node,layout:p} of orbit.items){
+   if(!p.visible)continue;shown.add(p.id);
+   let m=models.get(p.id);
+   if(!m){
+    const object=body(p.id);scene.add(object);
+    const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:flareMap,color:new THREE.Color(node.dataset.accent||'#a9c8e0'),transparent:true,opacity:.15,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));scene.add(halo);
+    const materials=new Map();object.traverse(child=>{for(const material of [].concat(child.material||[]))if(material.color&&!materials.has(material))materials.set(material,material.color.clone());});
+    m={object,halo,materials};models.set(p.id,m);node.dataset.modelKind=object.userData.kind;
    }
-   model.source=source;model.node=node;node.dataset.modelKind=model.object.userData.kind;
-   const x=space.left-box.left+source.x,y=space.top-box.top+source.y-source.height/2+source.size/2;
-   model.target.copy(screenToWorld(x,y,model.depth));
-   model.radius=source.size*.42*(2*Math.tan(THREE.MathUtils.degToRad(19))*(32-model.depth)/height);
-   if(!model.orbitPosition)model.orbitPosition=model.target.clone();
-   if(!model.visualRadius)model.visualRadius=model.radius;
-   model.object.scale.setScalar(model.radius);model.object.position.copy(model.target);model.object.visible=true;
+   const radius=p.size*.42*(2*Math.tan(THREE.MathUtils.degToRad(19))*(32-p.depth)/height);
+   m.object.position.copy(screenToWorld(spaceBox.left+p.x,spaceBox.top+p.bodyY,p.depth));
+   m.object.scale.setScalar(radius);m.object.visible=m.halo.visible=true;
+   const light=.42+.58*Math.pow(p.foreground,2);
+   m.materials.forEach((original,material)=>material.color.copy(original).multiplyScalar(light));
+   m.halo.position.copy(m.object.position);m.halo.position.z-=.6;m.halo.scale.setScalar(radius*5);
+   m.halo.material.opacity=.035+.22*Math.pow(p.foreground,5);
   }
-  for(const [id,m]of models)m.object.visible=m.halo.visible=m.ring.visible=activeIds.includes(id);
-  const guide=orbitPaths[0];
-  tracks.visible=Boolean(guide);
-  if(guide)tracks.children.forEach((line,index)=>{
-   const points=[],factor=[1,1.13,.87][index];
+  for(const [id,m] of models)if(!shown.has(id))m.object.visible=m.halo.visible=false;
+ }
+ function measure(){
+  const box=root.getBoundingClientRect(),space=root.querySelector('.solar-space').getBoundingClientRect();
+  width=box.width;height=box.height;if(!width||!height)return;
+  renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();camera.updateMatrixWorld();
+  spaceBox={left:space.left-box.left,top:space.top-box.top,width:space.width,height:space.height};
+  tracks.children.forEach((line,index)=>{
+   const points=[],factor=[1,1.065,.935][index];
    for(let j=0;j<=160;j++){
-    const p=orbitPoint(guide,guide.period*j/160);
-    points.push(screenToWorld(spaceBox.left+guide.cx+(p.x-guide.cx)*factor,spaceBox.top+guide.cy+(p.y-guide.cy)*factor-(p.height-p.size)/2,p.depth-index*1.5));
+    const p=orbitSlot(j/160*Math.PI*2,space.width,space.height);
+    points.push(screenToWorld(spaceBox.left+space.width*.5+(p.x-space.width*.5)*factor,spaceBox.top+space.height*.34+(p.bodyY-space.height*.34)*factor,p.depth-index*.6));
    }
    line.geometry.dispose();line.geometry=new THREE.BufferGeometry().setFromPoints(points);
    if(index===1)line.computeLineDistances();
   });
-  requestRender();
+  syncModels();requestRender();
  }
- function layoutEvent(event){for(const item of event.detail.nodes)item.node._cinematicLayout={...item.layout};updateLayout();}
- root.addEventListener('solar:layout',layoutEvent);
- root.addEventListener('solar:focus',requestRender);
+ root.addEventListener('solar:frame',requestRender);
  root.addEventListener('pointermove',event=>{const r=root.getBoundingClientRect();pointer.x=(event.clientX-r.left)/r.width-.5;pointer.y=(event.clientY-r.top)/r.height-.5;requestRender();},{passive:true});
  root.addEventListener('pointerleave',()=>{pointer.x=pointer.y=0;});
  function render(now){
   frame=0;if(!visible||contextLost||document.hidden||!width||!height)return;
-  const realDelta=Math.min(Math.max((now-(lastTime||now))/1000,0),.25),dt=Math.min(realDelta,.05);lastTime=now;
+  const dt=Math.min(Math.max((now-(lastTime||now))/1000,0),.05);lastTime=now;
   const paused=document.documentElement.classList.contains('project-dialog-open');
-  const focusedId=root.dataset.focusProject;
-  if(!paused&&!reduced.matches){elapsed+=realDelta;orbitTime+=realDelta;}
-  root.dataset.orbitTime=String(Math.round(orbitTime*100));
-  // Near and far objects respond differently to a restrained camera parallax.
-  cameraTarget.set(reduced.matches?0:Math.sin(elapsed*.15)*.25+pointer.x*.8,reduced.matches?0:Math.sin(elapsed*.11)*.12-pointer.y*.4,32);
-  camera.position.lerp(cameraTarget,1-Math.exp(-dt*5));
-  // Labels are projected before renderer.render updates the camera. This must
-  // also be correct on the only frame rendered with reduced motion enabled.
-  camera.updateMatrixWorld();
-  const space=spaceBox;
-  const smoothing=1-Math.exp(-dt*5);
-  for(const [i,id]of activeIds.entries()){
-   const m=models.get(id),p=orbitPoint(orbitPaths[i],reduced.matches?0:orbitTime);if(!m)continue;
-   m.source=p;m.depth=p.depth;
-   m.target.copy(screenToWorld(space.left+p.x,space.top+p.y-p.height/2+p.size/2,m.depth));
-   m.radius=p.size*.42*(2*Math.tan(THREE.MathUtils.degToRad(19))*(32-m.depth)/height);
-  }
-  for(const [id,m]of models){
-   if(!m.object.visible)continue;
-   const focus=id===focusedId;
-   if(reduced.matches)m.orbitPosition.copy(m.target);else m.orbitPosition.lerp(m.target,smoothing);
-   m.object.position.copy(m.orbitPosition);
-   if(!reduced.matches){m.object.position.x+=Math.sin(elapsed*.14+m.phase)*.045;m.object.position.y+=Math.sin(elapsed*.19+m.phase)*.065;}
-   m.visualRadius=reduced.matches?m.radius:m.visualRadius+(m.radius-m.visualRadius)*smoothing;
-   m.focusScale=reduced.matches?(focus?1.07:1):(m.focusScale||1)+((focus?1.07:1)-(m.focusScale||1))*smoothing;
-   m.object.scale.setScalar(m.visualRadius*m.focusScale);
-   const emphasis=focus?1:0;
-   m.halo.position.copy(m.object.position);m.halo.position.z-=.6;
-   m.halo.scale.setScalar(m.visualRadius*(4+(m.focusScale-1)*20));
-   m.halo.material.opacity=reduced.matches?(focus?.3:.075):m.halo.material.opacity+((focus?.3:.075)-m.halo.material.opacity)*smoothing;
-   m.ring.position.copy(m.object.position);m.ring.position.y-=m.visualRadius*.22;
-   m.ring.rotation.set(.85,0,-.24);m.ring.scale.setScalar(m.visualRadius*(focus?1.18:1.07));
-   m.ring.material.opacity=reduced.matches?.055+emphasis*.19:m.ring.material.opacity+(.055+emphasis*.19-m.ring.material.opacity)*smoothing;
-   m.node.style.setProperty('--orbit-depth',String(m.source.foreground??.5));
-   projected.copy(m.object.position).project(camera);
-   const x=(projected.x*.5+.5)*width-space.left,y=(-projected.y*.5+.5)*height-space.top;
-   const diameter=m.visualRadius/(2*Math.tan(THREE.MathUtils.degToRad(19))*(camera.position.z-m.object.position.z))*height*2/.84;
-   const nodeHeight=diameter+(m.source.height-m.source.size);
-   m.node.style.setProperty('--planet-x',`${x}px`);m.node.style.setProperty('--planet-y',`${y+nodeHeight/2-diameter/2}px`);if(!m.lastDiameter||Math.abs(diameter-m.lastDiameter)>.25){m.node.style.setProperty('--planet-size',`${diameter}px`);m.node.style.setProperty('--planet-height',`${nodeHeight}px`);m.lastDiameter=diameter;}
-  }
-  if(!paused&&!reduced.matches)for(const object of dynamicObjects){object.globe.rotation.x=object.base.x+Math.sin(elapsed*.22+object.phase)*.07;object.globe.rotation.y=object.base.y+Math.sin(elapsed*.18+object.phase)*.18;object.globe.rotation.z=object.base.z+Math.sin(elapsed*.14+object.phase)*.045;}
+  if(!paused&&!reduced.matches)elapsed+=dt;
+  syncModels();
+  if(!paused&&!reduced.matches)for(const object of dynamicObjects){object.globe.rotation.x=object.base.x+Math.sin(elapsed*.22+object.phase)*.035;object.globe.rotation.y=object.base.y+Math.sin(elapsed*.18+object.phase)*.1;object.globe.rotation.z=object.base.z+Math.sin(elapsed*.14+object.phase)*.025;}
   spaceBackdrop.update(elapsed,pointer,root.dataset.activeGroup==='side',width/height,!reduced.matches,dt);
-  spaceBackdrop.renderFog(renderer,width,height);
-  starMaterial.uniforms.time.value=reduced.matches?0:elapsed;
-  sky.rotation.y=-.8+(reduced.matches?0:elapsed*.003);
-  starField.rotation.y=reduced.matches?0:elapsed*.004;
-  renderer.render(scene,camera);
-  root.dataset.cinematicFrame=String(Math.round(elapsed*100));
+  spaceBackdrop.renderFog(renderer,width,height);starMaterial.uniforms.time.value=reduced.matches?0:elapsed;
+  sky.rotation.y=-.8+(reduced.matches?0:elapsed*.003);starField.rotation.y=reduced.matches?0:elapsed*.004;
+  renderer.render(scene,camera);root.dataset.cinematicFrame=String(Math.round(elapsed*100));
   if(!reduced.matches&&!paused)frame=requestAnimationFrame(render);
  }
- function requestRender(){if(ready&&!frame&&visible&&!contextLost&&!document.hidden){lastTime=0;frame=requestAnimationFrame(render);}}
+ function requestRender(){if(ready&&!frame&&visible&&!contextLost&&!document.hidden)frame=requestAnimationFrame(render);}
  new ResizeObserver(measure).observe(root);
- const visibility=new IntersectionObserver(entries=>{
-  visible=entries.some(entry=>entry.isIntersecting);
-  if(visible){lastTime=0;requestRender();}
-  else{cancelAnimationFrame(frame);frame=0;}
- },{threshold:.08});visibility.observe(root);
- document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else{lastTime=0;requestRender();}});
- reduced.addEventListener('change',()=>{if(reduced.matches){camera.position.set(0,0,32);camera.rotation.set(0,0,0);root.classList.remove('cinema-opening');}requestRender();});
+ new ResizeObserver(measure).observe(root.querySelector('.solar-space'));
+ const visibility=new IntersectionObserver(entries=>{visible=entries.some(entry=>entry.isIntersecting);lastTime=0;if(visible)requestRender();else{cancelAnimationFrame(frame);frame=0;}},{threshold:.08});visibility.observe(root);
+ document.addEventListener('visibilitychange',()=>{lastTime=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;}else requestRender();});
+ reduced.addEventListener('change',requestRender);
  new MutationObserver(requestRender).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
- canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();contextLost=true;cancelAnimationFrame(frame);frame=0;root.classList.remove('cinematic-ready','cinema-opening');root.dataset.cinematic='fallback';root.dispatchEvent(new Event('solar:restore-layout'));});
+ canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();contextLost=true;cancelAnimationFrame(frame);frame=0;root.classList.remove('cinematic-ready');root.dataset.cinematic='fallback';root.dispatchEvent(new Event('solar:restore-layout'));});
  canvas.addEventListener('webglcontextrestored',()=>{contextLost=false;root.classList.add('cinematic-ready');root.dataset.cinematic='ready';requestRender();});
  measure();
  if(renderer.extensions.has('KHR_parallel_shader_compile'))await renderer.compileAsync(scene,camera);else renderer.compile(scene,camera);
- ready=true;
- root.classList.add('cinematic-ready');root.dataset.cinematic='ready';root.dataset.visualMode='representative';
- requestRender();
+ ready=true;root.classList.add('cinematic-ready');root.dataset.cinematic='ready';root.dataset.visualMode='orbital-carousel';requestRender();
 }
