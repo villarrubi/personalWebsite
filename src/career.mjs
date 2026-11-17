@@ -89,6 +89,7 @@ export function careerSection(lang) {
  const es = lang === 'es';
  const milestones = [...learning, ...experience].sort((a,b)=>a.start.localeCompare(b.start));
  return `<section id="career" class="career-section container" aria-labelledby="career-title">
+  <div class="career-viewer">
   <header class="career-heading">
    <p class="eyebrow">02 / ${es?'TRAYECTORIA':'CAREER'}</p>
    <div><h2 id="career-title">${es?'La curiosidad, en el tiempo.':'Curiosity, over time.'}</h2><p>2018 <span aria-hidden="true">⟶</span> ${es?'hoy':'today'}</p></div>
@@ -116,5 +117,12 @@ export function careerSection(lang) {
     </li>`;
    }).join('')}
   </ol>
+  <div class="career-controls" hidden>
+   <div class="career-steps" role="group" aria-label="${es?'Elegir una etapa':'Choose a stage'}">
+    ${milestones.map((job,index)=>`<button type="button" data-career-step="${index}" aria-label="${job.start.slice(0,4)} — ${job.role[lang]}${typeof job.company==='string'?` — ${job.company}`:''}"><span>${job.start.slice(0,4)}</span></button>`).join('')}
+   </div>
+   <div class="career-continuation"><span class="career-counter" data-career-counter></span><p data-career-next-label></p><button type="button" data-career-next>${es?'Siguiente':'Next'} <span aria-hidden="true">↓</span></button></div>
+  </div>
+  </div>
  </section>`;
 }
