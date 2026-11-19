@@ -11,12 +11,14 @@ if(root){
  const allNodes=[...root.querySelectorAll('[data-project]')];
  const catalog={nodes:allNodes,carousel:new OrbitCarousel(allNodes.length)};
  let visible=!('IntersectionObserver'in window),frame=0,last=null,ambientTime=0;
+ let keyboardNavigation=true;
  const pointer={x:0,y:0},pointerTarget={x:0,y:0};
  const current=()=>catalog;
  // The scene's explicit motion control governs both autoplay and manual turns.
  const animate=()=>!motion.matches;
  const blocked=()=>document.hidden||!visible||document.documentElement.classList.contains('intro-playing')||document.documentElement.classList.contains('intro-pending')||document.documentElement.classList.contains('project-dialog-open');
- const autoAllowed=()=>!blocked()&&!motion.matches&&!root.contains(document.activeElement?.closest?.('.planet-node,.solar-preview'));
+ const focusPaused=()=>keyboardNavigation&&root.contains(document.activeElement?.closest?.('.planet-node,.solar-preview'));
+ const autoAllowed=()=>!blocked()&&!motion.matches&&!focusPaused();
  function paint(announce=false){
   const {nodes,carousel}=current(),width=space.clientWidth,height=space.clientHeight;
   if(!width||!height)return;
@@ -58,6 +60,14 @@ if(root){
   if(!blocked()&&!motion.matches&&(current().carousel.moving||(autoAllowed()&&(current().nodes.length>1||(animate()&&current().nodes.length)))))frame=requestAnimationFrame(tick);
  }
  function step(direction){current().carousel.step(direction,animate());paint(true);sync();}
+ // Pointer focus persists after selection and native dialog close. It is not a pause.
+ // Keep the keyboard pause until Tab navigation leaves the project/preview.
+ function setKeyboardNavigation(value){
+  if(keyboardNavigation===value)return;
+  keyboardNavigation=value;sync();
+ }
+ document.addEventListener('pointerdown',()=>setKeyboardNavigation(false),{capture:true,passive:true});
+ document.addEventListener('keydown',event=>{if(event.key==='Tab')setKeyboardNavigation(true);});
  controls.forEach(button=>button.addEventListener('click',()=>step(Number(button.dataset.carouselStep))));
  root.querySelector('.solar-carousel-controls').hidden=false;
  allNodes.forEach(node=>{
@@ -77,6 +87,7 @@ if(root){
  root.addEventListener('pointerleave',()=>{pointerTarget.x=pointerTarget.y=0;});
  root.addEventListener('keydown',event=>{
   if(event.altKey||event.ctrlKey||event.metaKey||!['ArrowLeft','ArrowRight'].includes(event.key))return;
+  keyboardNavigation=true;
   event.preventDefault();step(event.key==='ArrowLeft'?-1:1);
  });
  root.addEventListener('focusin',sync);root.addEventListener('focusout',()=>queueMicrotask(sync));

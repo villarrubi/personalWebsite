@@ -198,3 +198,30 @@ assert.equal(previewPause.previewAnimation.playState,'finished','Resuming motion
 previewPause.motion.setEnabled(false);previewPause.click(previewPause.controls[1]);previewPause.motion.setEnabled(true);
 assert.equal(previewPause.previewAnimation.playState,'idle','A cancelled fade cannot reappear over newly selected text');
 console.log('PASS: text fades pause/resume without replaying finished or cancelled animations.');
+
+// Pointer focus survives both selecting an icon and closing its native dialog.
+for(const closeWith of [null,'button','Escape']){
+ const pointerVisit=visit();pointerVisit.show();
+ pointerVisit.doc.dispatchEvent(new Event('pointerdown'));
+ pointerVisit.doc.activeElement={closest:()=>pointerVisit.nodes[2]};
+ pointerVisit.root.dispatchEvent(new Event('focusin'));
+ pointerVisit.click(pointerVisit.nodes[2]);pointerVisit.advance(1000);
+ assert.equal(pointerVisit.root.dataset.focusProject,'project-2');
+ if(closeWith){
+  pointerVisit.doc.documentElement.classList.add('project-dialog-open');pointerVisit.mutate();pointerVisit.advance(5000);
+  assert.equal(pointerVisit.root.dataset.focusProject,'project-2','An open dialog still pauses autoplay');
+  if(closeWith==='button')pointerVisit.doc.dispatchEvent(new Event('pointerdown'));
+  else pointerVisit.doc.dispatchEvent(Object.assign(new Event('keydown'),{key:'Escape'}));
+  pointerVisit.doc.documentElement.classList.remove('project-dialog-open');pointerVisit.mutate();
+  pointerVisit.root.dispatchEvent(new Event('focusin'));
+ }
+ pointerVisit.advance(4500);assert.equal(pointerVisit.root.dataset.focusProject,'project-3','Pointer-selected icons resume autoplay, including after closing their dialog');
+ pointerVisit.advance(3500);assert.equal(pointerVisit.root.dataset.focusProject,'project-4','Restored pointer focus must not stop later cycles');
+ pointerVisit.doc.dispatchEvent(Object.assign(new Event('keydown'),{key:'Tab'}));
+ pointerVisit.advance(5000);assert.equal(pointerVisit.root.dataset.focusProject,'project-4','Switching to keyboard navigation pauses for reading');
+ pointerVisit.doc.dispatchEvent(new Event('pointerdown'));pointerVisit.advance(4500);
+ assert.equal(pointerVisit.root.dataset.focusProject,'project-5','Returning to pointer interaction resumes playback without blurring the link');
+ pointerVisit.motion.setEnabled(false);pointerVisit.doc.dispatchEvent(new Event('pointerdown'));pointerVisit.advance(5000);
+ assert.equal(pointerVisit.root.dataset.focusProject,'project-5','Pointer actions never override an explicit pause');
+}
+console.log('PASS: autoplay after pointer selection and modal close, Escape without a permanent pause, keyboard focus protection and explicit pause preservation.');
