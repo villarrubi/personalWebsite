@@ -31,14 +31,6 @@ assert(canUseViewer({height:520,availableHeight:700}));
 assert(canUseViewer({height:520,availableHeight:520}));
 assert(!canUseViewer({height:701,availableHeight:700}));
 assert(!canUseViewer({height:520,availableHeight:700,motionOff:true}));
-for(let step=0;step<=600;step++){
- const state=careerFrame(step/100,7,true);
- assert.equal(state.index,careerFrame(step/100,7).index);
- assert.equal(state.pages.length,1,'Reduced motion never overlays two text blocks');
- const page=state.pages[0];
- assert.equal(page.index,state.index);assert.equal(page.offset,0);assert.equal(page.scale,1);
- assert.equal(page.opacity,1,'Stopping scroll must never leave a dim or blank stage');
-}
 for(const lang of ['es','en']){
  const html=await readFile(new URL(`../dist/${lang}/index.html`,import.meta.url),'utf8');
  const section=html.split('<section id="career"')[1].split('</section>')[0];
@@ -68,10 +60,9 @@ const buttons=Array.from({length:7},element),next={...element(),firstChild:{text
 const counter={},label={},events=new Map(),frames=new Map(),preference=new EventTarget();
 preference.matches=false;
 let sequence=0,expanded=false,listReflowShift=0;
-const fades=[];
+let scrollBehavior;
 const cards=Array.from({length:7},(_,index)=>({
  ...element(),querySelector:()=>({textContent:String(index)}),
- animate(keyframes,options){const fade={index,keyframes,options,cancelled:false,cancel(){this.cancelled=true;}};fades.push(fade);return fade;},
  contains(node){return node===this;},
  blur(){doc.activeElement=null;},
  get offsetHeight(){return index===5&&expanded?600:300;},
@@ -90,7 +81,7 @@ const context={document:doc,window:{},innerHeight:844,innerWidth:390,scrollY:0,U
  matchMedia:()=>preference,getComputedStyle:()=>({paddingTop:'28'}),
  addEventListener:(type,fn)=>events.set(type,fn),
  requestAnimationFrame:fn=>{frames.set(++sequence,fn);return sequence;},cancelAnimationFrame:id=>frames.delete(id),
- scrollTo:({top})=>{context.scrollY=top;},
+ scrollTo:({top,behavior})=>{context.scrollY=top;scrollBehavior=behavior;},
 };
 function flush(){const pending=[...frames.values()];frames.clear();pending.forEach(fn=>fn());}
 runInNewContext(source,context);
@@ -115,13 +106,24 @@ assert(section.classList.contains('career-deck'),'Reduced motion retains the vie
 assert(cards[5].classList.contains('is-active'),'Reduced motion keeps the selected stage');
 assert.equal(cards[5].getBoundingClientRect().top,180,'Reduced motion keeps the reading position');
 buttons[4].events.get('click')();events.get('scroll')();flush();
-assert.equal(fades.at(-1).index,4);
-assert.equal(fades.at(-1).options.duration,180,'Reduced-motion fades finish independently of the scroll position');
-assert.equal(fades.at(-1).keyframes.at(-1).opacity,1);
+assert.equal(scrollBehavior,'smooth','Stage buttons retain the sliding journey with reduced system motion');
+const fourthPosition=context.scrollY;
+for(const reduced of [false,true]){
+ preference.matches=reduced;preference.dispatchEvent(new Event('change'));
+ for(const progress of [0,.32,.5,.68,1,.68,.5,.32,0]){
+  context.scrollY=fourthPosition+careerScrollStep(context.innerHeight)*progress;
+  events.get('scroll')();flush();
+  const visible=cards.filter(card=>!card.hidden);
+  assert.equal(visible.length,progress>0&&progress<1?2:1,'Both OS preferences retain overlapping cards during the slide');
+  assert(visible.every(card=>card.style.getPropertyValue('--page-opacity')==='1.000'),'Cards slide without fading their text');
+  if(progress===.5){
+   assert.equal(cards[4].style.getPropertyValue('--page-offset'),'-6.00%');
+   assert.equal(cards[5].style.getPropertyValue('--page-offset'),'50.00%');
+  }
+ }
+}
 buttons[5].events.get('click')();events.get('scroll')();flush();
-assert(fades.at(-2).cancelled,'Rapid navigation cancels the previous fade');
 preference.matches=false;preference.dispatchEvent(new Event('change'));
-assert(fades.at(-1).cancelled,'Changing the system preference cancels an in-flight fade');
 assert(cards[5].classList.contains('is-active'));
 // A summary can retain focus after scrolling away: resizing must not jump back.
 doc.activeElement=cards[5];
