@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -17,6 +18,8 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      PAGES_ARTIFACT_NAME: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -34,7 +37,26 @@ jobs:
           npm run build
           npm run check
       - uses: actions/upload-pages-artifact@v4
+        id: artifact
         with:
+          name: ${{ env.PAGES_ARTIFACT_NAME }}
           path: dist
+      - name: Wait for artifact availability
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGES_ARTIFACT_ID: ${{ steps.artifact.outputs.artifact_id }}
+        run: |
+          for attempt in {1..12}; do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" \
+              | jq -e --arg name "$PAGES_ARTIFACT_NAME" --arg id "$PAGES_ARTIFACT_ID" \
+                '.artifacts | any(.name == $name and (.id | tostring) == $id and .expired == false)' >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::The uploaded Pages artifact is not available for deployment yet."
+          exit 1
       - uses: actions/deploy-pages@v4
         id: deployment
+        with:
+          artifact_name: ${{ env.PAGES_ARTIFACT_NAME }}
