@@ -21,7 +21,7 @@ export function advanceCareerProgress(current,target,elapsed){
  const origin=target-Math.sign(distance)*Math.min(Math.abs(distance),.75);
  return origin+(target-origin)*(1-Math.exp(-Math.max(0,Math.min(64,elapsed))/65));
 }
-export function careerScrollStep(height){return Math.max(460,Math.min(760,height*.8));}
+export function careerScrollStep(height){return Math.max(320,Math.min(520,height*.55));}
 export function canUseViewer({height,availableHeight,motionOff=false}) {
  return !motionOff&&height>0&&height<=availableHeight;
 }
@@ -115,7 +115,13 @@ if(timeline){
   enabled=canUseViewer({height:required,availableHeight:available,motionOff});
   // Fit the pinned viewer to its content instead of stretching the cards to
   // fill the viewport. Keep one measured card height for seamless overlap.
-  if(enabled)section.style.setProperty('--viewer-height',`${required}px`);
+  if(enabled){
+   // Balance the free space below the fixed header around the compact viewer.
+   // Use this same top for the scroll origin so pinning and stage changes agree.
+   top+=Math.round((available-required)/2);
+   section.style.setProperty('--viewer-top',`${top}px`);
+   section.style.setProperty('--viewer-height',`${required}px`);
+  }
   section.classList.remove('is-measuring');
   section.style.setProperty('--card-height',`${cardHeight}px`);
   section.style.setProperty('--career-travel',`${step*(cards.length-1)}px`);
@@ -123,7 +129,10 @@ if(timeline){
   if(enabled){
    section.classList.add('career-deck');
    // Use the section's natural position, not the already pinned viewer rect.
-   start=scrollY+section.getBoundingClientRect().top+parseFloat(getComputedStyle(section).paddingTop)-top;
+   const sectionPadding=parseFloat(getComputedStyle(section).paddingTop);
+   const scrollPadding=parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0;
+   section.style.setProperty('--career-anchor-offset',`${top-sectionPadding-scrollPadding}px`);
+   start=scrollY+section.getBoundingClientRect().top+sectionPadding-top;
    if(keepPosition)scrollTo({top:start+oldProgress*step,behavior:'instant'});
    else if(readingCard)scrollTo({top:start+cards.indexOf(readingCard)*step,behavior:'instant'});
    select(careerFrame((scrollY-start)/step,cards.length).index);

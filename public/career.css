@@ -47,7 +47,7 @@
 @media(max-width:760px){.career-section{padding-block:28px 30px}.career-heading>div{display:block}.career-heading>div>p{margin-top:8px}.career-entry{min-height:0;padding:20px}.career-content{grid-template-columns:1fr;gap:10px}.career-content h3{font-size:21px}.career-tags{margin-top:10px}}
 @media(max-width:480px){.career-entry{grid-template-columns:1fr;gap:14px;padding:18px;margin-bottom:10px}.career-date{flex-direction:row;align-items:center;gap:14px;border-right:0;border-bottom:1px solid #a0b8d329;padding:0 0 12px}.career-date>time{font-size:32px}.career-page{margin-left:auto}.career-content h3{font-size:20px}.career-company{font-size:11px}.career-points{font-size:12px}.career-heading h2{font-size:30px}}
 
-.career-deck{height:calc(var(--viewer-height) + var(--career-travel) + 76px)}
+.career-deck{height:calc(var(--viewer-height) + var(--career-travel) + 76px);scroll-margin-top:var(--career-anchor-offset,0px)}
 .career-deck .career-viewer{position:sticky;top:var(--viewer-top);height:var(--viewer-height);display:flex;flex-direction:column;justify-content:flex-start;gap:12px}
 .career-deck .career-heading{margin-bottom:0;flex:none}
 .career-deck .career-timeline{display:grid;align-items:center;flex:none;height:var(--card-height);min-height:var(--card-height);padding:0;overflow:clip;overflow-clip-margin:10px}

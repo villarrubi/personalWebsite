@@ -43,7 +43,7 @@ for(const hz of [30,60,120]){
  assert(advanceCareerProgress(progress,.2,1000/hz)<progress,'Reversing scroll responds on the next frame');
 }
 assert(advanceCareerProgress(0,6,16)>5.25,'Large jumps never animate through the entire timeline');
-for(const height of [320,600,900,1440])assert(careerScrollStep(height)>=460&&careerScrollStep(height)<=760);
+for(const height of [320,600,900,1440])assert(careerScrollStep(height)>=320&&careerScrollStep(height)<=520);
 assert(canUseViewer({height:520,availableHeight:700}));
 assert(canUseViewer({height:520,availableHeight:520}));
 assert(!canUseViewer({height:701,availableHeight:700}));
@@ -60,7 +60,7 @@ for(const lang of ['es','en']){
  assert(section.includes('class="career-controls" hidden'),'Controls do not appear without JavaScript');
  assert(!section.includes('inert')&&!section.includes('aria-hidden="true"><article'),'Content stays readable without enhancement');
 }
-console.log('PASS: overlapping reversible cards, reading pauses, slower scroll steps, responsive fallback, and seven bilingual navigation steps.');
+console.log('PASS: overlapping reversible cards, reading pauses, bounded scroll steps, responsive fallback, and seven bilingual navigation steps.');
 
 // Reproduce a detail that outgrows the mobile viewer, then returns to it.
 const source=(await readFile(new URL('../public/career-motion.js',import.meta.url),'utf8')).replaceAll('export ','');
