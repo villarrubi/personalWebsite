@@ -10,7 +10,7 @@ export async function mountCinematicSpace(root){
  const mobile=matchMedia('(max-width:700px)').matches;
  const canvas=document.createElement('canvas');canvas.className='cinematic-canvas';canvas.setAttribute('aria-hidden','true');
  let renderer;
- try{renderer=new THREE.WebGLRenderer({canvas,antialias:!mobile,alpha:true,powerPreference:'high-performance'});}catch{root.dataset.cinematic='fallback';return;}
+ try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});}catch{root.dataset.cinematic='fallback';return;}
  renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.25));
  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;
  renderer.shadowMap.enabled=!mobile;renderer.shadowMap.type=THREE.PCFSoftShadowMap;

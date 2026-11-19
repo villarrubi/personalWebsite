@@ -7,16 +7,13 @@ if(root){
  const es=document.documentElement.lang==='es',motion=sceneMotion;
  const preference=matchMedia('(prefers-reduced-motion: reduce)');
  const space=root.querySelector('.solar-space'),status=root.querySelector('.solar-status');
- const worlds=[...root.querySelectorAll('[data-map-world]')],buttons=[...root.querySelectorAll('[data-map-group]')];
- const description=root.querySelector('.solar-description'),focus=createOrbitFocus(root,motion);
+ const focus=createOrbitFocus(root,motion);
  const controls=[...root.querySelectorAll('[data-carousel-step]')];
- const groups=Object.fromEntries(worlds.map(world=>[world.dataset.mapWorld,{world,nodes:[...world.querySelectorAll('[data-project]')],carousel:new OrbitCarousel(world.querySelectorAll('[data-project]').length)}]));
- const allNodes=Object.values(groups).flatMap(group=>group.nodes);
- groups.all={nodes:allNodes,carousel:new OrbitCarousel(allNodes.length)};
- let active=location.hash==='#complementary'?'side':'all';
+ const allNodes=[...root.querySelectorAll('[data-project]')];
+ const catalog={nodes:allNodes,carousel:new OrbitCarousel(allNodes.length)};
  let visible=!('IntersectionObserver'in window),frame=0,last=null,ambientTime=0;
  const pointer={x:0,y:0},pointerTarget={x:0,y:0};
- const current=()=>groups[active];
+ const current=()=>catalog;
  const animate=()=>!preference.matches&&!motion.matches;
  const blocked=()=>document.hidden||!visible||document.documentElement.classList.contains('intro-playing')||document.documentElement.classList.contains('intro-pending')||document.documentElement.classList.contains('project-dialog-open');
  const autoAllowed=()=>!blocked()&&!motion.matches&&!root.contains(document.activeElement?.closest?.('.planet-node,.solar-preview'));
@@ -41,7 +38,7 @@ if(root){
   controls.forEach(button=>button.disabled=nodes.length<2);
   root.dispatchEvent(new Event('solar:frame'));
   const destination=wrapIndex(carousel.target,nodes.length);
-  if(announce)status.textContent=nodes.length?`${nodes[destination].dataset.name} · ${destination+1} / ${nodes.length}`:(es?'No hay proyectos en este grupo.':'No projects in this group.');
+  if(announce)status.textContent=nodes.length?`${nodes[destination].dataset.name} · ${destination+1} / ${nodes.length}`:(es?'No hay proyectos publicados.':'No published projects.');
  }
  function tick(now){
   frame=0;if(blocked()){last=null;return;}
@@ -61,17 +58,8 @@ if(root){
   if(!blocked()&&(current().carousel.moving||(autoAllowed()&&(current().nodes.length>1||(animate()&&current().nodes.length)))))frame=requestAnimationFrame(tick);
  }
  function step(direction){current().carousel.step(direction,animate());paint(true);sync();}
- function selectGroup(group){
-  if(!groups[group])return;
-  current().carousel.settle();active=group;root.dataset.activeGroup=active;
-  worlds.forEach(world=>world.hidden=active!=='all'&&world.dataset.mapWorld!==active);
-  buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mapGroup===active)));
-  description.textContent=description.dataset[active==='side'?'sideCopy':'featuredCopy'];
-  paint();sync();
- }
  controls.forEach(button=>button.addEventListener('click',()=>step(Number(button.dataset.carouselStep))));
  root.querySelector('.solar-carousel-controls').hidden=false;
- buttons.forEach(button=>button.addEventListener('click',()=>selectGroup(button.dataset.mapGroup)));
  allNodes.forEach(node=>{
   node.addEventListener('click',event=>{
    if(event.defaultPrevented||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button!==0)return;
@@ -105,7 +93,6 @@ if(root){
  preference.addEventListener('change',syncMotion);
  document.addEventListener('visibilitychange',sync);
  new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
- window.addEventListener('hashchange',()=>{if(location.hash==='#complementary')selectGroup('side');});
  if('ResizeObserver'in window)new ResizeObserver(()=>paint()).observe(space);else window.addEventListener('resize',()=>paint());
  if('IntersectionObserver'in window)new IntersectionObserver(entries=>{
   visible=entries.some(entry=>entry.isIntersecting);root.classList.toggle('is-sleeping',!visible);
@@ -115,5 +102,5 @@ if(root){
   }
   sync();
  },{threshold:.12}).observe(root);
- selectGroup(active);syncMotion();
+ syncMotion();
 }

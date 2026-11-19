@@ -50,8 +50,8 @@ export function orbitDrift(id,time,pointer={x:0,y:0},foreground=1){
 export function orbitSlot(angle,width,height,slots=7){
  const foreground=(Math.cos(angle)+1)/2,compact=width<600;
  const frontSize=Math.min(compact?width*.66:width*.35,height*.59,340);
- const rearScale=Math.max(.14,.24*7/Math.max(7,slots));
- const size=frontSize*(rearScale+(1-rearScale)*Math.pow(foreground,4));
+ const rearScale=Math.max(.10,.16*7/Math.max(7,slots));
+ const size=frontSize*(rearScale+(1-rearScale)*Math.pow(foreground,7));
  const x=width*.5+Math.sin(angle)*width*.34;
  const bodyY=height*(.34+.22*Math.cos(angle)+.055*Math.sin(angle));
  const labelHeight=compact?42:58;

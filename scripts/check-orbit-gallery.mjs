@@ -15,7 +15,7 @@ for(const lang of ['es','en']){
  assert(html.includes('class="solar-carousel-controls" hidden'),'Controls are enhanced only with JS');
  for(const direction of [-1,1])assert(html.includes(`data-carousel-step="${direction}" aria-label="`));
  assert(!html.includes('data-preview-step'));
- assert(html.includes('data-map-group="all" aria-pressed="true"'),'The entire catalog is the default view');
+ assert(!html.includes('data-map-group='),'There are no catalog filters');
 }
 
 assert.equal(ORBIT_INTERVAL,3500);assert.equal(ORBIT_TURN_DURATION,900);
@@ -48,7 +48,7 @@ for(const count of [1,2,3,6,7,13,20,100])for(const [width,height] of [[294,465],
   for(const p of visible){
    assert(p.x-p.size/2>=0&&p.x+p.size/2<=width,'Bodies stay in horizontal bounds');
    assert(p.bodyY-p.size/2>=0&&p.y+p.height/2<=height,'Bodies and labels fit in the stage');
-   if(p!==front){assert(front.size>p.size*1.5,'A single project dominates the foreground');assert(front.depth>p.depth);}
+   if(p!==front){assert(front.size>p.size*2.5,'A single project dominates the foreground');assert(front.depth>p.depth);}
   }
  }
  for(let step=0;step<40;step++){
@@ -70,8 +70,6 @@ function visit({paused=false,reduced=false}={}){
  };
  const nodes=Array.from({length:6},(_,i)=>element({project:`project-${i}`,name:`Project ${i}`,accent:'#abcdef'}));
  const sideNodes=[element({project:'side',name:'Side',accent:'#abcdef'})];
- const worlds=['featured','side'].map((group,i)=>{const world=element({mapWorld:group});world.querySelectorAll=()=>i?sideNodes:nodes;return world;});
- const buttons=['featured','side','all'].map(mapGroup=>element({mapGroup}));
  const controls=[-1,1].map(carouselStep=>element({carouselStep}));
  const motion=new EventTarget();motion.matches=paused;motion.setEnabled=value=>{motion.matches=!value;motion.dispatchEvent(new Event('change'));};
  const preference=new EventTarget();preference.matches=reduced;
@@ -79,9 +77,9 @@ function visit({paused=false,reduced=false}={}){
  const body={replaceChildren(value){rendered=value??null;},animate(){animations++;return {cancel(){}};}};
  const counter={},status={},controlBox={hidden:true},motionButton=element(),space={clientWidth:1100,clientHeight:490,getBoundingClientRect:()=>({width:1100,height:490,left:0,top:0})};
  motionButton.querySelector=()=>({});
- const root=element({cinematic:'fallback'}),description={dataset:{featuredCopy:'Featured',sideCopy:'Side'}};
- const selectors={'.solar-space':space,'.solar-status':status,'.solar-description':description,'.solar-preview-body':body,'.solar-carousel-count':counter,'.solar-carousel-controls':controlBox,'.space-motion-toggle':motionButton};
- root.querySelector=s=>selectors[s];root.querySelectorAll=s=>s==='[data-map-world]'?worlds:s==='[data-map-group]'?buttons:s==='[data-carousel-step]'?controls:[...nodes,...sideNodes];
+ const root=element({cinematic:'fallback'});
+ const selectors={'.solar-space':space,'.solar-status':status,'.solar-preview-body':body,'.solar-carousel-count':counter,'.solar-carousel-controls':controlBox,'.space-motion-toggle':motionButton};
+ root.querySelector=s=>selectors[s];root.querySelectorAll=s=>s==='[data-carousel-step]'?controls:[...nodes,...sideNodes];
  root.contains=node=>[...nodes,...sideNodes,body].includes(node);
  const doc=element();doc.documentElement=element();doc.documentElement.lang='en';doc.hidden=false;doc.querySelector=()=>root;doc.activeElement=null;
  doc.getElementById=id=>({content:{cloneNode:()=>id}});
@@ -95,13 +93,13 @@ function visit({paused=false,reduced=false}={}){
  function advance(ms){for(let elapsed=0;elapsed<ms;elapsed+=50){now+=Math.min(50,ms-elapsed);const pending=[...frames.values()];frames.clear();pending.forEach(fn=>fn(now));}}
  function click(element){const event={button:0,defaultPrevented:false,preventDefault(){this.defaultPrevented=true;}};element.events.get('click')(event);return event;}
  function show(value=true){visibility([{isIntersecting:value}]);}
- return {root,nodes,sideNodes,worlds,buttons,controls,motion,doc,status,counter,controlBox,advance,click,show,mutate:()=>observer(),get rendered(){return rendered;},get animations(){return animations;}};
+ return {root,nodes,sideNodes,controls,motion,doc,status,counter,controlBox,advance,click,show,mutate:()=>observer(),get rendered(){return rendered;},get animations(){return animations;}};
 }
-const v=visit();assert.equal(v.counter.textContent,'01 / 07');assert(v.worlds.every(world=>!world.hidden),'Both groups share the default orbit');v.click(v.buttons[0]);assert(!v.controlBox.hidden);assert.equal(v.root.dataset.focusProject,'project-0');
+const v=visit();assert.equal(v.counter.textContent,'01 / 07');assert(!v.controlBox.hidden);assert.equal(v.root.dataset.focusProject,'project-0');
 v.advance(6000);assert.equal(v.root.dataset.focusProject,'project-0','Offscreen scenes do not rotate');
 v.show();v.advance(4500);assert.equal(v.root.dataset.focusProject,'project-1');
 v.click(v.controls[1]);assert(v.status.textContent.startsWith('Project 2'));v.advance(1000);
-assert.equal(v.root.dataset.focusProject,'project-2');assert.equal(v.counter.textContent,'03 / 06');
+assert.equal(v.root.dataset.focusProject,'project-2');assert.equal(v.counter.textContent,'03 / 07');
 assert.equal(v.rendered,'project-preview-project-2');
 assert.equal(v.nodes.filter(n=>n.classList.contains('is-featured')).length,1);
 assert(v.click(v.nodes[4]).defaultPrevented,'Clicking a rear project selects it before opening');v.advance(1000);
@@ -112,11 +110,9 @@ v.doc.documentElement.classList.remove('project-dialog-open');v.mutate();v.advan
 v.doc.hidden=true;v.doc.dispatchEvent(new Event('visibilitychange'));v.advance(8000);assert.equal(v.root.dataset.focusProject,'project-5');
 v.doc.hidden=false;v.doc.dispatchEvent(new Event('visibilitychange'));
 v.doc.activeElement={closest:()=>v.nodes[5]};v.root.dispatchEvent(new Event('focusin'));v.advance(8000);assert.equal(v.root.dataset.focusProject,'project-5','Keyboard focus pauses the orbit');
-v.doc.activeElement=null;v.root.dispatchEvent(new Event('focusin'));v.advance(4500);assert.equal(v.root.dataset.focusProject,'project-0');
-v.click(v.buttons[1]);assert.equal(v.root.dataset.focusProject,'side');assert(v.controls.every(b=>b.disabled));
-v.advance(8000);assert.equal(v.root.dataset.focusProject,'side');
-v.click(v.buttons[0]);assert.equal(v.root.dataset.focusProject,'project-0');
-v.click(v.buttons[2]);assert.equal(v.counter.textContent,'01 / 07');v.click(v.sideNodes[0]);v.advance(1000);assert.equal(v.counter.textContent,'07 / 07');v.click(v.controls[1]);v.advance(1000);assert.equal(v.root.dataset.focusProject,'project-0','All-project navigation wraps across both groups');
+v.doc.activeElement=null;v.root.dispatchEvent(new Event('focusin'));v.advance(4500);assert.equal(v.root.dataset.focusProject,'side');
+assert(!v.controls.some(b=>b.disabled),'All catalog entries remain reachable');
+v.click(v.controls[1]);v.advance(1000);assert.equal(v.counter.textContent,'01 / 07');v.click(v.sideNodes[0]);v.advance(1000);assert.equal(v.counter.textContent,'07 / 07');v.click(v.controls[1]);v.advance(1000);assert.equal(v.root.dataset.focusProject,'project-0','All-project navigation wraps across both groups');
 for(const options of [{paused:true},{reduced:true}]){
  const calm=visit(options);calm.show();calm.click(calm.controls[1]);
  assert.equal(calm.root.dataset.focusProject,'project-1','Manual navigation works without animation');assert.equal(calm.animations,0);
