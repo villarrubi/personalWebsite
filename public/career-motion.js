@@ -1,11 +1,16 @@
 // Opaque pages slide over one another without mixing two blocks of text.
-export function careerFrame(progress,count) {
+export function careerFrame(progress,count,reducedMotion=false) {
  const last=Math.max(0,count-1);
  const position=Math.min(last,Math.max(0,Number.isFinite(progress)?progress:0));
  const index=Math.min(last,Math.floor(position+.5));
  const lower=Math.floor(position),fraction=position-lower;
  const blend=Math.max(0,Math.min(1,(fraction-.28)/.44));
  const mix=blend*blend*(3-2*blend);
+ // Reduced motion keeps a single stationary, readable card. A short entry
+ // fade is timed separately so stopping the scroll never leaves dim text.
+ if(reducedMotion){
+  return {index,pages:[{index,offset:0,scale:1,opacity:1}],progress:last?position/last:1};
+ }
  const pages=lower===last||mix===0?[{index:lower,offset:0,scale:1,opacity:1}]:mix===1?[{index:lower+1,offset:0,scale:1,opacity:1}]:[
   {index:lower,offset:-12*mix,scale:1-.025*mix,opacity:1},
   {index:lower+1,offset:100*(1-mix),scale:1,opacity:1},
@@ -13,8 +18,8 @@ export function careerFrame(progress,count) {
  return {index,pages,progress:last?position/last:1};
 }
 export function careerScrollStep(height){return Math.max(460,Math.min(760,height*.8));}
-export function canUseViewer({height,availableHeight,reducedMotion}) {
- return !reducedMotion&&height>0&&height<=availableHeight;
+export function canUseViewer({height,availableHeight,motionOff=false}) {
+ return !motionOff&&height>0&&height<=availableHeight;
 }
 
 const timeline=typeof document!=='undefined'?document.querySelector('.career-timeline'):null;
@@ -34,10 +39,13 @@ if(timeline){
  const titles=cards.map(card=>`${card.querySelector('time').textContent} · ${card.querySelector('h3').textContent}`);
  let enabled=false,active=-1,frame=0,visible=true,top=98,step=600,start=0,measuring=false;
  let readingAnchor=null;
+ let entryFade=null;
  const clampIndex=index=>Math.max(0,Math.min(cards.length-1,index));
  function select(index){
   if(index===active)return;
   const previous=cards[active];
+  entryFade?.cancel();
+  entryFade=previous&&preference.matches?cards[index].animate?.([{opacity:0},{opacity:1}],{duration:180,easing:'ease-out'}):null;
   if(previous?.contains(document.activeElement))document.activeElement.blur();
   cards.forEach((card,i)=>{card.inert=i!==index;card.setAttribute('aria-hidden',String(i!==index));card.classList.toggle('is-active',i===index);});
   steps.forEach((button,i)=>{if(i===index)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');});
@@ -50,7 +58,7 @@ if(timeline){
  function paint(){
   frame=0;
   if(!enabled||document.hidden)return;
-  const state=careerFrame((scrollY-start)/step,cards.length);
+  const state=careerFrame((scrollY-start)/step,cards.length,preference.matches);
   select(state.index);
   cards.forEach((card,index)=>{
    const page=state.pages.find(page=>page.index===index);
@@ -73,6 +81,7 @@ if(timeline){
  function measure(event){
   if(measuring)return;
   measuring=true;
+  entryFade?.cancel();entryFade=null;
   const wasEnabled=enabled;
   const oldProgress=wasEnabled?(scrollY-start)/step:0;
   const keepPosition=wasEnabled&&oldProgress>=0&&oldProgress<=cards.length-1;
@@ -93,7 +102,7 @@ if(timeline){
   section.classList.add('career-deck','is-measuring');
   const cardHeight=Math.max(...cards.map(card=>card.offsetHeight));
   const required=heading.offsetHeight+cardHeight+controls.offsetHeight+24;
-  enabled=canUseViewer({height:required,availableHeight:available,reducedMotion:preference.matches||motionOff});
+  enabled=canUseViewer({height:required,availableHeight:available,motionOff});
   section.classList.remove('is-measuring');
   section.style.setProperty('--card-height',`${cardHeight}px`);
   section.style.setProperty('--career-travel',`${step*(cards.length-1)}px`);
@@ -122,7 +131,7 @@ if(timeline){
  }
  function go(index){
   if(!enabled)return;
-  scrollTo({top:start+clampIndex(index)*step,behavior:'smooth'});
+  scrollTo({top:start+clampIndex(index)*step,behavior:preference.matches?'instant':'smooth'});
  }
  steps.forEach((button,index)=>button.addEventListener('click',()=>go(index)));
  controls.addEventListener('keydown',event=>{
@@ -133,7 +142,7 @@ if(timeline){
   event.preventDefault();go(target);steps[target].focus({preventScroll:true});
  });
  nextButton.addEventListener('click',()=>{
-  if(active===cards.length-1)document.querySelector('#about')?.scrollIntoView({behavior:'smooth',block:'start'});
+  if(active===cards.length-1)document.querySelector('#about')?.scrollIntoView({behavior:preference.matches?'instant':'smooth',block:'start'});
   else go(active+1);
  });
  timeline.addEventListener('toggle',measure,true);

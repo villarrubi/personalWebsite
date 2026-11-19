@@ -27,10 +27,18 @@ assert.equal(careerFrame(.2,7).pages.length,1,'Reading time before each transiti
 assert.equal(careerFrame(.5,7).pages.length,2,'Outgoing and incoming cards overlap');
 assert.equal(careerFrame(.8,7).pages.length,1,'Incoming card settles for reading');
 for(const height of [320,600,900,1440])assert(careerScrollStep(height)>=460&&careerScrollStep(height)<=760);
-assert(canUseViewer({height:520,availableHeight:700,reducedMotion:false}));
-assert(canUseViewer({height:520,availableHeight:520,reducedMotion:false}));
-assert(!canUseViewer({height:701,availableHeight:700,reducedMotion:false}));
-assert(!canUseViewer({height:520,availableHeight:700,reducedMotion:true}));
+assert(canUseViewer({height:520,availableHeight:700}));
+assert(canUseViewer({height:520,availableHeight:520}));
+assert(!canUseViewer({height:701,availableHeight:700}));
+assert(!canUseViewer({height:520,availableHeight:700,motionOff:true}));
+for(let step=0;step<=600;step++){
+ const state=careerFrame(step/100,7,true);
+ assert.equal(state.index,careerFrame(step/100,7).index);
+ assert.equal(state.pages.length,1,'Reduced motion never overlays two text blocks');
+ const page=state.pages[0];
+ assert.equal(page.index,state.index);assert.equal(page.offset,0);assert.equal(page.scale,1);
+ assert.equal(page.opacity,1,'Stopping scroll must never leave a dim or blank stage');
+}
 for(const lang of ['es','en']){
  const html=await readFile(new URL(`../dist/${lang}/index.html`,import.meta.url),'utf8');
  const section=html.split('<section id="career"')[1].split('</section>')[0];
@@ -60,9 +68,12 @@ const buttons=Array.from({length:7},element),next={...element(),firstChild:{text
 const counter={},label={},events=new Map(),frames=new Map(),preference=new EventTarget();
 preference.matches=false;
 let sequence=0,expanded=false,listReflowShift=0;
+const fades=[];
 const cards=Array.from({length:7},(_,index)=>({
  ...element(),querySelector:()=>({textContent:String(index)}),
+ animate(keyframes,options){const fade={index,keyframes,options,cancelled:false,cancel(){this.cancelled=true;}};fades.push(fade);return fade;},
  contains(node){return node===this;},
+ blur(){doc.activeElement=null;},
  get offsetHeight(){return index===5&&expanded?600:300;},
  getBoundingClientRect(){
   const top=section.classList.contains('career-deck')?180:1500+150+index*312+listReflowShift-context.scrollY;
@@ -100,13 +111,23 @@ context.innerHeight=844;listReflowShift=900;events.get('resize')({type:'resize'}
 assert(cards[5].classList.contains('is-active'),'Orientation restores the card visible before reflow');
 listReflowShift=0;
 preference.matches=true;preference.dispatchEvent(new Event('change'));
-assert(!section.classList.contains('career-deck'));
+assert(section.classList.contains('career-deck'),'Reduced motion retains the viewer on desktop and tall mobile screens');
+assert(cards[5].classList.contains('is-active'),'Reduced motion keeps the selected stage');
 assert.equal(cards[5].getBoundingClientRect().top,180,'Reduced motion keeps the reading position');
+buttons[4].events.get('click')();events.get('scroll')();flush();
+assert.equal(fades.at(-1).index,4);
+assert.equal(fades.at(-1).options.duration,180,'Reduced-motion fades finish independently of the scroll position');
+assert.equal(fades.at(-1).keyframes.at(-1).opacity,1);
+buttons[5].events.get('click')();events.get('scroll')();flush();
+assert(fades.at(-2).cancelled,'Rapid navigation cancels the previous fade');
 preference.matches=false;preference.dispatchEvent(new Event('change'));
+assert(fades.at(-1).cancelled,'Changing the system preference cancels an in-flight fade');
 assert(cards[5].classList.contains('is-active'));
 // A summary can retain focus after scrolling away: resizing must not jump back.
-preference.matches=true;preference.dispatchEvent(new Event('change'));
+doc.activeElement=cards[5];
+context.innerHeight=390;events.get('resize')({type:'resize'});
 context.scrollY=5000;
-preference.matches=false;preference.dispatchEvent(new Event('change'));
+events.get('scroll')();
+context.innerHeight=844;events.get('resize')({type:'resize'});
 assert.equal(context.scrollY,5000,'Offscreen focus never pulls the visitor back into the cards');
 console.log('PASS: detail expansion/collapse, orientation and motion preference anchoring, readable fallback and offscreen focus.');
