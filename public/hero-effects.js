@@ -2,6 +2,13 @@ export function pointerInfluence(x,y,pointer,radius=150){
  if(!pointer?.active||radius<=0)return 0;
  return Math.max(0,1-Math.hypot(x-pointer.x,y-pointer.y)/radius)*(pointer.strength??1);
 }
+export function pointerResponse(x,y,pointer){
+ const proximity=pointerInfluence(x,y,pointer,230);
+ const influence=proximity*(2-proximity);
+ const dx=x-pointer.x,dy=y-pointer.y,distance=Math.hypot(dx,dy);
+ const displacement=12*influence/Math.max(24,distance);
+ return {influence,dx:dx*displacement,dy:dy*displacement};
+}
 export const codeSnippets=[
  'engine.search(depth);','score = evaluate(position);\nalpha = max(alpha, score);','sensor.read();','distance = lidar.measure();',
  'model.predict(input)','map.render(viewport);','for (auto move : moves)','return bestMove;',
@@ -52,6 +59,14 @@ if(canvas){
   let width=0,height=0,time=0,frame=0,last=0,visible=true,layout=[];
   const running=()=>visible&&!document.hidden&&root.classList.contains('ambient-enabled');
   const rgba=(opacity,warm=false)=>warm?`rgba(191,169,132,${opacity})`:`rgba(139,211,222,${opacity})`;
+  function halo(){
+   if(pointer.strength<.001)return;
+   const glow=ctx.createRadialGradient(pointer.x,pointer.y,0,pointer.x,pointer.y,210);
+   glow.addColorStop(0,`rgba(69,212,242,${pointer.strength*.13})`);
+   glow.addColorStop(.38,`rgba(61,179,224,${pointer.strength*.065})`);
+   glow.addColorStop(1,'rgba(61,179,224,0)');
+   ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);
+  }
   function code(){
    for(const [index,item] of layout.entries()){
     const {snippet,text}=codeFrame(time*item.speed+item.phase,index,snippets);
@@ -61,17 +76,22 @@ if(canvas){
     const fullWidth=Math.max(...fullLines.map(line=>ctx.measureText(line).width));
     const fit=Math.min(1,(width-32)/Math.max(1,fullWidth));
     size*=fit;
-    const x=Math.max(12,Math.min(width-fullWidth*fit-12,item.x+Math.sin(time*.12+item.drift)*5));
-    const y=Math.max(size,Math.min(height-size*1.55*fullLines.length,item.y+Math.sin(time*.18+item.drift)*7));
-    const influence=pointerInfluence(x+70,y,pointer,180);
-    const opacity=item.opacity+influence*.35;
+    const baseX=item.x+Math.sin(time*.12+item.drift)*5;
+    const baseY=item.y+Math.sin(time*.18+item.drift)*7;
+    const {influence,dx,dy}=pointerResponse(baseX+fullWidth*fit/2,baseY+(fullLines.length-1)*size*.775,pointer);
+    const x=Math.max(12,Math.min(width-fullWidth*fit-12,baseX+dx));
+    const y=Math.max(size,Math.min(height-size*1.55*fullLines.length,baseY+dy));
+    const opacity=Math.min(.95,item.opacity+influence*.72);
+    const cool=`rgba(${Math.round(139-45*influence)},${Math.round(211+27*influence)},${Math.round(222+33*influence)},${opacity})`;
+    const violet=`rgba(${Math.round(178+28*influence)},${Math.round(157+21*influence)},${Math.round(230+25*influence)},${opacity})`;
+    const warm=`rgba(${Math.round(191+64*influence)},${Math.round(169+39*influence)},${Math.round(132+25*influence)},${opacity})`;
     ctx.font=`${size}px monospace`;
     const lines=text.split('\n');
     for(const [lineIndex,line] of lines.entries()){
      // Lightweight syntax colour, drawn inline without HTML or extra layers.
      let offset=0;
      for(const token of line.split(/(\b(?:const|auto|for|return|await|with|in|SELECT|FROM|WHERE|true)\b|"[^"]*"|\b\d+\b|[{}();:])/g)){
-      ctx.fillStyle=/^(const|auto|for|return|await|with|in|SELECT|FROM|WHERE|true)$/.test(token)?`rgba(178,157,230,${opacity})`:/^["\d]/.test(token)?rgba(opacity,true):rgba(opacity);
+      ctx.fillStyle=/^(const|auto|for|return|await|with|in|SELECT|FROM|WHERE|true)$/.test(token)?violet:/^["\d]/.test(token)?warm:cool;
       ctx.fillText(token,x+offset,y+lineIndex*size*1.55);
       offset+=ctx.measureText(token).width;
      }
@@ -86,6 +106,7 @@ if(canvas){
    pointer.strength+=((pointer.active?1:0)-pointer.strength)*blend;
    const wasActive=pointer.active;pointer.active=pointer.strength>.001;
    ctx.clearRect(0,0,width,height);
+   halo();
    code();
    pointer.active=wasActive;
    // Keep the name legible while preserving the effects around it.
@@ -111,12 +132,15 @@ if(canvas){
    draw();sync();
   }
   hero.addEventListener('pointermove',event=>{
-   if(event.pointerType==='touch'||!running())return;
+   if(event.pointerType==='touch'){pointer.active=false;return;}
+   if(!running())return;
    const bounds=hero.getBoundingClientRect();pointer.tx=event.clientX-bounds.left;pointer.ty=event.clientY-bounds.top;
    if(pointer.strength<.001){pointer.x=pointer.tx;pointer.y=pointer.ty;}
    pointer.active=true;
   },{passive:true});
   hero.addEventListener('pointerleave',()=>{pointer.active=false;});
+  hero.addEventListener('pointercancel',()=>{pointer.active=false;});
+  addEventListener('blur',()=>{pointer.active=false;});
   document.addEventListener('visibilitychange',sync);
   new MutationObserver(sync).observe(root,{attributes:true,attributeFilter:['class']});
   if('IntersectionObserver'in window)new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;sync();}).observe(hero);

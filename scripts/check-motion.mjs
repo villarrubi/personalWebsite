@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {pointerInfluence,codeSnippets,codeFrame,codeLayout} from '../public/hero-effects.js';
+import {pointerInfluence,pointerResponse,codeSnippets,codeFrame,codeLayout} from '../public/hero-effects.js';
 
 const source=(await readFile(new URL('../public/scene-motion.js',import.meta.url),'utf8'))
  .replace('export const sceneMotion=', 'const sceneMotion=globalThis.motion=');
@@ -70,6 +70,19 @@ assert.equal(pointerInfluence(100,100,{active:true,x:100,y:100}),1);
 assert.equal(pointerInfluence(500,500,{active:true,x:100,y:100}),0);
 assert.equal(pointerInfluence(100,100,{active:true,x:100,y:100,strength:.5}),.5);
 console.log('PASS: local pointer response.');
+const cursor={active:true,x:100,y:100,strength:1};
+assert.equal(pointerResponse(100,100,cursor).influence,1);
+assert.equal(pointerResponse(500,500,cursor).influence,0);
+assert.equal(pointerResponse(110,100,{...cursor,active:false}).influence,0);
+assert(pointerResponse(160,100,cursor).dx>0,'Nearby code gently moves away from the cursor');
+assert(pointerResponse(40,100,cursor).dx<0);
+for(let distance=0;distance<300;distance+=5){
+ const response=pointerResponse(100+distance,100,cursor);
+ assert(Number.isFinite(response.dx)&&Number.isFinite(response.dy));
+ assert(Math.hypot(response.dx,response.dy)<=12,'Pointer displacement remains subtle and bounded');
+ assert(pointerResponse(100+distance,100,{...cursor,strength:.1}).influence<=response.influence,'Leaving the header fades the response');
+}
+console.log('PASS: stronger local highlight, bounded displacement and smooth pointer decay.');
 
 for(let index=0;index<8;index++){
  const seen=new Set(Array.from({length:32},(_,cycle)=>codeFrame(cycle*7,index).snippet));
