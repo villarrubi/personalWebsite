@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {pointerInfluence,codeSnippets,codeFrame} from '../public/hero-effects.js';
+import {pointerInfluence,codeSnippets,codeFrame,codeLayout} from '../public/hero-effects.js';
 
 const source=(await readFile(new URL('../public/scene-motion.js',import.meta.url),'utf8'))
  .replace('export const sceneMotion=', 'const sceneMotion=globalThis.motion=');
@@ -86,6 +86,17 @@ assert.equal(codeFrame(6.9,0).text,'','Erase the previous snippet before replaci
 assert.notEqual(codeFrame(7,0).snippet,codeFrame(0,0).snippet);
 console.log('PASS: varied code cycles, distinct rows, and typing/erasing transitions.');
 
+for(const [width,height,count] of [[320,540,14],[390,540,14],[1000,500,24],[1440,500,30]]){
+ const layout=codeLayout(width,height);
+ assert.equal(layout.length,count);
+ assert.deepEqual(layout,codeLayout(width,height),'Resizing does not randomly reshuffle the field');
+ assert(layout.every(item=>item.x>=16&&item.x+item.blockWidth<=width-16&&item.y>0&&item.y+item.blockHeight<height),'Blocks fit mobile and desktop bounds');
+ assert(new Set(layout.map(item=>Math.round(item.x))).size>count*.8,'Fragments are not locked to columns');
+ assert(new Set(layout.map(item=>item.speed)).size===count,'Typing clocks have independent rhythms');
+ assert(layout.some(item=>item.x+item.blockWidth/2>width*.35&&item.x+item.blockWidth/2<width*.65),'Code also occupies the area behind the name');
+}
+console.log('PASS: scattered responsive code field, central coverage and independent typing clocks.');
+
 // The code field renders on load even when motion is paused.
 const effectSource=(await readFile(new URL('../public/hero-effects.js',import.meta.url),'utf8')).replaceAll('export ','');
 const calls=[];
@@ -96,5 +107,6 @@ runInNewContext(effectSource,{
  document:{querySelector:()=>canvas,documentElement:{classList:{contains:()=>false}},hidden:false,addEventListener(){}},
  window:{},devicePixelRatio:1,MutationObserver:class{observe(){}},addEventListener(){},cancelAnimationFrame(){},
 });
-assert.equal(calls.filter(call=>call[0]==='fillText').length,8,'Code background renders immediately without a selector');
+assert(calls.some(call=>call[0]==='fillText'&&call[1].length>0),'Code background renders immediately without a selector');
+assert(calls.filter(call=>call[0]==='fillText').every(call=>Number.isFinite(call[2])&&Number.isFinite(call[3])),'All code tokens have valid drawing positions');
 console.log('PASS: code background renders on load, including while motion is paused.');
