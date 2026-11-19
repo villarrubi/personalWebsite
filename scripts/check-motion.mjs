@@ -39,11 +39,11 @@ console.log('PASS: project motion on by default for every visit, reload, history
 
 // Decorative backgrounds have an independent, accessible pause control.
 const ambientSource=await readFile(new URL('../public/ambient-motion.js',import.meta.url),'utf8');
-function ambientVisit({reduced=false,search=''}={}){
+function ambientVisit({reduced=false,search='',standaloneHero=false}={}){
  const classes=new Set(),events=new Map(),preference=new EventTarget();preference.matches=reduced;
  const control={dataset:{pause:'Pause background',resume:'Animate background'},addEventListener:(_,fn)=>{control.click=fn;}};
  const root={classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}};
- const doc={documentElement:root,hidden:false,querySelectorAll:()=>[{classList:{add(){}}}],querySelector:()=>control,addEventListener:(name,fn)=>events.set(name,fn)};
+ const doc={documentElement:root,hidden:false,querySelectorAll:()=>standaloneHero?[]:[{classList:{add(){}}}],querySelector:()=>control,addEventListener:(name,fn)=>events.set(name,fn)};
  runInNewContext(ambientSource,{document:doc,window:{},location:{search},URLSearchParams,matchMedia:()=>preference,addEventListener:(name,fn)=>events.set(name,fn)});
  return {classes,control,preference,doc,events};
 }
@@ -54,10 +54,15 @@ ambient.control.click();assert(ambient.classes.has('ambient-enabled'));
 ambient.doc.hidden=true;ambient.events.get('visibilitychange')();assert(!ambient.classes.has('ambient-enabled'));
 ambient.doc.hidden=false;ambient.events.get('visibilitychange')();assert(ambient.classes.has('ambient-enabled'));
 ambient.preference.matches=true;ambient.preference.dispatchEvent(new Event('change'));
-assert(!ambient.classes.has('ambient-enabled'));assert(ambient.control.hidden);
-assert(!ambientVisit({reduced:true}).classes.has('ambient-enabled'));
+assert(ambient.classes.has('ambient-enabled'));assert(!ambient.control.hidden);
+assert(ambientVisit({reduced:true}).classes.has('ambient-enabled'),'The header remains animated with either OS motion preference');
 assert(!ambientVisit({search:'?motion=off'}).classes.has('ambient-enabled'));
-console.log('PASS: background pause/resume, hidden-tab suspension, reduced motion, and explicit motion opt-out.');
+const standalone=ambientVisit({reduced:true,standaloneHero:true});
+assert(standalone.classes.has('ambient-enabled'),'Header animation does not depend on decorative fields in other sections');
+standalone.control.click();assert(!standalone.classes.has('ambient-enabled'));assert(!standalone.control.hidden);
+standalone.control.click();assert(standalone.classes.has('ambient-enabled'));
+
+console.log('PASS: background pause/resume, hidden-tab suspension, visible controls with either OS preference, and explicit motion opt-out.');
 
 // The code background reacts locally to the pointer.
 assert.equal(pointerInfluence(100,100,{active:false,x:100,y:100}),0);

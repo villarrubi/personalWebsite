@@ -1,19 +1,17 @@
 // Only animate visible decorative layers; no rendering loop or external assets.
 const backgrounds=[...document.querySelectorAll('.ambient-field')];
-if(backgrounds.length){
+if(backgrounds.length||document.querySelector('.hero-effects')){
  const root=document.documentElement;
  const button=document.querySelector('[data-ambient-toggle]');
- const preference=matchMedia('(prefers-reduced-motion: reduce)');
  let paused=new URLSearchParams(location.search).get('motion')==='off';
  function sync(){
-  root.classList.toggle('ambient-enabled',!paused&&!preference.matches&&!document.hidden);
+  root.classList.toggle('ambient-enabled',!paused&&!document.hidden);
   if(button){
-   button.hidden=preference.matches;
+   button.hidden=false;
    button.textContent=paused?button.dataset.resume:button.dataset.pause;
   }
  }
  button?.addEventListener('click',()=>{paused=!paused;sync();});
- preference.addEventListener('change',sync);
  document.addEventListener('visibilitychange',sync);
  addEventListener('pageshow',sync);
  if('IntersectionObserver'in window){

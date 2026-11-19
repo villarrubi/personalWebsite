@@ -4,7 +4,8 @@ const home=document.querySelector('.experience-hero');
 const es=document.documentElement.lang==='es';
 const query=new URLSearchParams(location.search);
 const disabled=query.get('intro')==='off'||query.get('motion')==='off';
-const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+// Play the requested circuit entrance consistently; explicit URL opt-outs and
+// the skip button remain available. Only a missing canvas uses the simple reveal.
 const DURATION=4800;
 let active=null,disposed=false;
 
@@ -71,7 +72,7 @@ function playIntro(trigger){
   function frame(now){
     if(finished||document.hidden)return;
     if(last!==null)elapsed+=Math.min(now-last,100);last=now;
-    let simple=reduced.matches||!scene;
+    let simple=!scene;
     try{if(scene?.render(elapsed,simple)===false){finish();return;}}catch{scene?.dispose();scene=null;simple=true;}
     // These are the actual hero nodes: reveal them once and leave them in place.
     root.style.setProperty('--intro-text',String(clamp((elapsed-(simple?150:2750))/(simple?650:600))));

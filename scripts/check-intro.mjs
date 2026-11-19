@@ -67,8 +67,12 @@ const history=visit();history.history('pagehide');released(history);history.hist
 assert(history.overlay.isConnected);history.key('Escape');released(history);
 for(const search of ['?intro=off','?motion=off'])assert.equal(visit({search}).overlay,null);
 assert.equal(visit({home:false}).overlay,null);
-const calm=visit({reduced:true});calm.tick();
-assert(calm.renders.every(frame=>frame.reduced));calm.key('Escape');released(calm);
+const entrance=visit({reduced:true});
+for(let i=0;i<25;i++)entrance.tick();
+assert(entrance.overlay.isConnected,'The complete entrance must not be replaced by a short fade');
+assert(entrance.renders.every(frame=>!frame.reduced),'The circuit remains active when the site animation is enabled');
+for(let i=0;i<25;i++)entrance.tick();released(entrance);
+
 for(const options of [{canvas:false},{renderFails:true}]){
  const fallback=visit(options);for(let i=0;i<15;i++)fallback.tick();
  assert.equal(fallback.root.style['--intro-text'],'1','A restricted or lost canvas reveals the original hero text');
@@ -116,4 +120,4 @@ for(const [width,height] of [[320,568],[390,844],[844,390],[1440,900]]){
  }
 }
 assert.deepEqual(circuitPaths(320,568,[]),[]);
-console.log('PASS: circuit intro lifecycle, live heading continuity, distributed traces at four viewport sizes, anchored visits, canvas fallback, focus and reduced motion.');
+console.log('PASS: circuit intro lifecycle, live heading continuity, distributed traces at four viewport sizes, anchored visits, canvas fallback, focus and full entrance with either OS motion preference.');
