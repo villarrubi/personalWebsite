@@ -113,12 +113,12 @@ v.doc.activeElement={closest:()=>v.nodes[5]};v.root.dispatchEvent(new Event('foc
 v.doc.activeElement=null;v.root.dispatchEvent(new Event('focusin'));v.advance(4500);assert.equal(v.root.dataset.focusProject,'side');
 assert(!v.controls.some(b=>b.disabled),'All catalog entries remain reachable');
 v.click(v.controls[1]);v.advance(1000);assert.equal(v.counter.textContent,'01 / 07');v.click(v.sideNodes[0]);v.advance(1000);assert.equal(v.counter.textContent,'07 / 07');v.click(v.controls[1]);v.advance(1000);assert.equal(v.root.dataset.focusProject,'project-0','All-project navigation wraps across both groups');
-for(const options of [{paused:true},{reduced:true}]){
+for(const options of [{paused:true},{paused:true,reduced:true}]){
  const calm=visit(options);calm.show();calm.click(calm.controls[1]);
  assert.equal(calm.root.dataset.focusProject,'project-1','Manual navigation works without animation');assert.equal(calm.animations,0);
- calm.advance(8000);assert.equal(calm.root.dataset.focusProject,'project-1','Paused and reduced-motion visits do not auto-advance');
+ calm.advance(8000);assert.equal(calm.root.dataset.focusProject,'project-1','Explicitly paused visits do not auto-advance');
 }
-console.log('PASS: orbital timing, reversible turns, wraparound, single foreground, responsive bounds, bilingual previews, arrows, background selection, modal/visibility/focus pauses and reduced-motion controls.');
+console.log('PASS: orbital timing, reversible turns, wraparound, single foreground, responsive bounds, bilingual previews, arrows, background selection, modal/visibility/focus pauses and explicit motion controls.');
 
 const allProjects=publishedProjects.map(p=>({id:p.id}));
 for(const width of [1040,1126,1267,1600]){
@@ -137,9 +137,23 @@ floating.advance(900);const secondPose=floating.root._orbitFrame.items[0].layout
 assert.equal(floating.root.dataset.focusProject,'project-0');assert.notEqual(firstPose.y,secondPose.y,'Projects float between carousel turns');
 floating.motion.setEnabled(false);const frozen=floating.root._orbitFrame;
 floating.advance(5000);assert.equal(floating.root._orbitFrame,frozen,'Pausing freezes ambient motion too');
-const calm=visit({reduced:true});calm.show();calm.advance(1000);
-assert.equal(calm.root._orbitFrame.items[0].layout.roll,0,'Reduced motion disables ambient tilt');
-console.log('PASS: full-catalog view, capacity by viewport, separated models, cross-group navigation, subtle floating and paused/reduced-motion poses.');
+// A focused arrow must restart autoplay, even when the OS requests reduced motion.
+for(const reduced of [false,true])for(const direction of [0,1]){
+ const active=visit({reduced});active.show();
+ active.doc.activeElement={closest:()=>null};active.root.dispatchEvent(new Event('focusin'));
+ active.click(active.controls[direction]);active.advance(450);
+ const middle=Number(active.root.dataset.orbitPosition);
+ assert(Math.abs(middle)>0&&Math.abs(middle)<1,'Arrow clicks animate instead of jumping, regardless of OS preference');
+ active.advance(550);
+ const manual=direction===1?'project-1':'side';
+ assert.equal(active.root.dataset.focusProject,manual);
+ assert(active.animations>0,'Preview follows the same active motion state');
+ active.advance(3500);
+ assert.equal(active.root.dataset.focusProject,direction===1?'project-2':'project-0','Autoplay resumes after either arrow, with focus still on the control');
+ active.advance(3500);
+ assert.equal(active.root.dataset.focusProject,direction===1?'project-3':'project-1','Autoplay keeps advancing on subsequent cycles');
+}
+console.log('PASS: full-catalog view, capacity by viewport, separated models, cross-group navigation, subtle floating and explicitly paused poses.');
 
 // Pause/resume must preserve the pose and the remaining part of a turn.
 const interrupted=visit();interrupted.show();interrupted.click(interrupted.controls[1]);interrupted.advance(350);
@@ -173,7 +187,7 @@ for(const direction of [-1,1]){
  assert(leaving,'A body crosses the mobile window edge');
  assert(leaving.edgeOpacity<.001&&b[leaving.index].edgeOpacity<.001,'No visible pop at the seam');
 }
-console.log('PASS: exact mid-turn pause/resume, rapid reversal, reduced-motion autoplay suppression and continuous mobile edge fades.');
+console.log('PASS: exact mid-turn pause/resume, rapid reversal, autoplay after manual arrows with either OS preference and continuous mobile edge fades.');
 
 const previewPause=visit();previewPause.show();previewPause.click(previewPause.controls[1]);previewPause.advance(600);
 assert.equal(previewPause.previewAnimation.playState,'running');

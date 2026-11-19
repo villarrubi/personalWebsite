@@ -6,7 +6,7 @@ import {sceneMotion} from './scene-motion.js';
 // Sculptural objects in a shared orbit. HTML anchors follow their 3D projections.
 export async function mountCinematicSpace(root){
  const THREE=await import('./assets/vendor/three.module.js');
- const reduced=sceneMotion,preference=matchMedia('(prefers-reduced-motion: reduce)');
+ const motion=sceneMotion;
  const mobile=matchMedia('(max-width:700px)').matches;
  const canvas=document.createElement('canvas');canvas.className='cinematic-canvas';canvas.setAttribute('aria-hidden','true');
  let renderer;
@@ -118,7 +118,7 @@ export async function mountCinematicSpace(root){
   frame=0;if(!visible||contextLost||document.hidden||!width||!height)return;
   const dt=Math.min(Math.max((now-(lastTime||now))/1000,0),.05);lastTime=now;
   const paused=['project-dialog-open','intro-playing','intro-pending'].some(name=>document.documentElement.classList.contains(name));
-  const moving=!paused&&!reduced.matches&&!preference.matches;
+  const moving=!paused&&!motion.matches;
   if(moving)elapsed+=dt;
   syncModels();
 
@@ -133,7 +133,7 @@ export async function mountCinematicSpace(root){
  new ResizeObserver(measure).observe(root.querySelector('.solar-space'));
  const visibility=new IntersectionObserver(entries=>{visible=entries.some(entry=>entry.isIntersecting);lastTime=0;if(visible)requestRender();else{cancelAnimationFrame(frame);frame=0;}},{threshold:.08});visibility.observe(root);
  document.addEventListener('visibilitychange',()=>{lastTime=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;}else requestRender();});
- reduced.addEventListener('change',requestRender);preference.addEventListener('change',requestRender);
+ motion.addEventListener('change',requestRender);
  new MutationObserver(requestRender).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
  canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();contextLost=true;cancelAnimationFrame(frame);frame=0;root.classList.remove('cinematic-ready');root.dataset.cinematic='fallback';root.dispatchEvent(new Event('solar:restore-layout'));});
  canvas.addEventListener('webglcontextrestored',()=>{contextLost=false;root.classList.add('cinematic-ready');root.dataset.cinematic='ready';requestRender();});

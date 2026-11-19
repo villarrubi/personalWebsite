@@ -5,7 +5,6 @@ import {OrbitCarousel,carouselLayout,wrapIndex} from './solar-carousel.js';
 const root=document.querySelector('.solar-system');
 if(root){
  const es=document.documentElement.lang==='es',motion=sceneMotion;
- const preference=matchMedia('(prefers-reduced-motion: reduce)');
  const space=root.querySelector('.solar-space'),status=root.querySelector('.solar-status');
  const focus=createOrbitFocus(root,motion);
  const controls=[...root.querySelectorAll('[data-carousel-step]')];
@@ -14,13 +13,14 @@ if(root){
  let visible=!('IntersectionObserver'in window),frame=0,last=null,ambientTime=0;
  const pointer={x:0,y:0},pointerTarget={x:0,y:0};
  const current=()=>catalog;
- const animate=()=>!preference.matches&&!motion.matches;
+ // The scene's explicit motion control governs both autoplay and manual turns.
+ const animate=()=>!motion.matches;
  const blocked=()=>document.hidden||!visible||document.documentElement.classList.contains('intro-playing')||document.documentElement.classList.contains('intro-pending')||document.documentElement.classList.contains('project-dialog-open');
- const autoAllowed=()=>!blocked()&&!motion.matches&&!preference.matches&&!root.contains(document.activeElement?.closest?.('.planet-node,.solar-preview'));
+ const autoAllowed=()=>!blocked()&&!motion.matches&&!root.contains(document.activeElement?.closest?.('.planet-node,.solar-preview'));
  function paint(announce=false){
   const {nodes,carousel}=current(),width=space.clientWidth,height=space.clientHeight;
   if(!width||!height)return;
-  const layouts=carouselLayout(nodes.map(node=>({id:node.dataset.project})),width,height,carousel.position,preference.matches?null:{time:ambientTime,pointer});
+  const layouts=carouselLayout(nodes.map(node=>({id:node.dataset.project})),width,height,carousel.position,{time:ambientTime,pointer});
   const items=nodes.map((node,index)=>{
    const layout=layouts[index];node.hidden=!layout.visible;
    node.style.setProperty('--planet-x',`${layout.x}px`);node.style.setProperty('--planet-y',`${layout.y}px`);
@@ -88,10 +88,9 @@ if(root){
   motionButton.setAttribute('aria-label',label);motionButton.title=label;
   motionButton.querySelector('.motion-toggle-label').textContent=label;motionButton.querySelector('.motion-toggle-icon').textContent=enabled?'Ⅱ':'▷';
   // Pause keeps the exact in-flight pose; manual navigation still settles instantly.
-  if(preference.matches)current().carousel.settle();paint();sync();
+  paint();sync();
  }
  motionButton.addEventListener('click',()=>motion.setEnabled(motion.matches));motion.addEventListener('change',syncMotion);
- preference.addEventListener('change',syncMotion);
  document.addEventListener('visibilitychange',sync);
  new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
  if('ResizeObserver'in window)new ResizeObserver(()=>paint()).observe(space);else window.addEventListener('resize',()=>paint());

@@ -2,13 +2,11 @@
 export function createOrbitFocus(root,motion){
  const body=root.querySelector('.solar-preview-body');
  const count=root.querySelector('.solar-carousel-count');
- const preference=matchMedia('(prefers-reduced-motion: reduce)');
  let selected=null,animation=null,resumePreview=false;
  motion.addEventListener('change',()=>{
   if(motion.matches){resumePreview=animation?.playState==='running';if(resumePreview)animation.pause();}
   else if(resumePreview){animation.play();resumePreview=false;}
  });
- preference.addEventListener('change',()=>{if(preference.matches){animation?.finish?.();resumePreview=false;}});
  return {update(nodes,index=0,animate=true){
   const node=nodes[index];
   count.textContent=nodes.length?`${String(index+1).padStart(2,'0')} / ${String(nodes.length).padStart(2,'0')}`:'00 / 00';
@@ -20,7 +18,7 @@ export function createOrbitFocus(root,motion){
   if(!template)return;
   root.dataset.focusProject=node.dataset.project;root.style.setProperty('--focus-color',node.dataset.accent);
   body.replaceChildren(template.content.cloneNode(true));
-  if(animate&&!preference.matches&&!motion.matches)animation=body.animate?.([{opacity:0,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}],{duration:300,easing:'ease-out'});
+  if(animate&&!motion.matches)animation=body.animate?.([{opacity:0,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}],{duration:300,easing:'ease-out'});
   root.dispatchEvent(new Event('solar:focus'));
  }};
 }
