@@ -48,10 +48,10 @@
 @media(max-width:480px){.career-entry{grid-template-columns:1fr;gap:14px;padding:18px;margin-bottom:10px}.career-date{flex-direction:row;align-items:center;gap:14px;border-right:0;border-bottom:1px solid #a0b8d329;padding:0 0 12px}.career-date>time{font-size:32px}.career-page{margin-left:auto}.career-content h3{font-size:20px}.career-company{font-size:11px}.career-points{font-size:12px}.career-heading h2{font-size:30px}}
 
 .career-deck{height:calc(var(--viewer-height) + var(--career-travel) + 76px)}
-.career-deck .career-viewer{position:sticky;top:var(--viewer-top);height:var(--viewer-height);display:flex;flex-direction:column;justify-content:space-between;gap:12px}
+.career-deck .career-viewer{position:sticky;top:var(--viewer-top);height:var(--viewer-height);display:flex;flex-direction:column;justify-content:flex-start;gap:12px}
 .career-deck .career-heading{margin-bottom:0;flex:none}
-.career-deck .career-timeline{display:grid;align-items:center;flex:1;min-height:var(--card-height);padding:0;overflow:clip;overflow-clip-margin:10px}
-.career-deck .career-entry{grid-area:1/1;margin:0;height:100%;align-items:center;transform:translate3d(0,var(--page-offset,0%),0) scale(var(--page-scale,1));opacity:var(--page-opacity,1);border-radius:14px;box-shadow:0 -12px 32px -18px #000b,0 22px 44px -24px #000e,inset 0 1px #bce9f226;will-change:transform}
+.career-deck .career-timeline{display:grid;align-items:center;flex:none;height:var(--card-height);min-height:var(--card-height);padding:0;overflow:clip;overflow-clip-margin:10px}
+.career-deck .career-entry{grid-area:1/1;margin:0;height:100%;align-items:center;align-content:center;transform:translate3d(0,var(--page-offset,0%),0) scale(var(--page-scale,1));opacity:var(--page-opacity,1);border-radius:14px;box-shadow:0 -12px 32px -18px #000b,0 22px 44px -24px #000e,inset 0 1px #bce9f226;will-change:transform}
 .career-deck .career-entry:before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,#04101f99,#020915);opacity:var(--page-shade,0);pointer-events:none;z-index:1}
 .career-controls{flex:none;padding-block:8px 12px}
 .career-steps{display:flex;gap:7px}

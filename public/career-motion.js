@@ -113,6 +113,9 @@ if(timeline){
   const cardHeight=Math.max(...cards.map(card=>card.offsetHeight));
   const required=heading.offsetHeight+cardHeight+controls.offsetHeight+24;
   enabled=canUseViewer({height:required,availableHeight:available,motionOff});
+  // Fit the pinned viewer to its content instead of stretching the cards to
+  // fill the viewport. Keep one measured card height for seamless overlap.
+  if(enabled)section.style.setProperty('--viewer-height',`${required}px`);
   section.classList.remove('is-measuring');
   section.style.setProperty('--card-height',`${cardHeight}px`);
   section.style.setProperty('--career-travel',`${step*(cards.length-1)}px`);
