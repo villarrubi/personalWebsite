@@ -4,13 +4,22 @@ export function careerFrame(progress,count) {
  const position=Math.min(last,Math.max(0,Number.isFinite(progress)?progress:0));
  const index=Math.min(last,Math.floor(position+.5));
  const lower=Math.floor(position),fraction=position-lower;
- const blend=Math.max(0,Math.min(1,(fraction-.28)/.44));
+ const blend=Math.max(0,Math.min(1,(fraction-.12)/.76));
  const mix=blend*blend*(3-2*blend);
- const pages=lower===last||mix===0?[{index:lower,offset:0,scale:1,opacity:1}]:mix===1?[{index:lower+1,offset:0,scale:1,opacity:1}]:[
-  {index:lower,offset:-12*mix,scale:1-.025*mix,opacity:1},
-  {index:lower+1,offset:100*(1-mix),scale:1,opacity:1},
+ const pages=lower===last||mix===0?[{index:lower,offset:0,scale:1,opacity:1,shade:0}]:mix===1?[{index:lower+1,offset:0,scale:1,opacity:1,shade:0}]:[
+  {index:lower,offset:-8*mix,scale:1-.06*mix,opacity:1,shade:.22*mix},
+  {index:lower+1,offset:100*(1-mix),scale:.96+.04*mix,opacity:1,shade:0},
  ];
- return {index,pages,progress:last?position/last:1};
+ return {index,pages,progress:last?position/last:1,stepProgress:lower+mix};
+}
+// Follow wheel steps smoothly without changing native page scrolling. Large
+// jumps catch up within one transition; the loop stops once the cards settle.
+export function advanceCareerProgress(current,target,elapsed){
+ if(!Number.isFinite(current))return target;
+ const distance=target-current;
+ if(Math.abs(distance)<.0005)return target;
+ const origin=target-Math.sign(distance)*Math.min(Math.abs(distance),.75);
+ return origin+(target-origin)*(1-Math.exp(-Math.max(0,Math.min(64,elapsed))/65));
 }
 export function careerScrollStep(height){return Math.max(460,Math.min(760,height*.8));}
 export function canUseViewer({height,availableHeight,motionOff=false}) {
@@ -35,6 +44,7 @@ if(timeline){
  const titles=cards.map(card=>`${card.querySelector('time').textContent} · ${card.querySelector('h3').textContent}`);
  let enabled=false,active=-1,frame=0,visible=true,top=98,step=600,start=0,measuring=false;
  let readingAnchor=null;
+ let renderedProgress=null,lastPaint=0;
  const clampIndex=index=>Math.max(0,Math.min(cards.length-1,index));
  function select(index){
   if(index===active)return;
@@ -48,10 +58,13 @@ if(timeline){
   nextLabel.textContent=last?(es?'Trayectoria completa · Sigue hacia Sobre mí':'Journey complete · Continue to About me'):`${es?'Después':'Up next'}: ${titles[index+1]}`;
   nextButton.firstChild.textContent=last?(es?'Sobre mí ':'About me '):(es?'Siguiente ':'Next ');
  }
- function paint(){
+ function paint(time=0){
   frame=0;
   if(!enabled||document.hidden)return;
-  const state=careerFrame((scrollY-start)/step,cards.length);
+  const target=Math.max(0,Math.min(cards.length-1,(scrollY-start)/step));
+  renderedProgress=advanceCareerProgress(renderedProgress,target,lastPaint&&time?time-lastPaint:16);
+  lastPaint=time;
+  const state=careerFrame(renderedProgress,cards.length);
   select(state.index);
   cards.forEach((card,index)=>{
    const page=state.pages.find(page=>page.index===index);
@@ -60,7 +73,11 @@ if(timeline){
    card.style.setProperty('--page-offset',`${page.offset.toFixed(2)}%`);
    card.style.setProperty('--page-scale',page.scale.toFixed(4));
    card.style.setProperty('--page-opacity',page.opacity.toFixed(3));
+   card.style.setProperty('--page-shade',page.shade.toFixed(3));
   });
+  steps.forEach((button,index)=>button.style.setProperty('--step-progress',Math.max(0,Math.min(1,state.stepProgress-index+1)).toFixed(4)));
+  if(renderedProgress!==target&&visible)frame=requestAnimationFrame(paint);
+  else lastPaint=0;
  }
  function readCard(){
   const inView=cards.map(card=>({card,rect:card.getBoundingClientRect()})).filter(({rect})=>rect.top<innerHeight&&rect.bottom>top);
@@ -69,11 +86,12 @@ if(timeline){
  }
  function schedule(){
   if(!enabled)readingAnchor=readCard();
-  if(enabled&&visible&&!document.hidden&&!frame)frame=requestAnimationFrame(paint);
+  if(enabled&&visible&&!document.hidden&&!frame){lastPaint=0;frame=requestAnimationFrame(paint);}
  }
  function measure(event){
   if(measuring)return;
   measuring=true;
+  cancelAnimationFrame(frame);frame=0;renderedProgress=null;lastPaint=0;
   const wasEnabled=enabled;
   const oldProgress=wasEnabled?(scrollY-start)/step:0;
   const keepPosition=wasEnabled&&oldProgress>=0&&oldProgress<=cards.length-1;
@@ -111,7 +129,7 @@ if(timeline){
    section.classList.remove('career-deck');
    controls.hidden=true;
    cancelAnimationFrame(frame);frame=0;
-   cards.forEach(card=>{card.hidden=false;card.style.removeProperty('--page-offset');card.style.removeProperty('--page-scale');card.style.removeProperty('--page-opacity');});
+   cards.forEach(card=>{card.hidden=false;card.style.removeProperty('--page-offset');card.style.removeProperty('--page-scale');card.style.removeProperty('--page-opacity');card.style.removeProperty('--page-shade');});
    if(keepPosition&&readingCard){
     const anchorTop=Math.max(top,Math.min(readingTop,innerHeight-80));
     scrollTo({top:scrollY+readingCard.getBoundingClientRect().top-anchorTop,behavior:'instant'});
@@ -143,7 +161,7 @@ if(timeline){
  addEventListener('pageshow',measure);
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else measure();});
  if('IntersectionObserver'in window){
-  new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)schedule();else{cancelAnimationFrame(frame);frame=0;}},{rootMargin:'100px'}).observe(section);
+  new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)schedule();else{cancelAnimationFrame(frame);frame=0;renderedProgress=null;lastPaint=0;}},{rootMargin:'100px'}).observe(section);
  }
  // Detect upstream layout changes (for example font loading) without observing
  // card visibility changes and causing repeated measurement of the deck.

@@ -51,13 +51,14 @@
 .career-deck .career-viewer{position:sticky;top:var(--viewer-top);height:var(--viewer-height);display:flex;flex-direction:column;justify-content:space-between;gap:12px}
 .career-deck .career-heading{margin-bottom:0;flex:none}
 .career-deck .career-timeline{display:grid;align-items:center;flex:1;min-height:var(--card-height);padding:0;overflow:clip;overflow-clip-margin:10px}
-.career-deck .career-entry{grid-area:1/1;margin:0;height:100%;align-items:center;transform:translateY(var(--page-offset,0%)) scale(var(--page-scale,1));opacity:var(--page-opacity,1);box-shadow:0 18px 36px -26px #000e,inset 0 1px #ffffff08}
+.career-deck .career-entry{grid-area:1/1;margin:0;height:100%;align-items:center;transform:translate3d(0,var(--page-offset,0%),0) scale(var(--page-scale,1));opacity:var(--page-opacity,1);border-radius:14px;box-shadow:0 -12px 32px -18px #000b,0 22px 44px -24px #000e,inset 0 1px #bce9f226;will-change:transform}
+.career-deck .career-entry:before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,#04101f99,#020915);opacity:var(--page-shade,0);pointer-events:none;z-index:1}
 .career-controls{flex:none;padding-block:8px 12px}
 .career-steps{display:flex;gap:7px}
 .career-steps>button{position:relative;flex:1;min-width:0;min-height:44px;padding:14px 0 4px;border:0;background:none;color:#9cb2c6;font-size:11px;cursor:pointer}
 .career-steps>button:before{content:'';position:absolute;top:4px;left:0;right:0;height:3px;border-radius:3px;background:#a0b8d32b;transition:background .18s}
+.career-steps>button:after{content:'';position:absolute;top:4px;left:0;right:0;height:3px;border-radius:3px;background:linear-gradient(90deg,#569ba8,var(--accent));transform:scaleX(var(--step-progress,0));transform-origin:left;box-shadow:0 0 10px #8bc9cf25}
 .career-steps>button[aria-current]{color:var(--white)}
-.career-steps>button[aria-current]:before{background:var(--accent)}
 .career-steps>button:hover:before{background:#a0b8d385}
 .career-continuation{display:flex;align-items:center;gap:18px;margin-top:6px;min-height:44px}
 .career-counter{font-size:11px;color:var(--accent);white-space:nowrap}

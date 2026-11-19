@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {careerFrame,careerScrollStep,canUseViewer} from '../public/career-motion.js';
+import {careerFrame,careerScrollStep,canUseViewer,advanceCareerProgress} from '../public/career-motion.js';
 
 // Two adjacent pages overlap without a blank frame; one owns interaction.
 assert.deepEqual([-1,0,.49,.5,1.49,1.5,6,100].map(value=>careerFrame(value,7).index),[0,0,0,1,1,2,6,6]);
@@ -12,7 +12,7 @@ for(let step=-100;step<=700;step++){
  assert(state.pages.length>=1&&state.pages.length<=2);
  assert(state.pages.every(page=>page.opacity===1),'Opaque cards keep overlapping text from showing through');
  assert(state.pages.some(page=>page.index===state.index),'The active page remains visible');
- assert(state.pages.every(page=>page.index>=0&&page.index<7&&Math.abs(page.offset)<=100&&page.scale>=.975&&page.scale<=1));
+ assert(state.pages.every(page=>page.index>=0&&page.index<7&&Math.abs(page.offset)<=100&&page.scale>=.94&&page.scale<=1&&page.shade>=0&&page.shade<=.22));
  if(state.pages.length===2){
   const [outgoing,incoming]=state.pages;
   assert(outgoing.offset<=0&&incoming.offset>=0);
@@ -23,9 +23,26 @@ for(let step=-100;step<=700;step++){
 }
 assert.equal(careerFrame(NaN,7).index,0);
 assert.equal(careerFrame(4,1).index,0);
-assert.equal(careerFrame(.2,7).pages.length,1,'Reading time before each transition');
+assert.equal(careerFrame(.1,7).pages.length,1,'Reading time before each transition');
+assert.equal(careerFrame(.2,7).pages.length,2,'The transition begins earlier for a longer, gentler slide');
 assert.equal(careerFrame(.5,7).pages.length,2,'Outgoing and incoming cards overlap');
-assert.equal(careerFrame(.8,7).pages.length,1,'Incoming card settles for reading');
+assert.equal(careerFrame(.9,7).pages.length,1,'Incoming card settles for reading');
+for(let sample=13;sample<88;sample++){
+ const previous=careerFrame((sample-1)/100,7).pages.find(page=>page.index===1)?.offset??100;
+ const incoming=careerFrame(sample/100,7).pages.find(page=>page.index===1)?.offset??0;
+ assert(previous-incoming<=2,'No compressed, abrupt slide in the middle of the transition');
+}
+assert.equal(advanceCareerProgress(null,4,16),4,'Initial layout lands on the correct stage');
+for(const hz of [30,60,120]){
+ let progress=0,iterations=0;
+ while(progress!==.6&&iterations++<hz){
+  const next=advanceCareerProgress(progress,.6,1000/hz);
+  assert(next>progress&&next<=.6,'Smoothing converges without overshooting');progress=next;
+ }
+ assert.equal(progress,.6,'Settles and stops requesting frames in under a second');
+ assert(advanceCareerProgress(progress,.2,1000/hz)<progress,'Reversing scroll responds on the next frame');
+}
+assert(advanceCareerProgress(0,6,16)>5.25,'Large jumps never animate through the entire timeline');
 for(const height of [320,600,900,1440])assert(careerScrollStep(height)>=460&&careerScrollStep(height)<=760);
 assert(canUseViewer({height:520,availableHeight:700}));
 assert(canUseViewer({height:520,availableHeight:520}));
@@ -83,7 +100,8 @@ const context={document:doc,window:{},innerHeight:844,innerWidth:390,scrollY:0,U
  requestAnimationFrame:fn=>{frames.set(++sequence,fn);return sequence;},cancelAnimationFrame:id=>frames.delete(id),
  scrollTo:({top,behavior})=>{context.scrollY=top;scrollBehavior=behavior;},
 };
-function flush(){const pending=[...frames.values()];frames.clear();pending.forEach(fn=>fn());}
+let clock=0;
+function flush(){let count=0;while(frames.size){assert(count++<120,'The render loop must settle');const pending=[...frames.values()];frames.clear();clock+=16;pending.forEach(fn=>fn(clock));}}
 runInNewContext(source,context);
 assert(section.classList.contains('career-deck'));
 buttons[5].events.get('click')();events.get('scroll')();flush();
@@ -117,8 +135,11 @@ for(const reduced of [false,true]){
   assert.equal(visible.length,progress>0&&progress<1?2:1,'Both OS preferences retain overlapping cards during the slide');
   assert(visible.every(card=>card.style.getPropertyValue('--page-opacity')==='1.000'),'Cards slide without fading their text');
   if(progress===.5){
-   assert.equal(cards[4].style.getPropertyValue('--page-offset'),'-6.00%');
+   assert.equal(cards[4].style.getPropertyValue('--page-offset'),'-4.00%');
    assert.equal(cards[5].style.getPropertyValue('--page-offset'),'50.00%');
+   assert.equal(cards[4].style.getPropertyValue('--page-scale'),'0.9700');
+   assert.equal(cards[5].style.getPropertyValue('--page-scale'),'0.9800');
+   assert.equal(buttons[5].style.getPropertyValue('--step-progress'),'0.5000','Year marker fills continuously with the cards');
   }
  }
 }
