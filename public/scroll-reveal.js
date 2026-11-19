@@ -41,6 +41,7 @@ if(typeof document!=='undefined'){
  document.addEventListener('focusin',schedule);
  document.addEventListener('focusout',schedule);
  document.addEventListener('toggle',schedule,true);
+ document.addEventListener('career:layout',()=>{blocks.filter(block=>block.element.matches('.career-heading,.career-entry')).forEach(reset);schedule();});
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else schedule();});
  preference.addEventListener('change',()=>{blocks.forEach(reset);schedule();});
  document.fonts?.ready.then(schedule);

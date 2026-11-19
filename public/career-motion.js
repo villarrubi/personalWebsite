@@ -1,4 +1,4 @@
-// Hold each page for reading, then overlap its exit with the next page's arrival.
+// Opaque pages slide over one another without mixing two blocks of text.
 export function careerFrame(progress,count) {
  const last=Math.max(0,count-1);
  const position=Math.min(last,Math.max(0,Number.isFinite(progress)?progress:0));
@@ -7,8 +7,8 @@ export function careerFrame(progress,count) {
  const blend=Math.max(0,Math.min(1,(fraction-.28)/.44));
  const mix=blend*blend*(3-2*blend);
  const pages=lower===last||mix===0?[{index:lower,offset:0,scale:1,opacity:1}]:mix===1?[{index:lower+1,offset:0,scale:1,opacity:1}]:[
-  {index:lower,offset:-72*mix,scale:1-.045*mix,opacity:1-mix},
-  {index:lower+1,offset:96*(1-mix),scale:.96+.04*mix,opacity:mix},
+  {index:lower,offset:-12*mix,scale:1-.025*mix,opacity:1},
+  {index:lower+1,offset:100*(1-mix),scale:1,opacity:1},
  ];
  return {index,pages,progress:last?position/last:1};
 }
@@ -33,6 +33,7 @@ if(timeline){
  const es=document.documentElement.lang==='es';
  const titles=cards.map(card=>`${card.querySelector('time').textContent} · ${card.querySelector('h3').textContent}`);
  let enabled=false,active=-1,frame=0,visible=true,top=98,step=600,start=0,measuring=false;
+ let readingAnchor=null;
  const clampIndex=index=>Math.max(0,Math.min(cards.length-1,index));
  function select(index){
   if(index===active)return;
@@ -55,18 +56,31 @@ if(timeline){
    const page=state.pages.find(page=>page.index===index);
    card.hidden=!page;
    if(!page)return;
-   card.style.setProperty('--page-offset',`${page.offset.toFixed(2)}px`);
+   card.style.setProperty('--page-offset',`${page.offset.toFixed(2)}%`);
    card.style.setProperty('--page-scale',page.scale.toFixed(4));
    card.style.setProperty('--page-opacity',page.opacity.toFixed(3));
   });
  }
- function schedule(){if(enabled&&visible&&!document.hidden&&!frame)frame=requestAnimationFrame(paint);}
- function measure(){
+ function readCard(){
+  const inView=cards.map(card=>({card,rect:card.getBoundingClientRect()})).filter(({rect})=>rect.top<innerHeight&&rect.bottom>top);
+  const entry=inView.find(({card})=>card.contains(document.activeElement))||inView.find(({rect})=>rect.top<innerHeight/2&&rect.bottom>innerHeight/2);
+  return entry?{card:entry.card,top:entry.rect.top}:null;
+ }
+ function schedule(){
+  if(!enabled)readingAnchor=readCard();
+  if(enabled&&visible&&!document.hidden&&!frame)frame=requestAnimationFrame(paint);
+ }
+ function measure(event){
   if(measuring)return;
   measuring=true;
   const wasEnabled=enabled;
   const oldProgress=wasEnabled?(scrollY-start)/step:0;
   const keepPosition=wasEnabled&&oldProgress>=0&&oldProgress<=cards.length-1;
+  // Keep the reader on the same card when details or a resize change modes.
+  // Resize events arrive after reflow, so use the last visible list card.
+  const anchor=!wasEnabled?(event?.type==='resize'?readingAnchor:readCard()):null;
+  const readingCard=keepPosition?cards[active]:anchor?.card;
+  const readingTop=keepPosition?readingCard?.getBoundingClientRect().top:anchor?.top;
   section.classList.remove('career-deck');
   cards.forEach(card=>{card.hidden=false;card.inert=false;card.removeAttribute('aria-hidden');card.classList.remove('is-active');});
   controls.hidden=false;
@@ -89,6 +103,7 @@ if(timeline){
    // Use the section's natural position, not the already pinned viewer rect.
    start=scrollY+section.getBoundingClientRect().top+parseFloat(getComputedStyle(section).paddingTop)-top;
    if(keepPosition)scrollTo({top:start+oldProgress*step,behavior:'instant'});
+   else if(readingCard)scrollTo({top:start+cards.indexOf(readingCard)*step,behavior:'instant'});
    select(careerFrame((scrollY-start)/step,cards.length).index);
    paint();
   }else{
@@ -96,8 +111,14 @@ if(timeline){
    controls.hidden=true;
    cancelAnimationFrame(frame);frame=0;
    cards.forEach(card=>{card.hidden=false;card.style.removeProperty('--page-offset');card.style.removeProperty('--page-scale');card.style.removeProperty('--page-opacity');});
+   if(keepPosition&&readingCard){
+    const anchorTop=Math.max(top,Math.min(readingTop,innerHeight-80));
+    scrollTo({top:scrollY+readingCard.getBoundingClientRect().top-anchorTop,behavior:'instant'});
+   }
   }
   measuring=false;
+  document.dispatchEvent(new Event('career:layout'));
+  readingAnchor=enabled?null:readCard();
  }
  function go(index){
   if(!enabled)return;
