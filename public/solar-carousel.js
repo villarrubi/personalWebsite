@@ -11,7 +11,12 @@ export class OrbitCarousel{
  settle(){this.position=this.target;this.moving=false;this.resetTimer();}
  step(direction,animate=true){
   if(this.count<2)return;
-  this.from=this.position;this.target+=direction<0?-1:1;this.elapsed=0;this.resetTimer();
+  const sign=direction<0?-1:1;
+  // Reverse from the visible pose, discarding pending steps in the old direction.
+  const reversing=this.moving&&Math.sign(this.target-this.position)!==sign;
+  this.from=this.position;
+  this.target=reversing?(sign<0?Math.ceil(this.position)-1:Math.floor(this.position)+1):this.target+sign;
+  this.elapsed=0;this.resetTimer();
   this.moving=animate;if(!animate)this.position=this.target;
  }
  select(index,animate=true){
@@ -72,6 +77,6 @@ export function carouselLayout(items,width,height,position,ambient=null){
   const drift=ambient?orbitDrift(item.id,ambient.time,ambient.pointer,layout.foreground):{x:0,y:0,roll:0,tilt:0};
   const edge=count<=slots?1:Math.max(0,Math.min(1,(slots/2-Math.abs(offset))*2));
   return {...layout,x:layout.x+drift.x,y:layout.y+drift.y,bodyY:layout.bodyY+drift.y,
-   roll:drift.roll,tilt:drift.tilt,id:item.id,index,offset,visible,opacity:layout.opacity*edge};
+   roll:drift.roll,tilt:drift.tilt,id:item.id,index,offset,visible,edgeOpacity:edge,opacity:layout.opacity*edge};
  });
 }

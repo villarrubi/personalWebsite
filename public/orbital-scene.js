@@ -71,7 +71,13 @@ export async function mountCinematicSpace(root){
    if(!m){
     const object=body(p.id);scene.add(object);
     const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:flareMap,color:new THREE.Color(node.dataset.accent||'#a9c8e0'),transparent:true,opacity:.15,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));scene.add(halo);
-    const materials=new Map();object.traverse(child=>{for(const material of [].concat(child.material||[]))if(material.color&&!materials.has(material))materials.set(material,material.color.clone());});
+    const materials=new Map();object.traverse(child=>{
+     for(const material of [].concat(child.material||[]))if(material.color&&!materials.has(material)){
+      materials.set(material,{color:material.color.clone(),opacity:material.opacity});
+      // Keep the shader stable while fading at the mobile window's rear seam.
+      material.transparent=true;
+     }
+    });
     m={object,halo,materials};models.set(p.id,m);node.dataset.modelKind=object.userData.kind;
    }
    const radius=p.size*.42*(2*Math.tan(THREE.MathUtils.degToRad(19))*(32-p.depth)/height);
@@ -80,9 +86,12 @@ export async function mountCinematicSpace(root){
    const base=m.object.userData.baseRotation;
    m.object.rotation.set(base.x+p.tilt*.4,base.y+p.tilt,base.z+THREE.MathUtils.degToRad(p.roll));
    const light=.42+.58*Math.pow(p.foreground,2);
-   m.materials.forEach((original,material)=>material.color.copy(original).multiplyScalar(light));
+   m.materials.forEach((original,material)=>{
+    material.color.copy(original.color).multiplyScalar(light);
+    material.opacity=original.opacity*p.edgeOpacity;
+   });
    m.halo.position.copy(m.object.position);m.halo.position.z-=.6;m.halo.scale.setScalar(radius*5);
-   m.halo.material.opacity=.035+.22*Math.pow(p.foreground,5);
+   m.halo.material.opacity=(.035+.22*Math.pow(p.foreground,5))*p.edgeOpacity;
   }
   for(const [id,m] of models)if(!shown.has(id))m.object.visible=m.halo.visible=false;
  }
@@ -108,16 +117,16 @@ export async function mountCinematicSpace(root){
  function render(now){
   frame=0;if(!visible||contextLost||document.hidden||!width||!height)return;
   const dt=Math.min(Math.max((now-(lastTime||now))/1000,0),.05);lastTime=now;
-  const paused=document.documentElement.classList.contains('project-dialog-open');
+  const paused=['project-dialog-open','intro-playing','intro-pending'].some(name=>document.documentElement.classList.contains(name));
   const moving=!paused&&!reduced.matches&&!preference.matches;
   if(moving)elapsed+=dt;
   syncModels();
 
   spaceBackdrop.update(elapsed,pointer,root.dataset.activeGroup==='side',width/height,moving,dt);
-  spaceBackdrop.renderFog(renderer,width,height);starMaterial.uniforms.time.value=reduced.matches?0:elapsed;
-  sky.rotation.y=-.8+(reduced.matches?0:elapsed*.003);starField.rotation.y=reduced.matches?0:elapsed*.004;
+  spaceBackdrop.renderFog(renderer,width,height);starMaterial.uniforms.time.value=elapsed;
+  sky.rotation.y=-.8+elapsed*.003;starField.rotation.y=elapsed*.004;
   renderer.render(scene,camera);root.dataset.cinematicFrame=String(Math.round(elapsed*100));
-  if(moving)frame=requestAnimationFrame(render);
+  if(moving)frame=requestAnimationFrame(render);else lastTime=0;
  }
  function requestRender(){if(ready&&!frame&&visible&&!contextLost&&!document.hidden)frame=requestAnimationFrame(render);}
  new ResizeObserver(measure).observe(root);

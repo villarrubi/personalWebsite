@@ -73,8 +73,8 @@ function visit({paused=false,reduced=false}={}){
  const controls=[-1,1].map(carouselStep=>element({carouselStep}));
  const motion=new EventTarget();motion.matches=paused;motion.setEnabled=value=>{motion.matches=!value;motion.dispatchEvent(new Event('change'));};
  const preference=new EventTarget();preference.matches=reduced;
- let rendered=null,animations=0,observer,visibility;
- const body={replaceChildren(value){rendered=value??null;},animate(){animations++;return {cancel(){}};}};
+ let rendered=null,animations=0,observer,visibility,previewAnimation;
+ const body={replaceChildren(value){rendered=value??null;},animate(){animations++;return previewAnimation={playState:'running',cancel(){this.playState='idle';},pause(){this.playState='paused';},play(){this.playState='running';},finish(){this.playState='finished';}};}};
  const counter={},status={},controlBox={hidden:true},motionButton=element(),space={clientWidth:1100,clientHeight:490,getBoundingClientRect:()=>({width:1100,height:490,left:0,top:0})};
  motionButton.querySelector=()=>({});
  const root=element({cinematic:'fallback'});
@@ -93,7 +93,7 @@ function visit({paused=false,reduced=false}={}){
  function advance(ms){for(let elapsed=0;elapsed<ms;elapsed+=50){now+=Math.min(50,ms-elapsed);const pending=[...frames.values()];frames.clear();pending.forEach(fn=>fn(now));}}
  function click(element){const event={button:0,defaultPrevented:false,preventDefault(){this.defaultPrevented=true;}};element.events.get('click')(event);return event;}
  function show(value=true){visibility([{isIntersecting:value}]);}
- return {root,nodes,sideNodes,controls,motion,doc,status,counter,controlBox,advance,click,show,mutate:()=>observer(),get rendered(){return rendered;},get animations(){return animations;}};
+ return {root,nodes,sideNodes,controls,motion,doc,status,counter,controlBox,advance,click,show,mutate:()=>observer(),get rendered(){return rendered;},get animations(){return animations;},get previewAnimation(){return previewAnimation;}};
 }
 const v=visit();assert.equal(v.counter.textContent,'01 / 07');assert(!v.controlBox.hidden);assert.equal(v.root.dataset.focusProject,'project-0');
 v.advance(6000);assert.equal(v.root.dataset.focusProject,'project-0','Offscreen scenes do not rotate');
@@ -116,7 +116,7 @@ v.click(v.controls[1]);v.advance(1000);assert.equal(v.counter.textContent,'01 / 
 for(const options of [{paused:true},{reduced:true}]){
  const calm=visit(options);calm.show();calm.click(calm.controls[1]);
  assert.equal(calm.root.dataset.focusProject,'project-1','Manual navigation works without animation');assert.equal(calm.animations,0);
- if(options.paused){calm.advance(8000);assert.equal(calm.root.dataset.focusProject,'project-1');}
+ calm.advance(8000);assert.equal(calm.root.dataset.focusProject,'project-1','Paused and reduced-motion visits do not auto-advance');
 }
 console.log('PASS: orbital timing, reversible turns, wraparound, single foreground, responsive bounds, bilingual previews, arrows, background selection, modal/visibility/focus pauses and reduced-motion controls.');
 
@@ -140,3 +140,47 @@ floating.advance(5000);assert.equal(floating.root._orbitFrame,frozen,'Pausing fr
 const calm=visit({reduced:true});calm.show();calm.advance(1000);
 assert.equal(calm.root._orbitFrame.items[0].layout.roll,0,'Reduced motion disables ambient tilt');
 console.log('PASS: full-catalog view, capacity by viewport, separated models, cross-group navigation, subtle floating and paused/reduced-motion poses.');
+
+// Pause/resume must preserve the pose and the remaining part of a turn.
+const interrupted=visit();interrupted.show();interrupted.click(interrupted.controls[1]);interrupted.advance(350);
+const interruptedPosition=Number(interrupted.root.dataset.orbitPosition);
+assert(interruptedPosition>0&&interruptedPosition<1);
+interrupted.motion.setEnabled(false);
+assert.equal(Number(interrupted.root.dataset.orbitPosition),interruptedPosition,'Pause does not snap to the destination');
+const interruptedFrame=interrupted.root._orbitFrame;
+interrupted.advance(5000);assert.equal(interrupted.root._orbitFrame,interruptedFrame,'Paused turns stop scheduling changes');
+interrupted.motion.setEnabled(true);
+assert.equal(Number(interrupted.root.dataset.orbitPosition),interruptedPosition,'Resume starts at the frozen pose');
+interrupted.advance(1000);assert.equal(interrupted.root.dataset.focusProject,'project-1');
+interrupted.motion.setEnabled(false);interrupted.click(interrupted.controls[1]);
+assert.equal(interrupted.root.dataset.focusProject,'project-2','Manual controls still work while paused');
+
+// Reverse even after rapid repeated input has queued several destinations.
+for(const direction of [-1,1]){
+ const rapid=new OrbitCarousel(13);
+ rapid.step(direction);rapid.tick(200);rapid.step(direction);rapid.step(direction);rapid.tick(100);
+ const before=rapid.position;rapid.step(-direction);
+ assert.equal(rapid.position,before,'Direction changes never teleport');
+ rapid.tick(100);assert((rapid.position-before)*direction<0,'Reversal follows the new direction immediately');
+ rapid.tick(900);assert(Math.abs(rapid.position-(direction>0?Math.floor(before):Math.ceil(before)))<1e-10);
+}
+
+// Every body fades to zero before crossing the rear visibility seam on mobile.
+for(const direction of [-1,1]){
+ const a=carouselLayout(allProjects,360,465,direction*.4999);
+ const b=carouselLayout(allProjects,360,465,direction*.5001);
+ const leaving=a.find((p,i)=>p.visible!==b[i].visible);
+ assert(leaving,'A body crosses the mobile window edge');
+ assert(leaving.edgeOpacity<.001&&b[leaving.index].edgeOpacity<.001,'No visible pop at the seam');
+}
+console.log('PASS: exact mid-turn pause/resume, rapid reversal, reduced-motion autoplay suppression and continuous mobile edge fades.');
+
+const previewPause=visit();previewPause.show();previewPause.click(previewPause.controls[1]);previewPause.advance(600);
+assert.equal(previewPause.previewAnimation.playState,'running');
+previewPause.motion.setEnabled(false);assert.equal(previewPause.previewAnimation.playState,'paused');
+previewPause.motion.setEnabled(true);assert.equal(previewPause.previewAnimation.playState,'running');
+previewPause.previewAnimation.finish();previewPause.motion.setEnabled(false);previewPause.motion.setEnabled(true);
+assert.equal(previewPause.previewAnimation.playState,'finished','Resuming motion must not replay a completed text fade');
+previewPause.motion.setEnabled(false);previewPause.click(previewPause.controls[1]);previewPause.motion.setEnabled(true);
+assert.equal(previewPause.previewAnimation.playState,'idle','A cancelled fade cannot reappear over newly selected text');
+console.log('PASS: text fades pause/resume without replaying finished or cancelled animations.');

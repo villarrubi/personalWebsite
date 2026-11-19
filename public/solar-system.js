@@ -16,7 +16,7 @@ if(root){
  const current=()=>catalog;
  const animate=()=>!preference.matches&&!motion.matches;
  const blocked=()=>document.hidden||!visible||document.documentElement.classList.contains('intro-playing')||document.documentElement.classList.contains('intro-pending')||document.documentElement.classList.contains('project-dialog-open');
- const autoAllowed=()=>!blocked()&&!motion.matches&&!root.contains(document.activeElement?.closest?.('.planet-node,.solar-preview'));
+ const autoAllowed=()=>!blocked()&&!motion.matches&&!preference.matches&&!root.contains(document.activeElement?.closest?.('.planet-node,.solar-preview'));
  function paint(announce=false){
   const {nodes,carousel}=current(),width=space.clientWidth,height=space.clientHeight;
   if(!width||!height)return;
@@ -41,7 +41,7 @@ if(root){
   if(announce)status.textContent=nodes.length?`${nodes[destination].dataset.name} · ${destination+1} / ${nodes.length}`:(es?'No hay proyectos publicados.':'No published projects.');
  }
  function tick(now){
-  frame=0;if(blocked()){last=null;return;}
+  frame=0;if(blocked()||motion.matches){last=null;return;}
   const delta=last===null?0:Math.min(now-last,100);last=now;
   const {carousel}=current();
   const ambient=animate()&&autoAllowed()&&carousel.count>0;
@@ -55,7 +55,7 @@ if(root){
  }
  function sync(){
   cancelAnimationFrame(frame);frame=0;last=null;current().carousel.resetTimer();
-  if(!blocked()&&(current().carousel.moving||(autoAllowed()&&(current().nodes.length>1||(animate()&&current().nodes.length)))))frame=requestAnimationFrame(tick);
+  if(!blocked()&&!motion.matches&&(current().carousel.moving||(autoAllowed()&&(current().nodes.length>1||(animate()&&current().nodes.length)))))frame=requestAnimationFrame(tick);
  }
  function step(direction){current().carousel.step(direction,animate());paint(true);sync();}
  controls.forEach(button=>button.addEventListener('click',()=>step(Number(button.dataset.carouselStep))));
@@ -87,7 +87,8 @@ if(root){
   const label=enabled?(es?'Pausar rotación':'Pause rotation'):(es?'Activar rotación':'Enable rotation');
   motionButton.setAttribute('aria-label',label);motionButton.title=label;
   motionButton.querySelector('.motion-toggle-label').textContent=label;motionButton.querySelector('.motion-toggle-icon').textContent=enabled?'Ⅱ':'▷';
-  if(!animate())current().carousel.settle();paint();sync();
+  // Pause keeps the exact in-flight pose; manual navigation still settles instantly.
+  if(preference.matches)current().carousel.settle();paint();sync();
  }
  motionButton.addEventListener('click',()=>motion.setEnabled(motion.matches));motion.addEventListener('change',syncMotion);
  preference.addEventListener('change',syncMotion);

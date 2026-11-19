@@ -1,8 +1,11 @@
-// A shared satin-blue tile and silver relief keep every app in the same icon family.
+import {projectTheme} from './project-presentation.js';
+
+// Satin coloured tiles and silver relief keep every app in the same icon family.
 export function createProjectModel(T,id,{mobile=false}={}){
  const root=new T.Group(),segments=mobile?16:28;
+ const theme=projectTheme(id);
  const material=(colour,options={})=>new T.MeshPhysicalMaterial({color:colour,roughness:.42,metalness:.12,clearcoat:.38,clearcoatRoughness:.25,envMapIntensity:1.15,...options});
- const ivory=material(0xe5edf5),dark=material(0x14283f),silver=material(0x9bb6ce,{metalness:.35}),blue=material(0x729abb),green=blue,gold=silver,purple=blue;
+ const ivory=material(0xe5edf5),dark=material(0x14283f),silver=material(0x9bb6ce,{metalness:.35}),blue=material(theme.detail),green=blue,gold=blue,purple=blue;
  function add(g,m,x=0,y=0,z=0,parent=root){const mesh=new T.Mesh(g,m);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
  function box(w,h,d,m,x=0,y=0,z=0,parent=root){return add(new T.BoxGeometry(w,h,d),m,x,y,z,parent);}
  function sphere(r,m,x=0,y=0,z=0,parent=root){return add(new T.SphereGeometry(r,segments,Math.max(12,segments/2)),m,x,y,z,parent);}
@@ -51,7 +54,7 @@ export function createProjectModel(T,id,{mobile=false}={}){
  }
  function robot(){
   plate(1.52,1.2,.49,.22,ivory,0,-.02,0);plate(1.22,.73,.09,.2,dark,0,-.02,.3);
-  const glow=material(0xd9ebf7,{emissive:0x729abb,emissiveIntensity:.6,metalness:0});
+  const glow=material(theme.accent,{emissive:theme.detail,emissiveIntensity:.35,metalness:0});
   for(const x of [-.32,.32])plate(.11,.25,.04,.045,glow,x,.03,.37);
   line([[-.13,-.2,.37],[0,-.26,.37],[.13,-.2,.37]],.023,glow);
   line([[0,.6,0],[0,.89,0]],.045,silver);sphere(.1,blue,0,.93);
@@ -80,7 +83,7 @@ export function createProjectModel(T,id,{mobile=false}={}){
   leaf(-.03,-.2,.9,.82);leaf(.05,.06,-.85,.78);leaf(.12,.44,-.1,.48);
  }
  function globe(){
-  sphere(.72,material(0x729abb,{roughness:.3,metalness:.32}));
+  sphere(.72,material(theme.detail,{roughness:.3,metalness:.32}));
   for(const a of [0,Math.PI/3,Math.PI*2/3]){const r=ring(.735,.012,ivory);r.rotation.y=a;}
   for(const y of [-.37,0,.37]){const r=ring(Math.sqrt(.735*.735-y*y),.012,ivory,0,y);r.rotation.x=Math.PI/2;}
   const arc=[];for(let i=0;i<=40;i++){const a=Math.PI*.25+i/40*Math.PI*1.15;arc.push([Math.cos(a)*.9,Math.sin(a)*.9,0]);}line(arc,.035,gold);
@@ -117,8 +120,8 @@ export function createProjectModel(T,id,{mobile=false}={}){
  const scale=1.42/Math.max(size.x,size.y);
  glyph.scale.set(scale,scale,Math.min(scale,.42/size.z));
  glyph.position.set(-centre.x*scale,-centre.y*scale,.24-centre.z*glyph.scale.z);
- plate(1.98,1.98,.20,.36,material(0x24415e),0,0,-.15);
- plate(1.84,1.84,.035,.30,material(0x315572),0,0,-.025);
+ plate(1.98,1.98,.20,.36,material(theme.edge),0,0,-.15);
+ plate(1.84,1.84,.035,.30,material(theme.face),0,0,-.025);
  root.rotation.set(.08,-.18,-.035);root.userData.kind=id in builders?id:'practica-web';root.userData.baseRotation=root.rotation.clone();
  return root;
 }
