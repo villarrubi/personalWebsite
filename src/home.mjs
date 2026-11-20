@@ -3,6 +3,7 @@ import {projectExplorer} from './project-explorer.mjs';
 import {experienceHero} from './hero.mjs';
 import {careerSection} from './career.mjs';
 import {ambientBackground} from './ambient.mjs';
+import {skillsSection} from './skills.mjs';
 
 export function homeContent(lang){
  const c=copy[lang],es=lang==='es';
@@ -23,15 +24,7 @@ export function homeContent(lang){
     <div class="about-languages"><h4>${es?'Idiomas':'Languages'}</h4><p>${es?'Español nativo · Inglés B2':'Native Spanish · English B2'}</p><small>Cambridge B2 First</small></div>
    </aside>
   </div>
-  <div class="about-tools" aria-labelledby="toolbox-title">
-   <header class="skills-heading" data-scroll-reveal><h3 id="toolbox-title">${es?'Competencias técnicas':'Technical skills'}</h3><p>${es?'Tecnologías que utilizo en mis proyectos y experiencia profesional.':'Technologies I use in my projects and professional work.'}</p></header>
-   <div class="skills-list">
-    <div class="skill-row" data-scroll-reveal><h4 id="skills-software">${es?'Desarrollo de software':'Software development'}</h4><ul class="skill-tags" aria-labelledby="skills-software"><li>Python</li><li>C++</li><li>Java</li><li>C#</li></ul></div>
-    <div class="skill-row" data-scroll-reveal data-reveal-delay="35"><h4 id="skills-interfaces">${es?'Interfaces web':'Web interfaces'}</h4><ul class="skill-tags" aria-labelledby="skills-interfaces"><li>TypeScript</li><li>Canvas 2D</li></ul></div>
-    <div class="skill-row" data-scroll-reveal data-reveal-delay="70"><h4 id="skills-ai">${es?'IA local':'Local AI'}</h4><ul class="skill-tags" aria-labelledby="skills-ai"><li>Ollama</li></ul></div>
-    <div class="skill-row" data-scroll-reveal data-reveal-delay="105"><h4 id="skills-hardware">${es?'Hardware y sensores':'Hardware and sensors'}</h4><ul class="skill-tags" aria-labelledby="skills-hardware"><li>ESP32-S3</li><li>LiDAR</li></ul></div>
-   </div>
-  </div>
+  ${skillsSection(lang)}
  </div></section>
  <section id="contact" class="contact-section contact-compact" aria-labelledby="contact-title"><div class="container">
   <div class="contact-main">

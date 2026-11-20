@@ -7,7 +7,7 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs && node scripts/serve.mjs",
     "start": "node scripts/serve.mjs --open",
-    "check": "node scripts/check.mjs && node scripts/check-orbit-gallery.mjs && node scripts/check-intro.mjs && node scripts/check-chess.mjs && node scripts/check-motion.mjs && node scripts/check-terrain.mjs && node scripts/check-cms.mjs && node scripts/check-career.mjs && node scripts/check-scroll.mjs && node scripts/check-hero-typing.mjs"
+    "check": "node scripts/check.mjs && node scripts/check-orbit-gallery.mjs && node scripts/check-intro.mjs && node scripts/check-chess.mjs && node scripts/check-motion.mjs && node scripts/check-terrain.mjs && node scripts/check-cms.mjs && node scripts/check-career.mjs && node scripts/check-scroll.mjs && node scripts/check-hero-typing.mjs && node scripts/check-skills.mjs"
   },
   "engines": { "node": ">=22" }
 }

@@ -48,6 +48,7 @@ import './intro.js';
 
 import './project-map.js';
 import './career-motion.js';
+import './skills.js';
 import './ambient-motion.js';
 import './hero-effects.js';
 import './hero-typing.js';
