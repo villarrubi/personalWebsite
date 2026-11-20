@@ -25,16 +25,20 @@ function element(){
  };
 }
 for(const reduced of [false,true])for(const motionOff of [false,true]){
- let animations=0,cancellations=0;
- const preference={matches:reduced,addEventListener(){}};
+ let animations=0,cancellations=0,reveal,resize;
+ const preference={matches:reduced,addEventListener(_,fn){this.change=fn;}};
+ globalThis.IntersectionObserver=class{constructor(fn){reveal=fn;}observe(){}disconnect(){}};
+ globalThis.ResizeObserver=class{constructor(fn){resize=fn;}observe(){}};
  globalThis.matchMedia=()=>preference;
  globalThis.location={search:motionOff?'?motion=off':''};
  globalThis.scrollTo=()=>{throw Error('Stage selection must never scroll the page');};
- const panels=Array.from({length:7},(_,i)=>({...element(),querySelector:()=>({textContent:String(2018+i)}),animate(){animations++;return {cancel(){cancellations++;}};}}));
- const tabs=panels.map((_,i)=>({...element(),id:'career-tab-'+i,offsetLeft:i*110,offsetWidth:110}));
+ const animated=()=>({...element(),animate(){animations++;return {cancel(){cancellations++;}};}});
+ const panels=Array.from({length:7},(_,i)=>({...element(),querySelector:()=>({textContent:String(2018+i)}),querySelectorAll:()=>Array.from({length:4},animated)}));
+ const tabs=panels.map((_,i)=>({...animated(),id:'career-tab-'+i,offsetLeft:i*110,offsetWidth:110,querySelector:animated}));
+ const trace={...animated(),style:{},getBoundingClientRect:()=>({width:parseFloat(trace.style.width)||0})};
  const rail={...element(),scrollLeft:0,clientWidth:330};
  const previous=element(),next=element(),counter=element(),timeline={...element(),children:panels},ui=[element(),element()];
- const section={...element(),querySelector:selector=>({'.career-timeline':timeline,'.career-steps':rail,'[data-career-prev]':previous,'[data-career-next]':next,'[data-career-counter]':counter})[selector],querySelectorAll:selector=>selector==='[data-career-step]'?tabs:ui};
+ const section={...element(),querySelector:selector=>({'.career-timeline':timeline,'.career-steps':rail,'.career-trace':trace,'[data-career-prev]':previous,'[data-career-next]':next,'[data-career-counter]':counter})[selector],querySelectorAll:selector=>selector==='[data-career-step]'?tabs:ui};
  globalThis.document={documentElement:{lang:'es'},activeElement:null,dispatchEvent(){}};
  initCareer(section);
  function selected(index){
@@ -46,7 +50,15 @@ for(const reduced of [false,true])for(const motionOff of [false,true]){
   assert.equal(panels[index].attrs.get('aria-labelledby'),tabs[index].id);
  }
  selected(0);assert(previous.disabled&&!next.disabled);
+ assert.equal(animations,0,'Initial offscreen content does not animate');
+ reveal([{isIntersecting:true}]);
+ const firstReveal=animations;
+ reveal([{isIntersecting:true}]);assert.equal(animations,firstReveal,'Entrance only plays once');
  tabs[5].events.get('click')();selected(5);
+ assert.equal(trace.style.width,'550px','Trace reaches the selected year');
+ const beforeRepeat=animations;
+ tabs[5].events.get('click')();assert.equal(animations,beforeRepeat,'Selecting the active stage does not restart animation');
+ tabs[5].offsetLeft=600;resize();assert.equal(trace.style.width,'600px','Trace follows responsive rail layout');
  assert(rail.scrollLeft>0,'Selected tabs stay visible in a narrow rail');
  next.events.get('click')();selected(6);assert(next.disabled);
  previous.events.get('click')();selected(5);
@@ -62,6 +74,12 @@ for(const reduced of [false,true])for(const motionOff of [false,true]){
  selected(2);
  if(reduced||motionOff)assert.equal(animations,0,'Motion preferences suppress transitions, not interaction');
  else assert(animations>0&&cancellations>0,'Rapid selection cancels obsolete transitions');
+ preference.matches=true;preference.change();
+ const beforeReduced=animations;
+ tabs[4].events.get('click')();selected(4);
+ assert.equal(animations,beforeReduced,'Changing the OS preference disables subsequent movement');
 }
 delete globalThis.document;
+delete globalThis.IntersectionObserver;
+delete globalThis.ResizeObserver;
 console.log('PASS: bilingual timeline, single visible panel, click/keyboard navigation, focus, boundaries, rapid selection, reduced motion and static content.');

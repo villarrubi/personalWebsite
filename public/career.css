@@ -21,6 +21,10 @@
 .career-steps>button[aria-selected="true"] .career-step-name{color:var(--accent)}
 .career-steps>button.is-past .career-step-dot{background:#4a7985;border-color:#4a7985}
 .career-steps>button.is-past:before{background:#4a7985}
+.career-trace{position:absolute;pointer-events:none;left:7.5px;top:54px;width:0;height:2px;background:linear-gradient(90deg,#4a7985,var(--accent));box-shadow:0 0 12px #8bc9cf40;z-index:1}
+.career-trace:after{content:'';position:absolute;right:-3px;top:-2px;width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px #8bc9cf88}
+.career-steps>button .career-step-dot{z-index:2}
+@media(max-width:760px){.career-trace{top:52px}}
 .career-steps>button:hover{color:var(--white)}
 .career-steps>button:hover .career-step-dot{border-color:var(--accent)}
 .career-steps>button:focus-visible,.career-buttons>button:focus-visible,.career-about:focus-visible,.career-detail summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}

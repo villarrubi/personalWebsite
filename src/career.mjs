@@ -127,6 +127,7 @@ export function careerSection(lang) {
    <div class="career-navigation" data-career-ui hidden>
     <p class="career-hint">${es?'Cada etapa, una forma de aprender. Elige un punto del recorrido.':'A different way to learn at every stage. Choose a point on the timeline.'}</p>
     <div class="career-steps" role="tablist" aria-label="${es?'Etapas de la trayectoria':'Career stages'}">
+     <span class="career-trace" aria-hidden="true"></span>
      ${milestones.map((job,index)=>`<button type="button" role="tab" id="career-tab-${index}" data-career-step="${index}" aria-controls="career-panel-${index}" aria-label="${job.start.slice(0,4)} — ${labels[index]} — ${job.role[lang]}"><span class="career-step-year">${job.start.slice(0,4)}</span><span class="career-step-dot" aria-hidden="true"></span><span class="career-step-name">${labels[index]}</span></button>`).join('')}
     </div>
    </div>
