@@ -26,5 +26,6 @@ import './project-map.js';
 import './career-motion.js';
 import './ambient-motion.js';
 import './hero-effects.js';
+import './hero-typing.js';
 import './scroll-pacing.js';
 import './scroll-reveal.js';

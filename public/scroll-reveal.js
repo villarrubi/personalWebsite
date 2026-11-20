@@ -8,11 +8,12 @@ export function revealFrame(top,height,remaining=Infinity){
 if(typeof document!=='undefined'){
  const preference=matchMedia('(prefers-reduced-motion: reduce)');
  const motionOff=new URLSearchParams(location.search).get('motion')==='off';
- const blocks=[...document.querySelectorAll('.project-card,.about-layout,.section-heading,.career-heading,.career-entry,.about-note,.about-tools,.contact-compact>.container')].map(element=>({element,offset:0}));
+ const blocks=[...document.querySelectorAll('.project-card,.about-layout,.section-heading,.career-heading,.career-entry,[data-scroll-reveal]')].map(element=>({element,offset:0}));
  let frame=0;
  function reset(block){
   block.element.classList.remove('scroll-reveal');
   block.element.style.removeProperty('--reveal-y');
+  block.element.style.removeProperty('--reveal-x');
   block.element.style.removeProperty('--reveal-opacity');
   block.offset=0;
  }
@@ -25,13 +26,16 @@ if(typeof document!=='undefined'){
    const {element,offset}=block;
    if(element.hidden||element.matches('.career-browser .career-entry'))return null;
    if(element.contains(document.activeElement))return {offset:0,opacity:1};
-   return revealFrame(element.getBoundingClientRect().top-offset,innerHeight,remaining);
+   const delay=Number(element.dataset?.revealDelay)||0;
+   return revealFrame(element.getBoundingClientRect().top-offset+delay,innerHeight,remaining);
   });
   blocks.forEach((block,index)=>{
    const state=states[index];
    if(!state){reset(block);return;}
    block.element.classList.add('scroll-reveal');
    block.element.style.setProperty('--reveal-y',`${state.offset}px`);
+   const direction=block.element.dataset?.revealFrom;
+   block.element.style.setProperty('--reveal-x',`${(direction==='left'?-1:direction==='right'?1:0)*state.offset*.45}px`);
    block.element.style.setProperty('--reveal-opacity',String(state.opacity));
    block.offset=state.offset;
   });

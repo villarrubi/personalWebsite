@@ -68,6 +68,7 @@ revealPreference.matches=false;
 const values=new Map(),classes=new Set();
 let naturalTop=750,focused=false,inDeck=false,sequence=0;
 const block={hidden:false,
+ dataset:{revealFrom:'left',revealDelay:'0'},
  classList:{add:name=>classes.add(name),remove:name=>classes.delete(name)},
  style:{setProperty:(key,value)=>values.set(key,value),removeProperty:key=>values.delete(key)},
  matches:()=>inDeck,contains:()=>focused,
@@ -85,6 +86,11 @@ function revealTick(event='scroll'){
 }
 const middle=Number(values.get('--reveal-opacity'));
 assert(middle>.4&&middle<.8,'An already visible block still animates');
+assert(parseFloat(values.get('--reveal-x'))<0,'Directional blocks enter from the left');
+block.dataset.revealFrom='right';block.dataset.revealDelay='70';revealTick();
+assert(parseFloat(values.get('--reveal-x'))>0,'CV and email enter from the right');
+assert(Number(values.get('--reveal-opacity'))<middle,'Staggered columns reveal at different scroll positions');
+block.dataset.revealFrom='left';block.dataset.revealDelay='0';revealTick();
 for(let i=0;i<20;i++)revealTick();
 assert.equal(Number(values.get('--reveal-opacity')),middle,'Elapsed time and transformed rects do not finish or jitter the entrance');
 naturalTop=500;revealTick();assert.equal(Number(values.get('--reveal-opacity')),1);
