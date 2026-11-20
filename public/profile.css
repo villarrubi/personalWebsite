@@ -7,7 +7,7 @@
 .about-profile{max-width:780px}
 .about-profile .about-lead{font-size:clamp(17px,1.45vw,20px);line-height:1.7;color:#e0e8ed}
 .about-personal{margin-top:28px}
-.about-personal h3,.about-practical h3,.about-tools>h3,.contact-primary h3{font:500 21px/1.3 var(--sans);letter-spacing:-.025em;color:#e0e8ed}
+.about-personal h3,.about-practical h3,.contact-primary h3{font:500 21px/1.3 var(--sans);letter-spacing:-.025em;color:#e0e8ed}
 .about-personal p{font-size:15px;line-height:1.8;color:#b0c3d1;margin-top:10px;max-width:62ch}
 .about-practical{padding:26px;border:1px solid #8bc9cf30;border-radius:8px;background:#081a2c80}
 .about-cv{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:48px;margin-top:18px;padding:12px 16px;border:1px solid #8bc9cf65;border-radius:5px;background:#183b4d;color:#d8edf0;font-size:14px}
@@ -18,11 +18,13 @@
 .about-languages p{font-size:14px;line-height:1.65;color:#d0dfe8}
 .about-languages small{display:block;font-size:12px;color:#9fb6c7;margin-top:4px}
 .about-tools{margin-top:36px;padding-top:28px;border-top:1px solid #a0b8d333}
-.about-tool-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:22px}
-.about-tool-grid>div+div{border-left:1px solid #a0b8d329;padding-left:28px}
-.about-tool-grid h4{font-size:15px;font-weight:500;color:#c5dce6;margin:0 0 9px}
-.about-tool-grid p{font-size:14px;line-height:1.7;color:#c6d6e0}
-.about-tool-grid small{display:block;font-size:13px;line-height:1.6;color:#98b1c3;margin-top:5px}
+.skills-heading h3{font:500 26px/1.3 var(--sans);letter-spacing:-.025em;color:#e0e8ed}
+.skills-heading p{font-size:16px;line-height:1.7;color:#b0c3d1;margin-top:8px;max-width:65ch}
+.skills-list{margin-top:22px;border-top:1px solid #a0b8d32b}
+.skill-row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:center;gap:24px;padding-block:18px;border-bottom:1px solid #a0b8d32b}
+.skill-row h4{font-size:17px;line-height:1.5;font-weight:500;color:#d7e6ec;margin:0}
+.skill-tags{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.skill-tags li{font-size:14px;line-height:1.5;color:#c3dce5;padding:6px 12px;border:1px solid #8bc9cf30;border-radius:4px;background:#081a2c66}
 .contact-section.contact-compact{position:relative;z-index:1;padding-block:56px 48px;border-top:1px solid #8bc9cf66;background:#061327;color:var(--white)}
 .contact-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(36px,7vw,112px);align-items:center}
 .contact-description{font-size:16px;line-height:1.8;color:#b6c9d8;max-width:45ch;margin-top:24px}
@@ -37,8 +39,8 @@
 .contact-secondary .social-links a{display:inline-flex;align-items:center;min-height:44px;color:#c4d8e5}
 .contact-secondary a:hover{color:var(--accent)}
 .about-cv:focus-visible,.contact-primary a:focus-visible,.contact-primary button:focus-visible,.contact-secondary a:focus-visible{outline:2px solid var(--accent);outline-offset:5px}
-@media(max-width:900px){.about-note{grid-template-columns:minmax(0,1fr) minmax(230px,.8fr);gap:32px}.contact-main{gap:32px}.contact-primary{padding:24px}.about-tool-grid{gap:20px}.about-tool-grid>div+div{padding-left:20px}}
-@media(max-width:680px){.about-section.about-journal{padding-block:36px}.profile-section-heading h2{font-size:42px}.about-note{grid-template-columns:1fr;gap:26px;margin-top:24px}.about-personal{margin-top:24px}.about-practical{padding:22px}.about-tools{margin-top:28px;padding-top:24px}.about-tool-grid{grid-template-columns:1fr;gap:0;margin-top:12px}.about-tool-grid>div{padding-block:16px}.about-tool-grid>div+div{border-left:0;border-top:1px solid #a0b8d329;padding-left:0}.about-tool-grid h4{margin-bottom:5px}.contact-section.contact-compact{padding-block:36px 30px}.contact-main{grid-template-columns:1fr;gap:26px}.contact-description{margin-top:18px}.contact-primary{padding:22px}.contact-primary .contact-email{font-size:21px}.contact-secondary{gap:24px;flex-wrap:wrap;margin-top:26px;padding-top:20px}}
+@media(max-width:900px){.about-note{grid-template-columns:minmax(0,1fr) minmax(230px,.8fr);gap:32px}.contact-main{gap:32px}.contact-primary{padding:24px}}
+@media(max-width:680px){.about-section.about-journal{padding-block:36px}.profile-section-heading h2{font-size:42px}.about-note{grid-template-columns:1fr;gap:26px;margin-top:24px}.about-personal{margin-top:24px}.about-practical{padding:22px}.about-tools{margin-top:28px;padding-top:24px}.skills-heading h3{font-size:24px}.skills-list{margin-top:18px}.skill-row{grid-template-columns:1fr;gap:12px;padding-block:18px}.contact-section.contact-compact{padding-block:36px 30px}.contact-main{grid-template-columns:1fr;gap:26px}.contact-description{margin-top:18px}.contact-primary{padding:22px}.contact-primary .contact-email{font-size:21px}.contact-secondary{gap:24px;flex-wrap:wrap;margin-top:26px;padding-top:20px}}
 /* Keep the opening compact without shrinking the name or the orbital workspace. */
 .experience-layout{min-height:0;padding-block:38px 44px}
 .experience-actions{flex-wrap:wrap;row-gap:12px}
