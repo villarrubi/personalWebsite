@@ -1,208 +1,66 @@
-// The current chapter travels between compact previews of its neighbours.
-export function careerFrame(progress,count) {
- const last=Math.max(0,count-1);
- const position=Math.min(last,Math.max(0,Number.isFinite(progress)?progress:0));
- const index=Math.min(last,Math.floor(position+.5));
- const lower=Math.floor(position),fraction=position-lower;
- const blend=Math.max(0,Math.min(1,(fraction-.12)/.76));
- const mix=blend*blend*(3-2*blend);
- const pages=Array.from({length:count},(_,index)=>({index,distance:index-lower-mix}));
- return {index,pages,progress:last?position/last:1,stepProgress:lower+mix};
+// An explicit timeline: scrolling always belongs to the page.
+export function careerDestination(key,index,count){
+ const last=count-1;
+ return key==='ArrowRight'?Math.min(last,index+1):key==='ArrowLeft'?Math.max(0,index-1):key==='Home'?0:key==='End'?last:null;
 }
-export function careerPreviewLayout(available,required,width,count){
- const mobile=width<=760,gap=mobile?8:16,min=mobile?48:104,max=mobile?72:144;
- const budget=Math.max(0,available-required-12);
- // Add real neighbouring chapters when a taller viewport has room for them.
- const limit=Math.min(mobile?2:6,Math.floor((count-1)/2)*2);
- const slots=Math.min(limit,2*Math.floor(budget/(2*(min+gap))));
- return {gap,slots,height:slots?Math.min(max,Math.floor(budget/slots)-gap):0};
-}
-export function careerCardLayout(distance,cardHeight,peekHeight,gap,position,count,previewSlots=2){
- const away=Math.abs(distance),blend=Math.min(1,away);
- const height=peekHeight?cardHeight+(peekHeight-cardHeight)*blend:cardHeight;
- const stride=peekHeight?(cardHeight+peekHeight)/2+gap:cardHeight+gap;
- // Keep every preview slot filled with a real chapter at either end.
- const half=previewSlots/2;
- const edge=peekHeight?(peekHeight+gap)*(Math.max(0,position-count+1+half)-Math.max(0,half-position)):0;
- const offset=Math.sign(distance)*(Math.min(1,away)*stride+Math.max(0,away-1)*(peekHeight+gap))+edge;
- const stageHeight=cardHeight+previewSlots*(peekHeight?peekHeight+gap:0);
- return {offset,height,visible:Math.abs(offset)<(stageHeight+height)/2-.5,
-  scale:1-.045*blend,shade:.28*blend,
-  content:peekHeight?Math.max(0,1-blend*2):1,
-  preview:peekHeight?Math.max(0,Math.min(1,(blend-.25)*2)):0};
-}
-// Follow wheel steps smoothly without changing native page scrolling. Large
-// jumps catch up within one transition; the loop stops once the cards settle.
-export function advanceCareerProgress(current,target,elapsed){
- if(!Number.isFinite(current))return target;
- const distance=target-current;
- if(Math.abs(distance)<.0005)return target;
- const origin=target-Math.sign(distance)*Math.min(Math.abs(distance),.75);
- return origin+(target-origin)*(1-Math.exp(-Math.max(0,Math.min(64,elapsed))/65));
-}
-export function careerScrollStep(height){return Math.max(320,Math.min(520,height*.55));}
-export function canUseViewer({height,availableHeight,motionOff=false}) {
- return !motionOff&&height>0&&height<=availableHeight;
-}
-
-const timeline=typeof document!=='undefined'?document.querySelector('.career-timeline'):null;
-if(timeline){
- const section=timeline.closest('.career-section');
- const cards=[...timeline.children];
- const controls=section.querySelector('.career-controls');
- const steps=[...controls.querySelectorAll('[data-career-step]')];
- const counter=controls.querySelector('[data-career-counter]');
- const nextLabel=controls.querySelector('[data-career-next-label]');
- const nextButton=controls.querySelector('[data-career-next]');
- const heading=section.querySelector('.career-heading');
- // Keep the requested card-sliding experience with either OS preference.
- // The explicit ?motion=off option still exposes the static list.
+export function initCareer(section){
+ const timeline=section.querySelector('.career-timeline');
+ const panels=[...timeline.children];
+ const tabs=[...section.querySelectorAll('[data-career-step]')];
+ if(!panels.length||panels.length!==tabs.length)return;
+ const rail=section.querySelector('.career-steps');
+ const previous=section.querySelector('[data-career-prev]');
+ const next=section.querySelector('[data-career-next]');
+ const counter=section.querySelector('[data-career-counter]');
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  const motionOff=new URLSearchParams(location.search).get('motion')==='off';
- section.classList.toggle('career-motion-off',motionOff);
  const es=document.documentElement.lang==='es';
- const titles=cards.map(card=>`${card.querySelector('time').textContent} · ${card.querySelector('h3').textContent}`);
- let enabled=false,active=-1,frame=0,visible=true,top=98,step=600,start=0,measuring=false;
- let readingAnchor=null;
- let renderedProgress=null,lastPaint=0;
- let cardHeight=0,peekHeight=0,cardGap=16,previewSlots=0;
- const clampIndex=index=>Math.max(0,Math.min(cards.length-1,index));
- function select(index){
-  if(index===active)return;
-  const previous=cards[active];
-  if(previous?.contains(document.activeElement))document.activeElement.blur();
-  cards.forEach((card,i)=>{card.inert=i!==index;card.setAttribute('aria-hidden',String(i!==index));card.classList.toggle('is-active',i===index);});
-  steps.forEach((button,i)=>{if(i===index)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');});
-  active=index;
-  counter.textContent=`${String(index+1).padStart(2,'0')} / ${String(cards.length).padStart(2,'0')}`;
-  const last=index===cards.length-1;
-  nextLabel.textContent=last?(es?'Trayectoria completa · Sigue hacia Sobre mí':'Journey complete · Continue to About me'):`${es?'Después':'Up next'}: ${titles[index+1]}`;
-  nextButton.firstChild.textContent=last?(es?'Sobre mí ':'About me '):(es?'Siguiente ':'Next ');
- }
- function paint(time=0){
-  frame=0;
-  if(!enabled||document.hidden)return;
-  const target=Math.max(0,Math.min(cards.length-1,(scrollY-start)/step));
-  renderedProgress=advanceCareerProgress(renderedProgress,target,lastPaint&&time?time-lastPaint:16);
-  lastPaint=time;
-  const state=careerFrame(renderedProgress,cards.length);
-  select(state.index);
-  cards.forEach((card,index)=>{
-   const entry=state.pages.find(page=>page.index===index);
-   const page=entry&&careerCardLayout(entry.distance,cardHeight,peekHeight,cardGap,state.stepProgress,cards.length,previewSlots);
-   card.hidden=!page?.visible;
-   if(!page?.visible)return;
-   card.style.setProperty('--page-offset',`${page.offset.toFixed(2)}px`);
-   card.style.setProperty('--page-height',`${page.height.toFixed(2)}px`);
-   card.style.setProperty('--page-scale',page.scale.toFixed(4));
-   card.style.setProperty('--page-shade',page.shade.toFixed(3));
-   card.style.setProperty('--page-content',page.content.toFixed(3));
-   card.style.setProperty('--page-preview',page.preview.toFixed(3));
+ let active=-1,animation=null;
+ function choose(index,{focus=false,animate=true}={}){
+  index=Math.max(0,Math.min(panels.length-1,index));
+  const direction=index>=active?1:-1;
+  const changed=index!==active;
+  animation?.cancel();animation=null;
+  if(focus||panels[active]?.contains(document.activeElement))tabs[index].focus({preventScroll:true});
+  panels.forEach((panel,i)=>{
+   panel.hidden=i!==index;panel.inert=i!==index;
+   panel.setAttribute('role','tabpanel');
+   panel.setAttribute('aria-labelledby',tabs[i].id);
+   panel.tabIndex=i===index?0:-1;
   });
-  steps.forEach((button,index)=>button.style.setProperty('--step-progress',Math.max(0,Math.min(1,state.stepProgress-index+1)).toFixed(4)));
-  if(renderedProgress!==target&&visible)frame=requestAnimationFrame(paint);
-  else lastPaint=0;
- }
- function readCard(){
-  const inView=cards.map(card=>({card,rect:card.getBoundingClientRect()})).filter(({rect})=>rect.top<innerHeight&&rect.bottom>top);
-  const entry=inView.find(({card})=>card.contains(document.activeElement))||inView.find(({rect})=>rect.top<innerHeight/2&&rect.bottom>innerHeight/2);
-  return entry?{card:entry.card,top:entry.rect.top}:null;
- }
- function schedule(){
-  if(!enabled)readingAnchor=readCard();
-  if(enabled&&visible&&!document.hidden&&!frame){lastPaint=0;frame=requestAnimationFrame(paint);}
- }
- function measure(event){
-  if(measuring)return;
-  measuring=true;
-  const previousProgress=renderedProgress;
-  cancelAnimationFrame(frame);frame=0;renderedProgress=null;lastPaint=0;
-  const wasEnabled=enabled;
-  const oldProgress=wasEnabled?(scrollY-start)/step:0;
-  const keepPosition=wasEnabled&&oldProgress>=0&&oldProgress<=cards.length-1;
-  // A viewport resize can reflow earlier sections and adjust scrollY before
-  // this handler runs. Preserve the chapter we actually painted, not that shift.
-  const preservedProgress=event?.type==='resize'&&Number.isFinite(previousProgress)?previousProgress:oldProgress;
-  // Keep the reader on the same card when details or a resize change modes.
-  // Resize events arrive after reflow, so use the last visible list card.
-  const anchor=!wasEnabled?(event?.type==='resize'?readingAnchor:readCard()):null;
-  const readingCard=keepPosition?cards[active]:anchor?.card;
-  const readingTop=keepPosition?readingCard?.getBoundingClientRect().top:anchor?.top;
-  section.classList.remove('career-deck');
-  cards.forEach(card=>{card.hidden=false;card.inert=false;card.removeAttribute('aria-hidden');card.classList.remove('is-active');});
-  controls.hidden=false;
-  top=(document.querySelector('.site-header')?.offsetHeight||70)+12;
-  step=careerScrollStep(innerHeight);
-  const available=innerHeight-top-16;
-  section.style.setProperty('--viewer-top',`${top}px`);
-  section.style.setProperty('--viewer-height',`${available}px`);
-  section.style.setProperty('--card-height','0px');
-  section.classList.add('career-deck','is-measuring');
-  cardHeight=Math.max(...cards.map(card=>card.offsetHeight));
-  const required=heading.offsetHeight+cardHeight+controls.offsetHeight+24;
-  enabled=canUseViewer({height:required,availableHeight:available,motionOff});
-  const previews=careerPreviewLayout(available,required,innerWidth,cards.length);
-  cardGap=previews.gap;peekHeight=previews.height;previewSlots=previews.slots;
-  const stageHeight=cardHeight+previewSlots*(peekHeight?peekHeight+cardGap:0);
-  if(enabled){
-   section.style.setProperty('--viewer-height',`${required+stageHeight-cardHeight}px`);
+  tabs.forEach((tab,i)=>{
+   tab.setAttribute('aria-selected',String(i===index));tab.tabIndex=i===index?0:-1;
+   tab.classList.toggle('is-past',i<index);
+  });
+  active=index;
+  previous.disabled=index===0;next.disabled=index===panels.length-1;
+  counter.textContent=`${String(index+1).padStart(2,'0')} / ${String(panels.length).padStart(2,'0')} · ${es?'Etapa':'Stage'} ${panels[index].querySelector('time').textContent}`;
+  // Move only the horizontal rail on narrow screens, never the document.
+  const tab=tabs[index],left=tab.offsetLeft,right=left+tab.offsetWidth;
+  if(left<rail.scrollLeft)rail.scrollLeft=left;
+  else if(right>rail.scrollLeft+rail.clientWidth)rail.scrollLeft=right-rail.clientWidth;
+  if(changed&&animate&&!reduced.matches&&!motionOff){
+   animation=panels[index].animate?.([{opacity:0,transform:`translateX(${direction*16}px)`},{opacity:1,transform:'translateX(0)'}],{duration:260,easing:'cubic-bezier(.2,.7,.2,1)'});
   }
-  section.classList.remove('is-measuring');
-  section.style.setProperty('--card-height',`${cardHeight}px`);
-  section.style.setProperty('--stage-height',`${stageHeight}px`);
-  section.style.setProperty('--career-travel',`${step*(cards.length-1)}px`);
-  active=-1;
-  if(enabled){
-   section.classList.add('career-deck');
-   // Use the section's natural position, not the already pinned viewer rect.
-   const sectionPadding=parseFloat(getComputedStyle(section).paddingTop);
-   const scrollPadding=parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0;
-   section.style.setProperty('--career-anchor-offset',`${top-sectionPadding-scrollPadding}px`);
-   start=scrollY+section.getBoundingClientRect().top+sectionPadding-top;
-   if(keepPosition)scrollTo({top:start+preservedProgress*step,behavior:'instant'});
-   else if(readingCard)scrollTo({top:start+cards.indexOf(readingCard)*step,behavior:'instant'});
-   select(careerFrame((scrollY-start)/step,cards.length).index);
-   paint();
-  }else{
-   section.classList.remove('career-deck');
-   controls.hidden=true;
-   cancelAnimationFrame(frame);frame=0;
-   cards.forEach(card=>{card.hidden=false;['offset','height','scale','shade','content','preview'].forEach(name=>card.style.removeProperty(`--page-${name}`));});
-   if(keepPosition&&readingCard){
-    const anchorTop=Math.max(top,Math.min(readingTop,innerHeight-80));
-    scrollTo({top:scrollY+readingCard.getBoundingClientRect().top-anchorTop,behavior:'instant'});
-   }
-  }
-  measuring=false;
   document.dispatchEvent(new Event('career:layout'));
-  readingAnchor=enabled?null:readCard();
  }
- function go(index){
-  if(!enabled)return;
-  scrollTo({top:start+clampIndex(index)*step,behavior:'smooth'});
- }
- steps.forEach((button,index)=>button.addEventListener('click',()=>go(index)));
- controls.addEventListener('keydown',event=>{
-  const index=steps.indexOf(event.target);
-  if(index<0)return;
-  const target=event.key==='ArrowRight'?clampIndex(index+1):event.key==='ArrowLeft'?clampIndex(index-1):event.key==='Home'?0:event.key==='End'?cards.length-1:null;
+ section.classList.add('career-browser');
+ timeline.setAttribute('role','presentation');
+ section.querySelectorAll('[data-career-ui]').forEach(element=>element.hidden=false);
+ tabs.forEach((tab,index)=>tab.addEventListener('click',()=>choose(index)));
+ rail.addEventListener('keydown',event=>{
+  const index=tabs.indexOf(event.target);
+  if(index<0||event.altKey||event.ctrlKey||event.metaKey)return;
+  const target=careerDestination(event.key,index,tabs.length);
   if(target===null)return;
-  event.preventDefault();go(target);steps[target].focus({preventScroll:true});
+  event.preventDefault();choose(target,{focus:true});
  });
- nextButton.addEventListener('click',()=>{
-  if(active===cards.length-1)document.querySelector('#about')?.scrollIntoView({behavior:'smooth',block:'start'});
-  else go(active+1);
- });
- timeline.addEventListener('toggle',measure,true);
- addEventListener('scroll',schedule,{passive:true});
- addEventListener('resize',measure,{passive:true});
- addEventListener('pageshow',measure);
- document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else measure();});
- if('IntersectionObserver'in window){
-  new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)schedule();else{cancelAnimationFrame(frame);frame=0;renderedProgress=null;lastPaint=0;}},{rootMargin:'100px'}).observe(section);
- }
- // Detect upstream layout changes (for example font loading) without observing
- // card visibility changes and causing repeated measurement of the deck.
- if('ResizeObserver'in window){let width=innerWidth;new ResizeObserver(()=>{if(innerWidth!==width){width=innerWidth;measure();}}).observe(document.documentElement);}
- document.fonts?.ready.then(measure);
- measure();
+ previous.addEventListener('click',()=>choose(active-1));
+ next.addEventListener('click',()=>choose(active+1));
+ reduced.addEventListener('change',()=>{animation?.cancel();animation=null;});
+ choose(0,{animate:false});
+}
+if(typeof document!=='undefined'){
+ const section=document.querySelector('.career-section');
+ if(section)initCareer(section);
 }

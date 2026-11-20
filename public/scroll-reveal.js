@@ -23,7 +23,7 @@ if(typeof document!=='undefined'){
   const remaining=document.documentElement.scrollHeight-innerHeight-scrollY;
   const states=blocks.map(block=>{
    const {element,offset}=block;
-   if(element.hidden||element.matches('.career-deck .career-entry'))return null;
+   if(element.hidden||element.matches('.career-browser .career-entry'))return null;
    if(element.contains(document.activeElement))return {offset:0,opacity:1};
    return revealFrame(element.getBoundingClientRect().top-offset,innerHeight,remaining);
   });

@@ -116,42 +116,46 @@ const experience = [
 export function careerSection(lang) {
  const es = lang === 'es';
  const milestones = [...learning, ...experience].sort((a,b)=>a.start.localeCompare(b.start));
+ const labels=['Scratch / RoboMind','C++','UEMC','Founderz','REDALSA','NTT DATA','ALTEN / MAHLE'];
  return `<section id="career" class="career-section container" aria-labelledby="career-title">
-  <div class="career-viewer">
+
   <header class="career-heading">
    <p class="eyebrow">02 / ${es?'TRAYECTORIA':'CAREER'}</p>
    <div><h2 id="career-title">${es?'La curiosidad, en el tiempo.':'Curiosity, over time.'}</h2><p>2018 <span aria-hidden="true">⟶</span> ${es?'hoy':'today'}</p></div>
-   <p class="career-scroll-hint">${es?'Sigue bajando para pasar de etapa':'Scroll to turn the next page'} <span aria-hidden="true">↓</span></p>
   </header>
+  <div class="career-explorer">
+   <div class="career-navigation" data-career-ui hidden>
+    <p class="career-hint">${es?'Cada etapa, una forma de aprender. Elige un punto del recorrido.':'A different way to learn at every stage. Choose a point on the timeline.'}</p>
+    <div class="career-steps" role="tablist" aria-label="${es?'Etapas de la trayectoria':'Career stages'}">
+     ${milestones.map((job,index)=>`<button type="button" role="tab" id="career-tab-${index}" data-career-step="${index}" aria-controls="career-panel-${index}" aria-label="${job.start.slice(0,4)} — ${labels[index]} — ${job.role[lang]}"><span class="career-step-year">${job.start.slice(0,4)}</span><span class="career-step-dot" aria-hidden="true"></span><span class="career-step-name">${labels[index]}</span></button>`).join('')}
+    </div>
+   </div>
   <ol class="career-timeline">
    ${milestones.map((job,index)=>{
     const isLearning = learning.includes(job);
-    return `<li class="career-entry${job.current?' is-current':''}${isLearning?' is-learning':''}" style="--card-index:${index}">
-     <div class="career-preview" aria-hidden="true"><span>${job.start.slice(0,4)}</span><div><p>${typeof job.company==='string'?job.company:job.company[lang]}</p><strong>${job.role[lang]}</strong></div></div>
-     <div class="career-date"><time datetime="${job.start}">${job.start.slice(0,4)}</time><span class="career-page" aria-hidden="true">${String(index+1).padStart(2,'0')} / ${String(milestones.length).padStart(2,'0')}</span>${job.current?`<span class="career-current">${es?'Ahora':'Now'}</span>`:''}</div>
+    return `<li id="career-panel-${index}" class="career-entry${job.current?' is-current':''}${isLearning?' is-learning':''}">
+     <div class="career-date"><p class="career-kind">${isLearning?(es?'Aprendizaje':'Learning'):(es?'Experiencia':'Experience')}</p><time datetime="${job.start}">${job.start.slice(0,4)}</time><span class="career-period">${job.period[lang]}</span>${job.current?`<span class="career-current">${es?'Actualmente':'Currently'}</span>`:''}</div>
      <article class="career-content">
       <div class="career-identity">
        <p class="career-company">${typeof job.company==='string'?job.company:job.company[lang]}${job.client?` <span> / ${es?'para':'for'} ${job.client}</span>`:''}</p>
        <h3>${job.role[lang]}</h3>
-       ${job.end||job.current?`<p class="career-period">${job.period[lang]}</p>`:''}
       </div>
       <div class="career-story">
        <p class="career-summary">${job.summary[lang]}</p>
        <p class="career-context">${job.context[lang]}</p>
-       ${!isLearning?`<details class="career-detail"><summary>${es?'Ver funciones':'View responsibilities'}<span aria-hidden="true">+</span></summary>
+      </div>
+       ${!isLearning?`<details class="career-detail"><summary>${es?'Explorar funciones y herramientas':'Explore responsibilities and tools'}<span aria-hidden="true">+</span></summary>
        <ul class="career-points">${job.points[lang].map(point=>`<li>${point}</li>`).join('')}</ul>
        <ul class="career-tags" aria-label="${es?'Áreas y herramientas':'Areas and tools'}">${job.tags.map(tag=>`<li>${tag}</li>`).join('')}</ul>
        </details>`:''}
-      </div>
      </article>
     </li>`;
    }).join('')}
   </ol>
-  <div class="career-controls" hidden>
-   <div class="career-steps" role="group" aria-label="${es?'Elegir una etapa':'Choose a stage'}">
-    ${milestones.map((job,index)=>`<button type="button" data-career-step="${index}" aria-label="${job.start.slice(0,4)} — ${job.role[lang]}${typeof job.company==='string'?` — ${job.company}`:''}"><span>${job.start.slice(0,4)}</span></button>`).join('')}
-   </div>
-   <div class="career-continuation"><span class="career-counter" data-career-counter></span><p data-career-next-label></p><button type="button" data-career-next>${es?'Siguiente':'Next'} <span aria-hidden="true">↓</span></button></div>
+  <div class="career-controls" data-career-ui hidden>
+   <p class="career-counter" data-career-counter aria-live="polite" aria-atomic="true"></p>
+   <div class="career-buttons"><button type="button" data-career-prev>${es?'Anterior':'Previous'}</button><button type="button" data-career-next>${es?'Siguiente':'Next'}</button></div>
+   <a class="career-about" href="#about">${es?'Sobre mí':'About me'}</a>
   </div>
   </div>
  </section>`;
