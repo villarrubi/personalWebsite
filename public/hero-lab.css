@@ -54,3 +54,11 @@
 @keyframes typing-cursor{50%{opacity:0}}
 @media(max-width:680px){.typing-line{display:block}.typing-prefix{display:block;margin-bottom:2px}.typing-words{text-align:center}.experience-description.hero-typing{width:100%;gap:0}.typing-toggle{flex-basis:36px;width:36px}}
 @media(prefers-reduced-motion:reduce){.is-typing [data-typed-text]:after{animation:none;opacity:0}}
+
+/* A quiet reading area follows both phrases, including wrapped mobile text.
+   Its opaque centre hides the code; soft edges blend into the midnight sky. */
+.experience-intro{position:relative;isolation:isolate;width:fit-content;max-width:100%;margin-inline:auto;color:#f2f0e9}
+.hero-typing{position:relative;isolation:isolate}
+.experience-intro:before,.hero-typing:before{content:'';position:absolute;inset:-3px -8px;z-index:-1;pointer-events:none;border-radius:12px;background:#061327;box-shadow:0 0 24px 16px #061327}
+.hero-typing .typing-prefix{color:#c1d1dc}
+.hero-typing .typing-words{color:#b4e1e6}
