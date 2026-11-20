@@ -14,7 +14,31 @@ const copyButton=document.querySelector('.copy-email');let toastTimeout;
 copyButton?.addEventListener('click',async()=>{const toast=document.querySelector('#toast');try{await navigator.clipboard.writeText(copyButton.dataset.email);toast.textContent=copyButton.dataset.success;}catch{toast.textContent=copyButton.dataset.failure;}toast.classList.add('visible');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>toast.classList.remove('visible'),3000);});
 
 const sections=[...document.querySelectorAll('section[id]')];
-if('IntersectionObserver'in window){const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting){const target=entry.target.id==='home'?'top':['archive','complementary','project-orbital-scene'].includes(entry.target.id)?'projects':entry.target.id;nav?.querySelectorAll('a').forEach(a=>{if(a.hash===`#${target}`)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});}}},{rootMargin:'-10% 0px -65% 0px'});sections.forEach(section=>observer.observe(section));}
+if('IntersectionObserver'in window){
+ let current=null,frame=0;
+ const visible=new Set();
+ const hasContact=sections.some(section=>section.id==='contact');
+ function updateNavigation(){
+  frame=0;
+  // The last section cannot always reach the observer's upper reading band.
+  const atEnd=scrollY+innerHeight>=document.documentElement.scrollHeight-2;
+  const target=atEnd&&hasContact?'contact':current;
+  if(!target)return;
+  nav?.querySelectorAll('a').forEach(a=>{if(a.hash===`#${target}`)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});
+ }
+ function scheduleNavigation(){if(!frame)frame=requestAnimationFrame(updateNavigation);}
+ const observer=new IntersectionObserver(entries=>{
+  for(const entry of entries){if(entry.isIntersecting)visible.add(entry.target);else visible.delete(entry.target);}
+  // Several sections can intersect at once; changed-entry order is not page order.
+  const active=sections.filter(section=>visible.has(section)).at(-1);
+  if(active)current=active.id==='home'?'top':['archive','complementary','project-orbital-scene'].includes(active.id)?'projects':active.id;
+  scheduleNavigation();
+ },{rootMargin:'-10% 0px -65% 0px'});
+ sections.forEach(section=>observer.observe(section));
+ addEventListener('scroll',scheduleNavigation,{passive:true});
+ addEventListener('resize',scheduleNavigation,{passive:true});
+ addEventListener('pageshow',scheduleNavigation);
+}
 
 // A language change keeps the current section on the home page.
 const languageLink=document.querySelector('.language-switch');
