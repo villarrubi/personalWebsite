@@ -1,4 +1,4 @@
-import {copy,profile,publishedProjects} from './content.mjs';
+import {copy,profile} from './content.mjs';
 import {projectExplorer} from './project-explorer.mjs';
 import {experienceHero} from './hero.mjs';
 import {careerSection} from './career.mjs';
@@ -6,7 +6,6 @@ import {ambientBackground} from './ambient.mjs';
 
 export function homeContent(lang){
  const c=copy[lang],es=lang==='es';
- const clubPublished=publishedProjects.some(p=>p.id==='club-palentino');
  return `
  ${experienceHero(lang)}
  ${projectExplorer(lang)}
@@ -16,7 +15,7 @@ export function homeContent(lang){
   <header class="profile-section-heading" data-scroll-reveal><p class="eyebrow">03 / ${es?'PERFIL':'PROFILE'}</p><h2 id="about-title">${es?'Sobre mí':'About me'}</h2></header>
   <div class="about-note">
    <div class="about-profile"><p class="about-lead" data-scroll-reveal data-reveal-from="left">${c.aboutP1}</p>
-    <div class="about-personal" data-scroll-reveal data-reveal-from="left" data-reveal-delay="30"><h3>${es?'Fuera del código':'Beyond software'}</h3><p>${es?'Juego, enseño y arbitro ajedrez. También soy secretario del':'I play, teach, and referee chess. I’m also secretary of the'} ${clubPublished?`<a class="underlined" href="/${lang}/projects/club-palentino/">Club Palentino de Ajedrez</a>.`:'Club Palentino de Ajedrez.'}</p></div>
+    <div class="about-personal" data-scroll-reveal data-reveal-from="left" data-reveal-delay="30"><h3>${es?'Fuera del código':'Beyond software'}</h3><p>${es?'Juego, enseño y arbitro ajedrez. También soy secretario del':'I play, teach, and referee chess. I’m also secretary of the'} Club Palentino de Ajedrez.</p></div>
    </div>
    <aside class="about-practical" aria-labelledby="cv-title" data-scroll-reveal data-reveal-from="right" data-reveal-delay="65">
     <h3 id="cv-title">${es?'Currículum':'Résumé'}</h3>
