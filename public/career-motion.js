@@ -6,17 +6,26 @@ export function careerFrame(progress,count) {
  const lower=Math.floor(position),fraction=position-lower;
  const blend=Math.max(0,Math.min(1,(fraction-.12)/.76));
  const mix=blend*blend*(3-2*blend);
- const pages=Array.from({length:count},(_,index)=>({index,distance:index-lower-mix})).filter(page=>Math.abs(page.distance)<3);
+ const pages=Array.from({length:count},(_,index)=>({index,distance:index-lower-mix}));
  return {index,pages,progress:last?position/last:1,stepProgress:lower+mix};
 }
-export function careerCardLayout(distance,cardHeight,peekHeight,gap,position,count){
+export function careerPreviewLayout(available,required,width,count){
+ const mobile=width<=760,gap=mobile?8:16,min=mobile?48:104,max=mobile?72:144;
+ const budget=Math.max(0,available-required-12);
+ // Add real neighbouring chapters when a taller viewport has room for them.
+ const limit=Math.min(mobile?2:6,Math.floor((count-1)/2)*2);
+ const slots=Math.min(limit,2*Math.floor(budget/(2*(min+gap))));
+ return {gap,slots,height:slots?Math.min(max,Math.floor(budget/slots)-gap):0};
+}
+export function careerCardLayout(distance,cardHeight,peekHeight,gap,position,count,previewSlots=2){
  const away=Math.abs(distance),blend=Math.min(1,away);
  const height=peekHeight?cardHeight+(peekHeight-cardHeight)*blend:cardHeight;
  const stride=peekHeight?(cardHeight+peekHeight)/2+gap:cardHeight+gap;
- // At either end, use the spare preview slot for another real chapter.
- const edge=peekHeight&&count>2?(peekHeight+gap)*(Math.max(0,position-count+2)-Math.max(0,1-position)):0;
+ // Keep every preview slot filled with a real chapter at either end.
+ const half=previewSlots/2;
+ const edge=peekHeight?(peekHeight+gap)*(Math.max(0,position-count+1+half)-Math.max(0,half-position)):0;
  const offset=Math.sign(distance)*(Math.min(1,away)*stride+Math.max(0,away-1)*(peekHeight+gap))+edge;
- const stageHeight=cardHeight+2*(peekHeight?peekHeight+gap:0);
+ const stageHeight=cardHeight+previewSlots*(peekHeight?peekHeight+gap:0);
  return {offset,height,visible:Math.abs(offset)<(stageHeight+height)/2-.5,
   scale:1-.045*blend,shade:.28*blend,
   content:peekHeight?Math.max(0,1-blend*2):1,
@@ -55,7 +64,7 @@ if(timeline){
  let enabled=false,active=-1,frame=0,visible=true,top=98,step=600,start=0,measuring=false;
  let readingAnchor=null;
  let renderedProgress=null,lastPaint=0;
- let cardHeight=0,peekHeight=0,cardGap=16;
+ let cardHeight=0,peekHeight=0,cardGap=16,previewSlots=0;
  const clampIndex=index=>Math.max(0,Math.min(cards.length-1,index));
  function select(index){
   if(index===active)return;
@@ -79,7 +88,7 @@ if(timeline){
   select(state.index);
   cards.forEach((card,index)=>{
    const entry=state.pages.find(page=>page.index===index);
-   const page=entry&&careerCardLayout(entry.distance,cardHeight,peekHeight,cardGap,state.stepProgress,cards.length);
+   const page=entry&&careerCardLayout(entry.distance,cardHeight,peekHeight,cardGap,state.stepProgress,cards.length,previewSlots);
    card.hidden=!page?.visible;
    if(!page?.visible)return;
    card.style.setProperty('--page-offset',`${page.offset.toFixed(2)}px`);
@@ -105,10 +114,14 @@ if(timeline){
  function measure(event){
   if(measuring)return;
   measuring=true;
+  const previousProgress=renderedProgress;
   cancelAnimationFrame(frame);frame=0;renderedProgress=null;lastPaint=0;
   const wasEnabled=enabled;
   const oldProgress=wasEnabled?(scrollY-start)/step:0;
   const keepPosition=wasEnabled&&oldProgress>=0&&oldProgress<=cards.length-1;
+  // A viewport resize can reflow earlier sections and adjust scrollY before
+  // this handler runs. Preserve the chapter we actually painted, not that shift.
+  const preservedProgress=event?.type==='resize'&&Number.isFinite(previousProgress)?previousProgress:oldProgress;
   // Keep the reader on the same card when details or a resize change modes.
   // Resize events arrive after reflow, so use the last visible list card.
   const anchor=!wasEnabled?(event?.type==='resize'?readingAnchor:readCard()):null;
@@ -127,10 +140,9 @@ if(timeline){
   cardHeight=Math.max(...cards.map(card=>card.offsetHeight));
   const required=heading.offsetHeight+cardHeight+controls.offsetHeight+24;
   enabled=canUseViewer({height:required,availableHeight:available,motionOff});
-  cardGap=innerWidth<=760?8:16;
-  peekHeight=Math.min(innerWidth<=760?72:144,Math.floor((available-required-12)/2)-cardGap);
-  if(peekHeight<(innerWidth<=760?48:104))peekHeight=0;
-  const stageHeight=cardHeight+2*(peekHeight?peekHeight+cardGap:0);
+  const previews=careerPreviewLayout(available,required,innerWidth,cards.length);
+  cardGap=previews.gap;peekHeight=previews.height;previewSlots=previews.slots;
+  const stageHeight=cardHeight+previewSlots*(peekHeight?peekHeight+cardGap:0);
   if(enabled){
    section.style.setProperty('--viewer-height',`${required+stageHeight-cardHeight}px`);
   }
@@ -146,7 +158,7 @@ if(timeline){
    const scrollPadding=parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0;
    section.style.setProperty('--career-anchor-offset',`${top-sectionPadding-scrollPadding}px`);
    start=scrollY+section.getBoundingClientRect().top+sectionPadding-top;
-   if(keepPosition)scrollTo({top:start+oldProgress*step,behavior:'instant'});
+   if(keepPosition)scrollTo({top:start+preservedProgress*step,behavior:'instant'});
    else if(readingCard)scrollTo({top:start+cards.indexOf(readingCard)*step,behavior:'instant'});
    select(careerFrame((scrollY-start)/step,cards.length).index);
    paint();

@@ -1,27 +1,39 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {careerFrame,careerScrollStep,canUseViewer,advanceCareerProgress,careerCardLayout} from '../public/career-motion.js';
+import {careerFrame,careerScrollStep,canUseViewer,advanceCareerProgress,careerCardLayout,careerPreviewLayout} from '../public/career-motion.js';
 
 // Neighbouring chapters keep their order and never overlap while changing size.
 assert.deepEqual([-1,0,.49,.5,1.49,1.5,6,100].map(value=>careerFrame(value,7).index),[0,0,0,1,1,2,6,6]);
 assert.deepEqual([6,5.49,4.49,3.49,2.49,1.49,.49,0].map(value=>careerFrame(value,7).index),[6,5,4,3,2,1,0,0]);
-for(const [height,peek,gap] of [[200,144,16],[395,50,8],[300,0,8]]){
+for(const [height,peek,gap,slots] of [[200,144,16,2],[200,144,16,4],[200,128,16,6],[395,50,8,2],[300,0,8,0]]){
  for(let step=-100;step<=700;step++){
   const state=careerFrame(step/100,7);
-  const pages=state.pages.map(page=>({...page,...careerCardLayout(page.distance,height,peek,gap,state.stepProgress,7)})).filter(page=>page.visible);
+  const pages=state.pages.map(page=>({...page,...careerCardLayout(page.distance,height,peek,gap,state.stepProgress,7,slots)})).filter(page=>page.visible);
   assert(Number.isInteger(state.index)&&state.index>=0&&state.index<7);
   assert(pages.some(page=>page.index===state.index),'The current chapter remains visible');
   assert(pages.every(page=>page.height>=Math.min(peek||height,height)&&page.height<=height));
   assert(pages.every(page=>page.content+page.preview>0),'Content must never disappear completely during a transition');
   for(let i=1;i<pages.length;i++){
-   assert(pages[i].offset-pages[i].height/2>=pages[i-1].offset+pages[i-1].height/2,'Neighbouring cards must never cover each other');
+   assert(pages[i].offset-pages[i].height/2>=pages[i-1].offset+pages[i-1].height/2-1e-8,'Neighbouring cards must never cover each other');
   }
   if(Number.isInteger(state.stepProgress)&&peek){
-   assert.equal(pages.length,3,'Show three real chapters, including at either end');
+   assert.equal(pages.length,slots+1,'Every slot holds a real chapter, including at either end');
    assert.equal(pages.find(page=>page.index===state.index).height,height,'The selected card keeps its natural content height');
   }
   assert(state.progress>=0&&state.progress<=1);
+ }
+}
+
+// Reproduce tall desktop whitespace while bounding every preview's height.
+for(const [viewport,width,required,expected] of [[900,1440,443,2],[1258,2560,443,4],[1440,2560,443,6],[844,390,618,2],[720,1280,443,0]]){
+ const available=viewport-(width<=760?82:96)-16;
+ const previews=careerPreviewLayout(available,required,width,7);
+ assert.equal(previews.slots,expected);
+ assert(required+previews.slots*(previews.height+previews.gap)<=available,'Controls stay inside the viewport');
+ if(viewport>=1258){
+  assert(available-required-previews.slots*(previews.height+previews.gap)<90,'Tall screens must not retain hundreds of empty pixels');
+  assert(previews.height<=144,'Fill the space with chapters, never oversized cards');
  }
 }
 assert.equal(careerFrame(NaN,7).index,0);
@@ -63,7 +75,7 @@ for(const lang of ['es','en']){
  assert(section.includes('class="career-controls" hidden'),'Controls do not appear without JavaScript');
  assert(!section.includes('inert')&&!section.includes('aria-hidden="true"><article'),'Content stays readable without enhancement');
 }
-console.log('PASS: reversible carousel, three readable chapters, non-overlapping transitions, bounded scrolling, and bilingual navigation.');
+console.log('PASS: reversible carousel, viewport-sized chapter previews, non-overlapping transitions, bounded scrolling, and bilingual navigation.');
 
 // Reproduce a detail that outgrows the mobile viewer, then returns to it.
 const source=(await readFile(new URL('../public/career-motion.js',import.meta.url),'utf8')).replaceAll('export ','');
@@ -109,6 +121,10 @@ runInNewContext(source,context);
 assert(section.classList.contains('career-deck'));
 buttons[5].events.get('click')();events.get('scroll')();flush();
 assert(cards[5].classList.contains('is-active'));
+const beforeReflow=context.scrollY;
+context.scrollY-=175;
+events.get('resize')({type:'resize'});
+assert.equal(context.scrollY,beforeReflow,'Upstream reflow during resize keeps the painted chapter, not an intermediate transition');
 expanded=true;doc.activeElement=cards[5];timeline.events.get('toggle')();
 assert(!section.classList.contains('career-deck'));
 assert.equal(cards[5].getBoundingClientRect().top,180,'Expanding details keeps the current card on screen');
