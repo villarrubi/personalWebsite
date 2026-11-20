@@ -127,6 +127,7 @@ export function careerSection(lang) {
    ${milestones.map((job,index)=>{
     const isLearning = learning.includes(job);
     return `<li class="career-entry${job.current?' is-current':''}${isLearning?' is-learning':''}" style="--card-index:${index}">
+     <div class="career-preview" aria-hidden="true"><span>${job.start.slice(0,4)}</span><div><p>${typeof job.company==='string'?job.company:job.company[lang]}</p><strong>${job.role[lang]}</strong></div></div>
      <div class="career-date"><time datetime="${job.start}">${job.start.slice(0,4)}</time><span class="career-page" aria-hidden="true">${String(index+1).padStart(2,'0')} / ${String(milestones.length).padStart(2,'0')}</span>${job.current?`<span class="career-current">${es?'Ahora':'Now'}</span>`:''}</div>
      <article class="career-content">
       <div class="career-identity">

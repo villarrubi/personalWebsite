@@ -1,4 +1,4 @@
-// Opaque pages slide over one another without mixing two blocks of text.
+// The current chapter travels between compact previews of its neighbours.
 export function careerFrame(progress,count) {
  const last=Math.max(0,count-1);
  const position=Math.min(last,Math.max(0,Number.isFinite(progress)?progress:0));
@@ -6,11 +6,21 @@ export function careerFrame(progress,count) {
  const lower=Math.floor(position),fraction=position-lower;
  const blend=Math.max(0,Math.min(1,(fraction-.12)/.76));
  const mix=blend*blend*(3-2*blend);
- const pages=lower===last||mix===0?[{index:lower,offset:0,scale:1,opacity:1,shade:0}]:mix===1?[{index:lower+1,offset:0,scale:1,opacity:1,shade:0}]:[
-  {index:lower,offset:-8*mix,scale:1-.06*mix,opacity:1,shade:.22*mix},
-  {index:lower+1,offset:100*(1-mix),scale:.96+.04*mix,opacity:1,shade:0},
- ];
+ const pages=Array.from({length:count},(_,index)=>({index,distance:index-lower-mix})).filter(page=>Math.abs(page.distance)<3);
  return {index,pages,progress:last?position/last:1,stepProgress:lower+mix};
+}
+export function careerCardLayout(distance,cardHeight,peekHeight,gap,position,count){
+ const away=Math.abs(distance),blend=Math.min(1,away);
+ const height=peekHeight?cardHeight+(peekHeight-cardHeight)*blend:cardHeight;
+ const stride=peekHeight?(cardHeight+peekHeight)/2+gap:cardHeight+gap;
+ // At either end, use the spare preview slot for another real chapter.
+ const edge=peekHeight&&count>2?(peekHeight+gap)*(Math.max(0,position-count+2)-Math.max(0,1-position)):0;
+ const offset=Math.sign(distance)*(Math.min(1,away)*stride+Math.max(0,away-1)*(peekHeight+gap))+edge;
+ const stageHeight=cardHeight+2*(peekHeight?peekHeight+gap:0);
+ return {offset,height,visible:Math.abs(offset)<(stageHeight+height)/2-.5,
+  scale:1-.045*blend,shade:.28*blend,
+  content:peekHeight?Math.max(0,1-blend*2):1,
+  preview:peekHeight?Math.max(0,Math.min(1,(blend-.25)*2)):0};
 }
 // Follow wheel steps smoothly without changing native page scrolling. Large
 // jumps catch up within one transition; the loop stops once the cards settle.
@@ -45,6 +55,7 @@ if(timeline){
  let enabled=false,active=-1,frame=0,visible=true,top=98,step=600,start=0,measuring=false;
  let readingAnchor=null;
  let renderedProgress=null,lastPaint=0;
+ let cardHeight=0,peekHeight=0,cardGap=16;
  const clampIndex=index=>Math.max(0,Math.min(cards.length-1,index));
  function select(index){
   if(index===active)return;
@@ -67,13 +78,16 @@ if(timeline){
   const state=careerFrame(renderedProgress,cards.length);
   select(state.index);
   cards.forEach((card,index)=>{
-   const page=state.pages.find(page=>page.index===index);
-   card.hidden=!page;
-   if(!page)return;
-   card.style.setProperty('--page-offset',`${page.offset.toFixed(2)}%`);
+   const entry=state.pages.find(page=>page.index===index);
+   const page=entry&&careerCardLayout(entry.distance,cardHeight,peekHeight,cardGap,state.stepProgress,cards.length);
+   card.hidden=!page?.visible;
+   if(!page?.visible)return;
+   card.style.setProperty('--page-offset',`${page.offset.toFixed(2)}px`);
+   card.style.setProperty('--page-height',`${page.height.toFixed(2)}px`);
    card.style.setProperty('--page-scale',page.scale.toFixed(4));
-   card.style.setProperty('--page-opacity',page.opacity.toFixed(3));
    card.style.setProperty('--page-shade',page.shade.toFixed(3));
+   card.style.setProperty('--page-content',page.content.toFixed(3));
+   card.style.setProperty('--page-preview',page.preview.toFixed(3));
   });
   steps.forEach((button,index)=>button.style.setProperty('--step-progress',Math.max(0,Math.min(1,state.stepProgress-index+1)).toFixed(4)));
   if(renderedProgress!==target&&visible)frame=requestAnimationFrame(paint);
@@ -110,20 +124,19 @@ if(timeline){
   section.style.setProperty('--viewer-height',`${available}px`);
   section.style.setProperty('--card-height','0px');
   section.classList.add('career-deck','is-measuring');
-  const cardHeight=Math.max(...cards.map(card=>card.offsetHeight));
+  cardHeight=Math.max(...cards.map(card=>card.offsetHeight));
   const required=heading.offsetHeight+cardHeight+controls.offsetHeight+24;
   enabled=canUseViewer({height:required,availableHeight:available,motionOff});
-  // Fit the pinned viewer to its content instead of stretching the cards to
-  // fill the viewport. Keep one measured card height for seamless overlap.
+  cardGap=innerWidth<=760?8:16;
+  peekHeight=Math.min(innerWidth<=760?72:144,Math.floor((available-required-12)/2)-cardGap);
+  if(peekHeight<(innerWidth<=760?48:104))peekHeight=0;
+  const stageHeight=cardHeight+2*(peekHeight?peekHeight+cardGap:0);
   if(enabled){
-   // Balance the free space below the fixed header around the compact viewer.
-   // Use this same top for the scroll origin so pinning and stage changes agree.
-   top+=Math.round((available-required)/2);
-   section.style.setProperty('--viewer-top',`${top}px`);
-   section.style.setProperty('--viewer-height',`${required}px`);
+   section.style.setProperty('--viewer-height',`${required+stageHeight-cardHeight}px`);
   }
   section.classList.remove('is-measuring');
   section.style.setProperty('--card-height',`${cardHeight}px`);
+  section.style.setProperty('--stage-height',`${stageHeight}px`);
   section.style.setProperty('--career-travel',`${step*(cards.length-1)}px`);
   active=-1;
   if(enabled){
@@ -141,7 +154,7 @@ if(timeline){
    section.classList.remove('career-deck');
    controls.hidden=true;
    cancelAnimationFrame(frame);frame=0;
-   cards.forEach(card=>{card.hidden=false;card.style.removeProperty('--page-offset');card.style.removeProperty('--page-scale');card.style.removeProperty('--page-opacity');card.style.removeProperty('--page-shade');});
+   cards.forEach(card=>{card.hidden=false;['offset','height','scale','shade','content','preview'].forEach(name=>card.style.removeProperty(`--page-${name}`));});
    if(keepPosition&&readingCard){
     const anchorTop=Math.max(top,Math.min(readingTop,innerHeight-80));
     scrollTo({top:scrollY+readingCard.getBoundingClientRect().top-anchorTop,behavior:'instant'});

@@ -1,36 +1,39 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {careerFrame,careerScrollStep,canUseViewer,advanceCareerProgress} from '../public/career-motion.js';
+import {careerFrame,careerScrollStep,canUseViewer,advanceCareerProgress,careerCardLayout} from '../public/career-motion.js';
 
-// Two adjacent pages overlap without a blank frame; one owns interaction.
+// Neighbouring chapters keep their order and never overlap while changing size.
 assert.deepEqual([-1,0,.49,.5,1.49,1.5,6,100].map(value=>careerFrame(value,7).index),[0,0,0,1,1,2,6,6]);
 assert.deepEqual([6,5.49,4.49,3.49,2.49,1.49,.49,0].map(value=>careerFrame(value,7).index),[6,5,4,3,2,1,0,0]);
-for(let step=-100;step<=700;step++){
- const state=careerFrame(step/100,7);
- assert(Number.isInteger(state.index)&&state.index>=0&&state.index<7);
- assert(state.pages.length>=1&&state.pages.length<=2);
- assert(state.pages.every(page=>page.opacity===1),'Opaque cards keep overlapping text from showing through');
- assert(state.pages.some(page=>page.index===state.index),'The active page remains visible');
- assert(state.pages.every(page=>page.index>=0&&page.index<7&&Math.abs(page.offset)<=100&&page.scale>=.94&&page.scale<=1&&page.shade>=0&&page.shade<=.22));
- if(state.pages.length===2){
-  const [outgoing,incoming]=state.pages;
-  assert(outgoing.offset<=0&&incoming.offset>=0);
-  assert(outgoing.offset+outgoing.scale*100>=incoming.offset,'The incoming card covers the outgoing edge without a gap');
+for(const [height,peek,gap] of [[200,144,16],[395,50,8],[300,0,8]]){
+ for(let step=-100;step<=700;step++){
+  const state=careerFrame(step/100,7);
+  const pages=state.pages.map(page=>({...page,...careerCardLayout(page.distance,height,peek,gap,state.stepProgress,7)})).filter(page=>page.visible);
+  assert(Number.isInteger(state.index)&&state.index>=0&&state.index<7);
+  assert(pages.some(page=>page.index===state.index),'The current chapter remains visible');
+  assert(pages.every(page=>page.height>=Math.min(peek||height,height)&&page.height<=height));
+  assert(pages.every(page=>page.content+page.preview>0),'Content must never disappear completely during a transition');
+  for(let i=1;i<pages.length;i++){
+   assert(pages[i].offset-pages[i].height/2>=pages[i-1].offset+pages[i-1].height/2,'Neighbouring cards must never cover each other');
+  }
+  if(Number.isInteger(state.stepProgress)&&peek){
+   assert.equal(pages.length,3,'Show three real chapters, including at either end');
+   assert.equal(pages.find(page=>page.index===state.index).height,height,'The selected card keeps its natural content height');
+  }
+  assert(state.progress>=0&&state.progress<=1);
  }
- if(state.pages.length===2)assert.equal(state.pages[1].index,state.pages[0].index+1);
- assert(state.progress>=0&&state.progress<=1);
 }
 assert.equal(careerFrame(NaN,7).index,0);
 assert.equal(careerFrame(4,1).index,0);
-assert.equal(careerFrame(.1,7).pages.length,1,'Reading time before each transition');
-assert.equal(careerFrame(.2,7).pages.length,2,'The transition begins earlier for a longer, gentler slide');
-assert.equal(careerFrame(.5,7).pages.length,2,'Outgoing and incoming cards overlap');
-assert.equal(careerFrame(.9,7).pages.length,1,'Incoming card settles for reading');
-for(let sample=13;sample<88;sample++){
- const previous=careerFrame((sample-1)/100,7).pages.find(page=>page.index===1)?.offset??100;
- const incoming=careerFrame(sample/100,7).pages.find(page=>page.index===1)?.offset??0;
- assert(previous-incoming<=2,'No compressed, abrupt slide in the middle of the transition');
+assert.equal(careerFrame(.1,7).stepProgress,0,'Reading pause before moving');
+assert.equal(careerFrame(.9,7).stepProgress,1,'Reading pause after moving');
+let previous=careerCardLayout(1,200,144,16,2,7).offset;
+for(let sample=1;sample<=100;sample++){
+ const state=careerFrame(2+sample/100,7);
+ const incoming=careerCardLayout(3-state.stepProgress,200,144,16,state.stepProgress,7).offset;
+ assert(previous-incoming<4,'The incoming card moves continuously without a sudden jump');
+ previous=incoming;
 }
 assert.equal(advanceCareerProgress(null,4,16),4,'Initial layout lands on the correct stage');
 for(const hz of [30,60,120]){
@@ -60,7 +63,7 @@ for(const lang of ['es','en']){
  assert(section.includes('class="career-controls" hidden'),'Controls do not appear without JavaScript');
  assert(!section.includes('inert')&&!section.includes('aria-hidden="true"><article'),'Content stays readable without enhancement');
 }
-console.log('PASS: overlapping reversible cards, reading pauses, bounded scroll steps, responsive fallback, and seven bilingual navigation steps.');
+console.log('PASS: reversible carousel, three readable chapters, non-overlapping transitions, bounded scrolling, and bilingual navigation.');
 
 // Reproduce a detail that outgrows the mobile viewer, then returns to it.
 const source=(await readFile(new URL('../public/career-motion.js',import.meta.url),'utf8')).replaceAll('export ','');
@@ -132,13 +135,12 @@ for(const reduced of [false,true]){
   context.scrollY=fourthPosition+careerScrollStep(context.innerHeight)*progress;
   events.get('scroll')();flush();
   const visible=cards.filter(card=>!card.hidden);
-  assert.equal(visible.length,progress>0&&progress<1?2:1,'Both OS preferences retain overlapping cards during the slide');
-  assert(visible.every(card=>card.style.getPropertyValue('--page-opacity')==='1.000'),'Cards slide without fading their text');
+  assert(visible.length>=3&&visible.length<=4,'Both OS preferences keep the neighbouring previews');
+  assert.equal(visible.filter(card=>!card.inert).length,1,'Only the current chapter accepts focus');
   if(progress===.5){
-   assert.equal(cards[4].style.getPropertyValue('--page-offset'),'-4.00%');
-   assert.equal(cards[5].style.getPropertyValue('--page-offset'),'50.00%');
-   assert.equal(cards[4].style.getPropertyValue('--page-scale'),'0.9700');
-   assert.equal(cards[5].style.getPropertyValue('--page-scale'),'0.9800');
+   assert(parseFloat(cards[4].style.getPropertyValue('--page-offset'))<0);
+   assert(parseFloat(cards[5].style.getPropertyValue('--page-offset'))>0);
+   assert.equal(cards[4].style.getPropertyValue('--page-scale'),cards[5].style.getPropertyValue('--page-scale'));
    assert.equal(buttons[5].style.getPropertyValue('--step-progress'),'0.5000','Year marker fills continuously with the cards');
   }
  }
