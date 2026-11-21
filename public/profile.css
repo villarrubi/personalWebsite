@@ -231,17 +231,4 @@
  .skill-story .skill-tags{margin-top:12px}
  .skill-story .skill-tags li{font-size:11.5px;padding:4px 8px}
  .skill-project{min-height:44px;padding-block:12px;margin-top:14px;gap:8px 12px}
- /* Put the project description beside the orbit to retain the objects' scale. */
- .orbit-carousel{grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr);grid-template-rows:auto auto auto;column-gap:4%;row-gap:12px;padding-block:20px 16px}
- .orbit-carousel .solar-heading{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;align-items:end;column-gap:28px}
- .orbit-carousel .solar-heading .eyebrow{grid-column:1/-1;margin-bottom:8px}
- .orbit-carousel .solar-heading h2,html[lang=es] .orbit-carousel .solar-heading h2{font-size:clamp(44px,6.5svh,64px)}
- .orbit-carousel .solar-description{max-width:32ch;margin:0;font-size:15px}
- .orbit-carousel .solar-space{grid-column:1;grid-row:2;height:clamp(300px,calc(100svh - 300px),600px);min-width:0;width:100%;margin:0}
- .orbit-carousel .solar-preview{grid-column:2;grid-row:2;align-self:center;min-height:0;max-width:480px;text-align:left}
- .solar-preview h3{font-size:clamp(30px,4.8svh,42px)}
- .solar-preview-summary{font-size:16px;line-height:1.6}
- .orbit-carousel .solar-footer{grid-column:1/-1;grid-row:3;margin-top:0}
- .orbit-arrow{width:52px;height:52px}
- .orbit-previous{left:0}.orbit-next{right:0}
 }
