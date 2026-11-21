@@ -31,7 +31,7 @@ if('IntersectionObserver'in window){
   for(const entry of entries){if(entry.isIntersecting)visible.add(entry.target);else visible.delete(entry.target);}
   // Several sections can intersect at once; changed-entry order is not page order.
   const active=sections.filter(section=>visible.has(section)).at(-1);
-  if(active)current=active.id==='home'?'top':['archive','complementary','project-orbital-scene'].includes(active.id)?'projects':active.id;
+  if(active)current=active.id==='home'?'top':active.id==='skills'?'about':['archive','complementary','project-orbital-scene'].includes(active.id)?'projects':active.id;
   scheduleNavigation();
  },{rootMargin:'-10% 0px -65% 0px'});
  sections.forEach(section=>observer.observe(section));

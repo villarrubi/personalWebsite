@@ -32,7 +32,7 @@ export function initSkills(root){
   choice.addEventListener('keydown',event=>{
    if(event.altKey||event.ctrlKey||event.metaKey)return;
    const target=event.key==='Home'?0:event.key==='End'?choices.length-1:['ArrowRight','ArrowDown'].includes(event.key)?(index+1)%choices.length:['ArrowLeft','ArrowUp'].includes(event.key)?(index+choices.length-1)%choices.length:null;
-   if(target!==null){event.preventDefault();choices[target].focus();}
+   if(target!==null){event.preventDefault();choices[target].focus({preventScroll:true});}
   });
  });
  root.addEventListener('keydown',event=>{if(event.key==='Escape'){cancel();select(0);}});

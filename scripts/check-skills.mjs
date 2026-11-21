@@ -19,7 +19,7 @@ for(const reduced of [true,false])for(const off of [true,false]){
  const element=()=>({hidden:false,attrs:{},events:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(k,v){this.events[k]=v;},animate(){animationCount++;return {cancel(){cancelled++;}};}});
  const choices=Array.from({length:4},element),panels=Array.from({length:4},element),selector=element();
  let focused=-1;
- choices.forEach((choice,index)=>choice.focus=()=>{focused=index;choice.events.focus();});
+ choices.forEach((choice,index)=>choice.focus=options=>{assert.equal(options?.preventScroll,true,'Keyboard selection must not scroll the page');focused=index;choice.events.focus();});
  const root={...element(),classList:{add(){},toggle(){}},querySelector:()=>selector,querySelectorAll:s=>s==='[data-skill]'?choices:s==='.skill-insight'?panels:[selector]};
  initSkills(root);
  assert(!panels[0].hidden);assert.equal(panels.filter(panel=>!panel.hidden).length,1,'A complete first discipline is visible immediately');

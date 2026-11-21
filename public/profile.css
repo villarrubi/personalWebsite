@@ -107,6 +107,9 @@
 .skill-insights{min-width:0;grid-column:1/-1}
 .skills-ready .skill-insights{grid-column:auto;display:grid;border-left:1px solid #8bc9cf25}
 .skills-ready .skill-insights>*{grid-area:1/1}
+/* Keep the tallest panel in the grid's sizing calculation when switching skills.
+   Visibility also removes inactive links from keyboard navigation and the accessibility tree. */
+.skills-ready .skill-insight[hidden]{display:block!important;visibility:hidden;pointer-events:none}
 .skill-insight{min-width:0;background:radial-gradient(ellipse at 55% 18%,color-mix(in srgb,var(--skill-color) 9%,transparent),transparent 70%),#0a1c2e}
 .skill-insight+.skill-insight{border-top:1px solid #8bc9cf33}
 .skills-ready .skill-insight{border-top:0}
@@ -115,15 +118,38 @@
 .skill-art-label,.skill-art-caption{position:relative;display:block;font:11px/1.4 var(--sans);text-transform:uppercase;letter-spacing:.13em;color:var(--skill-color)}
 .skill-art-caption{text-align:right;font-size:10px;opacity:.7}
 .skill-art svg{position:relative;display:block;width:100%;max-height:280px;overflow:visible;margin:8px auto}
-.diagram-plane{fill:color-mix(in srgb,var(--skill-color) 9%,#0a1c2e);stroke:var(--skill-color);stroke-width:1;stroke-opacity:.55;stroke-linejoin:round}
-.diagram-plane.back{fill:color-mix(in srgb,var(--skill-color) 5%,#0a1c2e);stroke-opacity:.25}
-.diagram-plane.front{fill:color-mix(in srgb,var(--skill-color) 17%,#0a1c2e);stroke-opacity:.9;filter:drop-shadow(0 8px 20px #020a1880)}
-.diagram-wire,.diagram-orbit{fill:none;stroke:var(--skill-color);stroke-width:1;stroke-opacity:.35}
-.diagram-orbit{stroke-dasharray:3 7}
-.diagram-bright{fill:none;stroke:var(--skill-color);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--skill-color) 50%,transparent))}
-.diagram-node{fill:var(--skill-color);stroke:#0a1c2e;stroke-width:3}
-.diagram-cursor{fill:var(--skill-color);stroke:#0a1c2e;stroke-width:3}
-.skill-drawing text{fill:var(--skill-color);font:10px monospace;letter-spacing:.1em;opacity:.65}
+.skill-product{filter:drop-shadow(0 10px 15px #02091250)}
+.product-shadow{fill:#020b18;opacity:.6}
+.product-window{fill:#14283b;stroke:#547086;stroke-width:1}
+.product-divider{fill:none;stroke:#395065;stroke-width:1}
+.product-sidebar{fill:#0c1d2e}
+.skill-product text{font:14px monospace;fill:#dce8ef}
+.skill-product .product-code{font-size:17px}
+.skill-product .product-muted{font-size:12px;fill:#9ab1c6}
+.skill-product .product-line{font-size:12px;fill:#617c94}
+.skill-product .product-small{font-size:13px;fill:#c5ddd8}
+.product-accent{fill:var(--skill-color)}
+.product-accent-soft{fill:color-mix(in srgb,var(--skill-color) 20%,#14283b)}
+.product-check{fill:none;stroke:#a8dfba;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.product-avatar{fill:#7a6da8}.product-spark{fill:#eee5ff}
+.product-bubble{fill:#24364e}.product-input{fill:#0b1a2b;stroke:#44566b}
+.product-skeleton{fill:#72889e;stroke:#72889e;stroke-width:4;stroke-linecap:round;opacity:.6}.product-skeleton.faint{opacity:.3}
+.product-send{fill:none;stroke:#17263b;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.product-board{fill:#214a43;stroke:#6eaa8b;stroke-width:1.5}
+.product-mount{fill:#122d2c;stroke:#b6b585;stroke-width:2}
+.product-trace{fill:none;stroke:#64a58c;stroke-width:2;stroke-linejoin:round}
+.product-pin{fill:none;stroke:#d0c496;stroke-width:5}
+.product-chip{fill:#182526;stroke:#8b9a92;stroke-width:1.5}
+.skill-product .product-chip-label{font-size:20px;fill:#e3e8de;letter-spacing:1px}
+.product-port{fill:#a3b7ba;stroke:#32454b;stroke-width:4}
+.product-cable{fill:none;stroke:#96cdb3;stroke-width:3}
+.skill-product .product-reading{font:32px var(--sans);fill:#d3f1df}
+.product-wave-fill{fill:#97c9af16}.product-wave{fill:none;stroke:#97c9af;stroke-width:2.5;stroke-linejoin:round}
+.product-map{fill:#1d3c57}.product-land{fill:#456d72}.product-land-near{fill:#63908c}
+.product-river{fill:none;stroke:#91bed7;stroke-width:9;stroke-linecap:round}
+.product-contour{fill:none;stroke:#b1ceac;stroke-width:1.5;stroke-opacity:.55}
+.product-map-control{fill:#e0e7e7}.product-control-lines{fill:none;stroke:#345061;stroke-width:2}
+.product-pointer{fill:#f5f2e5;stroke:#233c53;stroke-width:2;stroke-linejoin:round}
 .skill-story{padding:28px 36px 0}
 .skill-story h4{font:400 clamp(29px,2.8vw,42px)/1.12 var(--serif);letter-spacing:-.025em;color:#edf1ed;max-width:22ch;margin:0 0 16px}
 .skill-story>p{font-size:16px;line-height:1.75;color:#afc5d5;max-width:54ch;margin:0}
@@ -155,3 +181,62 @@
 }
 @media(max-width:380px){.skill-selector{padding:24px 12px}.skill-label{gap:4px;min-height:48px}.skill-label strong{font-size:11px}.skill-core{gap:7px}.skill-core>span{font-size:24px}.skill-core small{font-size:7px}.skill-story{padding-inline:20px}.skill-story h4{font-size:30px}.skill-project-action{margin-left:0}}
 @media(prefers-reduced-motion:reduce){.skill-sector path,.skill-label{transition:none!important}}
+
+/* Give each desktop section room beneath the sticky header, without clipping content. */
+.profile-skills{position:relative;z-index:1}
+.profile-skills .skill-explorer{margin-top:0}
+@media(min-width:901px){
+ :root{scroll-padding-top:96px}
+ .experience-hero + .project-explorer{scroll-margin-top:0}
+ .about-section.about-journal{padding-block:32px}
+ .about-note{margin-top:22px;gap:clamp(28px,5vw,80px)}
+ .profile-section-heading h2{font-size:clamp(42px,5.8svh,56px)}
+ .about-profile .about-lead{font-size:18px;line-height:1.6}
+ .about-personal{margin-top:20px}
+ .about-practical{padding:22px}
+ .contact-section.contact-compact{padding-block:32px}
+ .contact-secondary{margin-top:24px;padding-top:18px}
+ .contact-description{margin-top:18px}
+ .career-section{padding-block:26px}
+ .career-heading{margin-bottom:18px}
+ .career-navigation{padding-top:14px}
+ .career-hint{margin-bottom:12px}
+ .career-entry{padding-block:22px}
+ .career-story{margin-top:16px;gap:22px}
+ .career-controls{padding-block:12px}
+ .skill-explorer{padding-block:24px 28px}
+ .skill-explorer .skills-heading{margin-bottom:18px;column-gap:6%}
+ .skill-explorer .skills-kicker{margin-bottom:10px}
+ .skill-explorer .skills-heading h3{font-size:clamp(44px,6.5svh,64px)}
+ .skill-explorer .skills-heading>p:last-child{font-size:16px;line-height:1.6;max-width:42ch}
+ .skills-workbench{grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr)}
+ .skill-selector{padding:18px 20px}
+ .skill-compass{max-width:clamp(260px,calc(100svh - 390px),400px)}
+ .skill-label strong{font-size:14px}
+ .skill-choice-icon{font-size:25px}
+ .skill-core>span{font-size:28px}
+ .skills-hint{margin-top:16px;font-size:13px}
+ .skills-hint span{margin-top:2px;font-size:11px}
+ .skill-art{padding:12px 24px 10px}
+ .skill-art svg{height:clamp(100px,calc(100svh - 660px),180px);margin:4px auto}
+ .skill-art-caption{font-size:9px}
+ .skill-story{padding:16px 26px 0}
+ .skill-story h4{font-size:clamp(28px,3.8svh,34px);line-height:1.08;max-width:28ch;margin-bottom:10px}
+ .skill-story>p{font-size:16px;line-height:1.5;max-width:60ch}
+ .skill-story .skill-tags{margin-top:12px}
+ .skill-story .skill-tags li{padding:5px 9px}
+ .skill-project{min-height:44px;padding-block:12px;margin-top:14px;gap:8px 12px}
+ /* Put the project description beside the orbit to retain the objects' scale. */
+ .orbit-carousel{grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr);grid-template-rows:auto auto auto;column-gap:4%;row-gap:12px;padding-block:20px 16px}
+ .orbit-carousel .solar-heading{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;align-items:end;column-gap:28px}
+ .orbit-carousel .solar-heading .eyebrow{grid-column:1/-1;margin-bottom:8px}
+ .orbit-carousel .solar-heading h2,html[lang=es] .orbit-carousel .solar-heading h2{font-size:clamp(44px,6.5svh,64px)}
+ .orbit-carousel .solar-description{max-width:32ch;margin:0;font-size:15px}
+ .orbit-carousel .solar-space{grid-column:1;grid-row:2;height:clamp(300px,calc(100svh - 300px),600px);min-width:0;width:100%;margin:0}
+ .orbit-carousel .solar-preview{grid-column:2;grid-row:2;align-self:center;min-height:0;max-width:480px;text-align:left}
+ .solar-preview h3{font-size:clamp(30px,4.8svh,42px)}
+ .solar-preview-summary{font-size:16px;line-height:1.6}
+ .orbit-carousel .solar-footer{grid-column:1/-1;grid-row:3;margin-top:0}
+ .orbit-arrow{width:52px;height:52px}
+ .orbit-previous{left:0}.orbit-next{right:0}
+}

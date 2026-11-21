@@ -31,8 +31,8 @@ export function homeContent(lang){
     <div class="about-languages"><h4>${es?'Idiomas':'Languages'}</h4><p>${es?'Español nativo · Inglés B2':'Native Spanish · English B2'}</p><small>Cambridge B2 First</small></div>
    </aside>
   </div>
-  ${skillsSection(lang)}
  </div></section>
+ <div class="container profile-skills">${skillsSection(lang)}</div>
  <section id="contact" class="contact-section contact-compact" aria-labelledby="contact-title"><div class="container">
   <div class="contact-main">
    <header class="profile-section-heading" data-scroll-reveal data-reveal-from="left"><p class="eyebrow">04 / ${es?'HABLEMOS':'LET’S TALK'}</p><h2 id="contact-title">${es?'Contacto':'Contact'}</h2><p class="contact-description">${c.contactText}</p></header>
