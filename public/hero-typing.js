@@ -22,11 +22,11 @@ if(typeof document!=='undefined'){
  if(root){
   const words=[...root.querySelectorAll('[data-typing-phrase]')].map(node=>node.textContent);
   const output=root.querySelector('[data-typed-text]'),button=root.querySelector('[data-typing-toggle]');
-  const cycle=new WordCycle(words),preference=matchMedia('(prefers-reduced-motion: reduce)');
+  const cycle=new WordCycle(words);
   const motionOff=new URLSearchParams(location.search).get('motion')==='off';
   let timer=0,paused=false,inView=false;
   const introActive=()=>['intro-pending','intro-playing'].some(name=>document.documentElement.classList.contains(name));
-  const enabled=()=>!motionOff&&!preference.matches&&!paused&&!document.hidden&&inView&&!introActive();
+  const enabled=()=>!motionOff&&!paused&&!document.hidden&&inView&&!introActive();
   function stop(){clearTimeout(timer);timer=0;root.classList.remove('is-typing');}
   function schedule(){
    if(!enabled())return;
@@ -49,15 +49,14 @@ if(typeof document!=='undefined'){
   }
   function sync(){
    stop();
-   if(motionOff||preference.matches||paused){cycle.complete();output.textContent=cycle.text;}
-   button.hidden=motionOff||preference.matches;
+   if(motionOff||paused){cycle.complete();output.textContent=cycle.text;}
+   button.hidden=motionOff;
    const label=paused?button.dataset.resume:button.dataset.pause;
    button.setAttribute('aria-label',label);button.title=label;
    root.classList.toggle('is-paused',paused);
    schedule();
   }
   button.addEventListener('click',()=>{paused=!paused;sync();});
-  preference.addEventListener('change',sync);
   document.addEventListener('visibilitychange',sync);
   document.addEventListener('intro:end',sync);
   addEventListener('pagehide',stop);
