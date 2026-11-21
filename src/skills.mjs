@@ -17,60 +17,60 @@ function skillIcon(id){
  const paths={software:'<rect x="3" y="4" width="26" height="24" rx="4"/><path d="M3 10h26m-18 5-4 4 4 4m10-8 4 4-4 4m-3-10-4 12"/>',ai:'<path d="M4 25V7m0 18h24M9 20l5-7 5 3 8-10"/><circle cx="14" cy="13" r="2"/><circle cx="19" cy="16" r="2"/>',hardware:'<rect x="8" y="8" width="16" height="16" rx="3"/><path d="M12 3v5m8-5v5m-8 16v5m8-5v5M3 12h5m-5 8h5m16-8h5m-5 8h5"/><rect x="12" y="12" width="8" height="8" rx="1"/>',interfaces:'<rect x="3" y="4" width="26" height="23" rx="3"/><path d="M3 10h26M11 10v17m5-12h8m-8 5h5"/><path d="m23 20 2 10 3-4 4-2Z"/>'};
  return `<svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[id]}</svg>`;
 }
-function artwork(id,lang){
- const es=lang==='es';
- const frame=body=>`<svg viewBox="0 0 600 280" aria-hidden="true" focusable="false"><g class="skill-product">${body}</g></svg>`;
- const window=(title,body)=>`<rect class="product-shadow" x="52" y="24" width="496" height="238" rx="16"/><rect class="product-window" x="44" y="16" width="512" height="240" rx="14"/><path class="product-divider" d="M44 54h512"/><circle fill="#ed8a92" cx="64" cy="35" r="4"/><circle fill="#e9c882" cx="79" cy="35" r="4"/><circle fill="#8acbb0" cx="94" cy="35" r="4"/><text class="product-muted" x="118" y="40">${title}</text>${body}`;
- if(id==='software')return frame(window(es?'Desarrollo de software':'Software development',`
-  <rect class="product-input" x="64" y="74" width="242" height="158" rx="8"/>
-  <text class="product-muted" x="80" y="98">service.ts</text>
-  <text class="product-code" data-scene-reveal x="80" y="128">async function run() {</text>
-  <text class="product-code" data-scene-reveal x="80" y="158">  await process(data);</text>
-  <text class="product-code" data-scene-reveal x="80" y="188">  return result;</text>
-  <text class="product-code" x="80" y="216">}</text>
-  <path class="product-cable" data-scene-trace pathLength="1" d="M307 151h32m-7-6 7 6-7 6M435 119v40"/>
-  <rect class="product-accent-soft" x="350" y="79" width="176" height="49" rx="7"/>
-  <text class="product-small" x="438" y="109" text-anchor="middle">API / ${es?'Servicios':'Services'}</text>
-  <rect class="product-accent-soft" data-scene-reveal x="350" y="167" width="176" height="49" rx="7"/>
-  <text class="product-small" x="438" y="197" text-anchor="middle">${es?'Lógica + Datos':'Logic + Data'}</text>`));
- if(id==='ai')return frame(window(es?'Inteligencia artificial':'Artificial intelligence',`
-  <rect class="product-input" x="64" y="87" width="113" height="126" rx="8"/>
-  <text class="product-small" x="120" y="111" text-anchor="middle">${es?'Datos':'Data'}</text>
-  ${[0,1,2,3].map(i=>`<path class="product-skeleton" data-scene-reveal d="M83 ${132+i*18}h${62-i*9}"/>`).join('')}
-  <path class="product-cable" data-scene-trace pathLength="1" d="M182 152h34m-7-6 7 6-7 6M350 152h25v-43h24m-24 43v43h24"/>
-  <circle class="product-accent-soft" cx="283" cy="148" r="56"/>
-  <path class="product-wave" data-scene-trace pathLength="1" d="m252 126 62 42m-62 0 62-42m-62 0v42m31-59v78m31-61v42M252 126l31-17 31 17m-62 42 31 19 31-19"/>
-  ${[[252,126],[252,168],[283,109],[283,148],[283,187],[314,126],[314,168]].map(([x,y])=>`<circle class="product-accent" cx="${x}" cy="${y}" r="5"/>`).join('')}
-  <rect class="product-bubble" x="401" y="79" width="132" height="61" rx="8"/>
-  <path class="product-wave" data-scene-trace pathLength="1" d="m414 125 20-14 22 7 25-24 18 10 20-13"/>
-  <rect class="product-bubble" x="401" y="166" width="132" height="61" rx="8"/>
-  <path class="product-skeleton" data-scene-reveal d="M418 184h94m-94 16h69"/>
-  <text class="product-muted" x="283" y="244" text-anchor="middle">${es?'Aprendizaje + Generación':'Learning + Generation'}</text>`));
- if(id==='hardware')return frame(window(es?'Sistemas conectados':'Connected systems',`
-  <rect class="product-board" x="66" y="86" width="157" height="130" rx="12"/>
-  <rect class="product-chip" x="108" y="117" width="72" height="65" rx="7"/>
-  <path class="product-pin" d="M117 105v12m18-12v12m18-12v12m18-12v12m-54 65v13m18-13v13m18-13v13m18-13v13M96 129h12m-12 17h12m-12 17h12m72-34h12m-12 17h12m-12 17h12"/>
-  <path class="product-cable" data-scene-trace pathLength="1" d="M223 150h101m-9-7 9 7-9 7"/>
-  <circle class="product-accent" data-scene-reveal cx="85" cy="103" r="4"/>
-  <rect class="product-input" x="336" y="85" width="196" height="132" rx="9"/>
-  <path class="product-divider" d="M352 111h164m-164 34h164m-164 34h164"/>
-  <path class="product-wave" data-scene-trace pathLength="1" d="M350 151h17l10-20 12 42 14-65 16 78 14-40 12 18 14-35 12 22h46"/>
-  <text class="product-muted" x="144" y="240" text-anchor="middle">${es?'Firmware':'Firmware'}</text>
-  <text class="product-muted" x="435" y="240" text-anchor="middle">${es?'Captura + Procesamiento':'Capture + Processing'}</text>`));
- return frame(window(es?'Diseño de interfaces':'Interface design',`
-  <rect class="product-sidebar" x="45" y="55" width="104" height="200" rx="8"/>
-  <circle class="product-accent" cx="70" cy="80" r="8"/>
-  <path class="product-skeleton" d="M65 112h61m-61 27h43m-43 27h52m-52 27h35"/>
-  <rect class="product-accent-soft" x="167" y="74" width="105" height="46" rx="7"/>
-  <rect class="product-accent-soft" data-scene-reveal x="285" y="74" width="105" height="46" rx="7"/>
-  <rect class="product-input" x="167" y="135" width="223" height="98" rx="7"/>
-  <path class="product-wave" data-scene-trace pathLength="1" d="m182 209 31-26 31 12 34-40 27 17 35-19 34 4"/>
-  <rect class="product-window" x="417" y="71" width="113" height="165" rx="14"/>
-  <path class="product-divider" d="M453 83h39"/>
-  <rect class="product-accent-soft" data-scene-reveal x="431" y="100" width="85" height="51" rx="6"/>
-  <path class="product-skeleton" d="M435 169h74m-74 15h53"/>
-  <rect class="product-accent" x="432" y="203" width="83" height="16" rx="6"/>
-  <path class="product-pointer" data-scene-cursor d="m352 102 8 29 7-10 12-2Z"/>`));
+function artwork(id){
+ const prefix=`skill-object-${id}`;
+ const paint=name=>`url(#${prefix}-${name})`;
+ const defs=`<defs>
+  <linearGradient id="${prefix}-top" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0e9e1"/><stop offset=".55" stop-color="var(--skill-color)"/><stop offset="1" stop-color="#6c7886"/></linearGradient>
+  <linearGradient id="${prefix}-left" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#697888"/><stop offset="1" stop-color="#192a3d"/></linearGradient>
+  <linearGradient id="${prefix}-right" x1="0" y1="0" x2="1" y2="1"><stop stop-color="var(--skill-color)"/><stop offset="1" stop-color="#304454"/></linearGradient>
+  <linearGradient id="${prefix}-glass" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#edf8ff" stop-opacity=".36"/><stop offset=".5" stop-color="var(--skill-color)" stop-opacity=".12"/><stop offset="1" stop-color="var(--skill-color)" stop-opacity=".35"/></linearGradient>
+  <radialGradient id="${prefix}-light" cx=".32" cy=".22" r=".8"><stop stop-color="#fff"/><stop offset=".32" stop-color="var(--skill-color)"/><stop offset="1" stop-color="#364459"/></radialGradient>
+  <radialGradient id="${prefix}-halo"><stop stop-color="var(--skill-color)" stop-opacity=".22"/><stop offset="1" stop-color="var(--skill-color)" stop-opacity="0"/></radialGradient>
+ </defs>`;
+ const frame=body=>`<svg class="skill-object" viewBox="0 0 600 300" aria-hidden="true" focusable="false">${defs}<ellipse cx="300" cy="256" rx="145" ry="25" fill="${paint('halo')}"/>${body}</svg>`;
+ const cube=(x,y,size,depth,motion='')=>`<g transform="translate(${x} ${y})"><g ${motion}>
+  <path d="M0 0 ${size} ${size*.5} 0 ${size} ${-size} ${size*.5}Z" fill="${paint('top')}" stroke="#f5ecdf66"/>
+  <path d="M${-size} ${size*.5} 0 ${size}v${depth}l${-size} ${-size*.5}Z" fill="${paint('left')}" stroke="#9cafbf45"/>
+  <path d="M0 ${size} ${size} ${-size*.5}v${depth}L0 ${size+depth}Z" fill="${paint('right')}" stroke="#d9e5eb55"/>
+  <path d="m${-size*.8} ${size*.48} ${size*.8} ${size*.4} ${size*.8} ${-size*.4}" fill="none" stroke="#fff" stroke-opacity=".32"/>
+ </g></g>`;
+ if(id==='software')return frame(`
+  <ellipse cx="300" cy="154" rx="177" ry="110" fill="${paint('halo')}"/>
+  <path class="object-wire" d="m160 188 140 70 140-70-140-70Z"/>
+  ${cube(300,119,57,55)}
+  ${cube(238,89,57,55,'data-object-motion="assemble" data-dx="-34" data-dy="-18"')}
+  ${cube(362,89,57,55,'data-object-motion="assemble" data-dx="34" data-dy="-18"')}
+  ${cube(300,56,57,55,'data-object-motion="assemble" data-dx="0" data-dy="-38"')}
+  <path class="object-energy" data-scene-trace pathLength="1" d="m167 193 70 35m126 0 70-35"/>
+  <circle class="object-spark" data-scene-reveal cx="300" cy="251" r="4"/>`);
+ if(id==='ai'){
+  const points=Array.from({length:82},(_,i)=>{
+   const y=1-2*(i+.5)/82,r=Math.sqrt(1-y*y),angle=i*2.39996323;
+   const z=Math.sin(angle)*r,x=Math.cos(angle)*r;
+   return {x:300+x*111,y:145+y*111,z,r:2.1+(z+1)*1.8,dx:Math.sin(i*3.7)*30,dy:Math.cos(i*2.3)*24};
+  }).sort((a,b)=>a.z-b.z);
+  return frame(`<ellipse cx="300" cy="145" rx="149" ry="134" fill="${paint('halo')}"/>
+   <g data-object-motion="orbit"><ellipse class="object-wire" cx="300" cy="145" rx="165" ry="51" transform="rotate(-24 300 145)"/><ellipse class="object-wire" cx="300" cy="145" rx="132" ry="111" transform="rotate(34 300 145)"/>
+   ${points.filter(p=>p.z>0).map((p,i,front)=>{const q=front[(i+7)%front.length];return Math.hypot(p.x-q.x,p.y-q.y)<98?`<path class="object-connection" data-scene-trace pathLength="1" d="M${p.x} ${p.y} ${q.x} ${q.y}"/>`:'';}).join('')}
+   ${points.map(p=>`<g data-object-motion="organize" data-dx="${p.dx.toFixed(1)}" data-dy="${p.dy.toFixed(1)}"><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="${paint('light')}" opacity="${(.4+(p.z+1)*.3).toFixed(2)}"/></g>`).join('')}
+   </g>`);
+ }
+ if(id==='hardware')return frame(`
+  <ellipse cx="300" cy="153" rx="172" ry="111" fill="${paint('halo')}"/>
+  <path d="m116 157 184-92 184 92v11l-184 92-184-92Z" fill="${paint('left')}" stroke="#8da9b84d"/>
+  <path d="m116 157 184-92 184 92-184 92Z" fill="${paint('glass')}" stroke="#a3e4c788"/>
+  ${[-1,1].flatMap(sign=>[0,1,2].map(i=>{const x=300+sign*(70+i*24),y=157+(i-1)*12;return `<path class="object-circuit" d="M${300+sign*45} ${136+i*15} ${x} ${y} ${x+sign*36} ${y-18}"/><path class="object-energy" data-scene-trace pathLength="1" d="M${300+sign*45} ${136+i*15} ${x} ${y} ${x+sign*36} ${y-18}"/><circle class="object-spark" data-scene-reveal cx="${x+sign*36}" cy="${y-18}" r="3"/>`;})).join('')}
+  ${cube(300,97,67,32)}
+  <path d="m262 127 38-19 38 19-38 19Z" fill="${paint('glass')}" stroke="#e3ffec99"/>
+  <path class="object-energy" data-scene-trace pathLength="1" d="m284 128 16-8 16 8-16 8Z"/>
+  ${[-1,1].flatMap(sign=>[0,1,2,3].map(i=>`<path d="m${300+sign*(12+i*14)} ${182-i*7}v12l${sign*11} 5" fill="none" stroke="#b2c4cb" stroke-width="4" stroke-linejoin="round"/>`)).join('')}`);
+ const plane=(y,shift,content)=>`<g transform="translate(0 ${y})"><g data-object-motion="layer" data-dy="${shift}"><path d="m164 104 147-74 137 70v9l-147 74-137-70Z" fill="${paint('left')}" opacity=".65"/><path d="m164 104 147-74 137 70-147 74Z" fill="${paint('glass')}" stroke="#cbe8ff99"/><path d="m179 105 122 61 132-66" fill="none" stroke="#e7f5ff66"/>${content}</g></g>`;
+ return frame(`<ellipse cx="300" cy="150" rx="178" ry="125" fill="${paint('halo')}"/>
+  ${plane(82,12,'')}
+  ${plane(41,0,'<path class="object-wire" d="m215 109 96-48 86 44-96 48Zm31-15 86 43m-55-58 86 43m-117 4 96-48"/>')}
+  ${plane(0,-18,`<path d="m207 103 45-23 39 20-45 23Z" fill="${paint('top')}" opacity=".8"/><path d="m270 72 42-21 49 25-42 21Z" fill="${paint('glass')}" stroke="#b3d9f0"/><path class="object-energy" data-scene-trace pathLength="1" d="m275 132 57-29m-43 36 69-34m-55 41 69-34"/>`)}
+  <circle class="object-spark" data-scene-reveal cx="311" cy="29" r="4"/>`);
 }
 
 export function skillsSection(lang){
@@ -93,7 +93,7 @@ export function skillsSection(lang){
     ${skills.map(skill=>{
      const story=stories[skill.id];
      return `<article class="skill-insight" id="skill-panel-${skill.id}" style="--skill-color:${skill.color}" aria-labelledby="skill-title-${skill.id}">
-      <div class="skill-art skill-art-${skill.id}"><span class="skill-art-label" aria-hidden="true">${skill.name[lang]}</span>${artwork(skill.id,lang)}<span class="skill-art-caption" aria-hidden="true">${story.caption[lang]}</span></div>
+      <div class="skill-art skill-art-${skill.id}"><span class="skill-art-label" aria-hidden="true">${skill.name[lang]}</span>${artwork(skill.id)}<span class="skill-art-caption" aria-hidden="true">${story.caption[lang]}</span></div>
       <div class="skill-story"><h4 id="skill-title-${skill.id}">${story.title[lang]}</h4><p>${skill.text[lang]}</p><ul class="skill-tags" aria-label="${es?'Tecnologías':'Technologies'}">${skill.tags.map(tag=>`<li>${tag}</li>`).join('')}</ul>
       </div>
      </article>`;

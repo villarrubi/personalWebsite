@@ -17,7 +17,13 @@ export function initSkills(root){
   const panel=panels[active],cycle={duration:4800,iterations:Infinity,easing:'ease-in-out'};
   panel.querySelectorAll('[data-scene-reveal]').forEach((element,i)=>animate(element,[{opacity:.2},{opacity:1,offset:.2},{opacity:1,offset:.85},{opacity:.2}],{...cycle,delay:i*160}));
   panel.querySelectorAll('[data-scene-trace]').forEach(element=>animate(element,[{strokeDasharray:'1',strokeDashoffset:'1'},{strokeDasharray:'1',strokeDashoffset:'0',offset:.45},{strokeDasharray:'1',strokeDashoffset:'0',offset:.9},{strokeDasharray:'1',strokeDashoffset:'1'}],cycle));
-  if(!preference.matches)panel.querySelectorAll('[data-scene-cursor]').forEach(element=>animate(element,[{transform:'translate(-40px,12px)'},{transform:'translate(0,0)',offset:.4},{transform:'translate(0,0)',offset:.85},{transform:'translate(-40px,12px)'}],cycle));
+  if(!preference.matches)panel.querySelectorAll('[data-object-motion]').forEach((element,i)=>{
+   const kind=element.getAttribute?.('data-object-motion');
+   const dx=Number(element.getAttribute?.('data-dx')||0),dy=Number(element.getAttribute?.('data-dy')||0);
+   const offset=`translate(${dx}px,${dy}px)`;
+   const frames=kind==='orbit'?[{transform:'rotate(-7deg)'},{transform:'rotate(7deg)'},{transform:'rotate(-7deg)'}]:[{transform:offset},{transform:'translate(0,0)',offset:.4},{transform:'translate(0,0)',offset:.7},{transform:offset}];
+   animate(element,frames,{duration:kind==='organize'||kind==='orbit'?11000:7000,iterations:Infinity,delay:kind==='organize'?0:i*180,easing:'ease-in-out'});
+  });
  }
  function start(){
   cancel();

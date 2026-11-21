@@ -123,38 +123,13 @@
 .skill-art-label{min-height:16px}
 .skill-art-caption{text-align:center;font-size:10px;opacity:.7}
 .skill-art svg{position:relative;display:block;width:100%;max-height:280px;overflow:visible;margin:8px auto}
-.skill-product{filter:drop-shadow(0 10px 15px #02091250)}
-.product-shadow{fill:#020b18;opacity:.6}
-.product-window{fill:#14283b;stroke:#547086;stroke-width:1}
-.product-divider{fill:none;stroke:#395065;stroke-width:1}
-.product-sidebar{fill:#0c1d2e}
-.skill-product text{font:14px monospace;fill:#dce8ef}
-.skill-product .product-code{font-size:17px}
-.skill-product .product-muted{font-size:12px;fill:#9ab1c6}
-.skill-product .product-line{font-size:12px;fill:#617c94}
-.skill-product .product-small{font-size:13px;fill:#c5ddd8}
-.product-accent{fill:var(--skill-color)}
-.product-accent-soft{fill:color-mix(in srgb,var(--skill-color) 20%,#14283b)}
-.product-check{fill:none;stroke:#a8dfba;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.product-avatar{fill:#7a6da8}.product-spark{fill:#eee5ff}
-.product-bubble{fill:#24364e}.product-input{fill:#0b1a2b;stroke:#44566b}
-.product-skeleton{fill:#72889e;stroke:#72889e;stroke-width:4;stroke-linecap:round;opacity:.6}.product-skeleton.faint{opacity:.3}
-.product-send{fill:none;stroke:#17263b;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.product-board{fill:#214a43;stroke:#6eaa8b;stroke-width:1.5}
-.product-mount{fill:#122d2c;stroke:#b6b585;stroke-width:2}
-.product-trace{fill:none;stroke:#64a58c;stroke-width:2;stroke-linejoin:round}
-.product-pin{fill:none;stroke:#d0c496;stroke-width:5}
-.product-chip{fill:#182526;stroke:#8b9a92;stroke-width:1.5}
-.skill-product .product-chip-label{font-size:20px;fill:#e3e8de;letter-spacing:1px}
-.product-port{fill:#a3b7ba;stroke:#32454b;stroke-width:4}
-.product-cable{fill:none;stroke:#96cdb3;stroke-width:3}
-.skill-product .product-reading{font:32px var(--sans);fill:#d3f1df}
-.product-wave-fill{fill:#97c9af16}.product-wave{fill:none;stroke:#97c9af;stroke-width:2.5;stroke-linejoin:round}
-.product-map{fill:#1d3c57}.product-land{fill:#456d72}.product-land-near{fill:#63908c}
-.product-river{fill:none;stroke:#91bed7;stroke-width:9;stroke-linecap:round}
-.product-contour{fill:none;stroke:#b1ceac;stroke-width:1.5;stroke-opacity:.55}
-.product-map-control{fill:#e0e7e7}.product-control-lines{fill:none;stroke:#345061;stroke-width:2}
-.product-pointer{fill:#f5f2e5;stroke:#233c53;stroke-width:2;stroke-linejoin:round}
+.skill-object{filter:drop-shadow(0 14px 12px #02091260)}
+.skill-object [data-object-motion]{transform-box:fill-box;transform-origin:center}
+.object-wire{fill:none;stroke:var(--skill-color);stroke-opacity:.25;stroke-width:1}
+.object-energy{fill:none;stroke:var(--skill-color);stroke-width:2;stroke-linecap:round;filter:drop-shadow(0 0 4px var(--skill-color))}
+.object-connection{fill:none;stroke:var(--skill-color);stroke-width:.8;stroke-opacity:.38}
+.object-circuit{fill:none;stroke:var(--skill-color);stroke-width:2;stroke-opacity:.18}
+.object-spark{fill:#edf9f6;filter:drop-shadow(0 0 5px var(--skill-color))}
 .skill-story{padding:28px 36px 24px}
 .skill-story h4{font:400 clamp(29px,2.8vw,42px)/1.12 var(--serif);letter-spacing:-.025em;color:#edf1ed;max-width:22ch;margin:0 0 16px}
 .skill-story>p{font-size:16px;line-height:1.75;color:#afc5d5;max-width:54ch;margin:0}
@@ -223,7 +198,7 @@
  .skills-hint{margin-top:16px;font-size:13px}
  .skills-hint span{margin-top:2px;font-size:11px}
  .skill-art{padding:12px 24px 10px}.skill-art-label{min-height:16px}
- .skill-art svg{height:clamp(110px,calc(100svh - 610px),210px);margin:4px auto}
+ .skill-art svg{height:clamp(130px,calc(100svh - 580px),240px);margin:4px auto}
  .skill-art-caption{font-size:9px}
  .skill-story{padding:16px 26px 24px}
  .skill-story h4{font-size:clamp(28px,3.8svh,34px);line-height:1.08;max-width:28ch;margin-bottom:10px}
