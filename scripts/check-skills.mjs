@@ -17,10 +17,11 @@ for(const reduced of [true,false])for(const off of [true,false]){
  globalThis.matchMedia=()=>media;globalThis.location={search:off?'?motion=off':''};
  globalThis.IntersectionObserver=class{constructor(fn){observe=fn;}observe(){}disconnect(){}};
  const element=()=>({hidden:false,attrs:{},events:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(k,v){this.events[k]=v;},animate(){animationCount++;return {cancel(){cancelled++;}};}});
- const choices=Array.from({length:4},element),panels=Array.from({length:4},element),selector=element();
+ const choices=Array.from({length:4},element),panels=Array.from({length:4},element),selector=element(),sceneButtons=Array.from({length:4},element);
+ panels.forEach(panel=>panel.querySelectorAll=()=>[element()]);
  let focused=-1;
  choices.forEach((choice,index)=>choice.focus=options=>{assert.equal(options?.preventScroll,true,'Keyboard selection must not scroll the page');focused=index;choice.events.focus();});
- const root={...element(),classList:{add(){},toggle(){}},querySelector:()=>selector,querySelectorAll:s=>s==='[data-skill]'?choices:s==='.skill-insight'?panels:[selector]};
+ const root={...element(),classList:{add(){},toggle(){}},querySelector:()=>selector,querySelectorAll:s=>s==='[data-skill]'?choices:s==='.skill-insight'?panels:s==='[data-skill-motion]'?sceneButtons:[selector]};
  initSkills(root);
  assert(!panels[0].hidden);assert.equal(panels.filter(panel=>!panel.hidden).length,1,'A complete first discipline is visible immediately');
  observe([{isIntersecting:true}]);const entered=animationCount;
@@ -39,6 +40,13 @@ for(const reduced of [true,false])for(const off of [true,false]){
  else assert(animationCount>0&&cancelled>0,'Switching rapidly cancels obsolete animation');
  media.matches=true;media.change();const before=animationCount;
  choices[2].events.click();assert.equal(animationCount,before);assert(!panels[2].hidden);
+ assert.equal(root.attrs['data-active-skill'],'2','The shared palette follows the active skill');
+ sceneButtons[2].events.click();
+ if(off){assert.equal(animationCount,before);assert(sceneButtons.every(button=>button.hidden));}
+ else assert(animationCount>before,'Reduced motion permits a scene explicitly requested with its button');
+ const playing=cancelled;
+ choices[0].events.click();
+ if(!off)assert(cancelled>playing,'Changing skill cancels the previous scene, including manually requested motion');
 }
 delete globalThis.IntersectionObserver;
 console.log('PASS: bilingual skill workbench, static fallback, hover/tap/focus, keyboard wrap, Escape, rapid changes and live reduced-motion preference.');

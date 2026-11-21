@@ -70,14 +70,17 @@
 .hero-language-banner:focus-visible{outline:2px solid #8bc9cf;outline-offset:-3px}
 
 /* A large, interactive workbench connects each discipline to an actual project. */
-.skill-explorer{padding-block:68px 12px;margin-top:64px;text-align:left}
+.skill-explorer{--active-skill:#e8b68c;padding-block:68px 12px;margin-top:64px;text-align:left}
+.skill-explorer[data-active-skill="1"]{--active-skill:#b9a0f4}
+.skill-explorer[data-active-skill="2"]{--active-skill:#85cbb0}
+.skill-explorer[data-active-skill="3"]{--active-skill:#80b8e7}
 .skill-explorer .skills-heading{display:grid;grid-template-columns:1.3fr 1fr;column-gap:10%;align-items:end;margin-bottom:40px}
 .skill-explorer .skills-kicker{grid-column:1/-1;margin:0 0 20px;color:#a8d8df;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
 .skill-explorer .skills-heading h3{font:400 clamp(48px,5.5vw,84px)/.98 var(--serif);letter-spacing:-.045em;color:#f1f1e9}
-.skill-explorer .skills-heading h3 em{font-weight:400;color:#a8d8df}
+.skill-explorer .skills-heading h3 em{font-weight:400;color:var(--active-skill);transition:color .4s}
 .skill-explorer .skills-heading>p:last-child{font-size:17px;line-height:1.75;color:#b6cbd8;max-width:36ch;margin:0 0 5px}
-.skills-workbench{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);background:#071726;border:1px solid #8bc9cf33;border-radius:16px;overflow:hidden;box-shadow:0 24px 70px #020b1633}
-.skill-selector{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:38px 24px;background:radial-gradient(ellipse at center,#173d4b80,transparent 70%)}
+.skills-workbench{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);background:radial-gradient(ellipse at 24% 45%,color-mix(in srgb,var(--active-skill) 12%,transparent),transparent 65%),#0c1721;border:1px solid color-mix(in srgb,var(--active-skill) 24%,transparent);border-radius:20px;overflow:hidden;box-shadow:0 24px 70px #020b1633;transition:border-color .4s}
+.skill-selector{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:38px 24px;background:none}
 .skill-selector[hidden],.skill-insight[hidden]{display:none}
 .skill-compass{position:relative;width:100%;max-width:530px;aspect-ratio:1;isolation:isolate}
 .skill-compass-rings{position:absolute;inset:1%;border:1px solid #8bc9cf24;border-radius:50%;pointer-events:none}
@@ -85,7 +88,7 @@
 .skill-compass-rings:after{inset:30%;border-style:solid;border-color:#8bc9cf28}
 .skill-choice{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;background:none;color:var(--skill-color);font:inherit;cursor:pointer;pointer-events:none}
 .skill-sector{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.skill-sector path{fill:color-mix(in srgb,var(--skill-color) 7%,#0a1c2e);stroke:color-mix(in srgb,var(--skill-color) 35%,transparent);stroke-width:1;pointer-events:visiblePainted;transition:fill .3s,stroke .3s,filter .3s}
+.skill-sector path{fill:#13212b;stroke:#64798550;stroke-width:1;pointer-events:visiblePainted;transition:fill .3s,stroke .3s,filter .3s}
 .skill-sector .skill-sector-edge{fill:none;stroke:var(--skill-color);stroke-width:2;stroke-opacity:.15;pointer-events:none}
 .skill-label{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:34%;min-height:60px;transform:translate(-50%,-50%);pointer-events:auto;color:#a2b8c8;text-align:center;transition:color .3s}
 .skill-label strong{max-width:12ch;font-size:clamp(12px,1.15vw,17px);font-weight:500;line-height:1.25;letter-spacing:-.02em}
@@ -94,29 +97,33 @@
 .skill-choice-ai .skill-label{left:82%;top:50%;width:28%}
 .skill-choice-hardware .skill-label{left:50%;top:82%}
 .skill-choice-interfaces .skill-label{left:18%;top:50%;width:28%}
-.skill-choice[aria-expanded=true] .skill-sector path,.skill-choice:hover .skill-sector path,.skill-choice:focus-visible .skill-sector path{fill:color-mix(in srgb,var(--skill-color) 23%,#0a1c2e);stroke:var(--skill-color);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--skill-color) 25%,transparent))}
+.skill-choice[aria-expanded=true] .skill-sector path,.skill-choice:hover .skill-sector path,.skill-choice:focus-visible .skill-sector path{fill:color-mix(in srgb,var(--skill-color) 30%,#15202a);stroke:var(--skill-color);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--skill-color) 25%,transparent))}
 .skill-choice[aria-expanded=true] .skill-sector .skill-sector-edge,.skill-choice:focus-visible .skill-sector .skill-sector-edge{fill:none;stroke-opacity:1}
 .skill-choice[aria-expanded=true] .skill-label,.skill-choice:hover .skill-label{color:#f0f5f2}
 .skill-choice:focus-visible{outline:none}
 .skill-choice:focus-visible .skill-label{outline:2px solid var(--skill-color);outline-offset:6px;border-radius:8px;color:#fff}
-.skill-core{position:absolute;inset:35%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px solid #8bc9cf55;background:radial-gradient(circle at 35% 25%,#254d5d,#091a2b 80%);box-shadow:0 0 45px #65bbcf18,inset 0 0 20px #8bc9cf09;pointer-events:none}
-.skill-core>span{font:400 clamp(22px,2.5vw,36px)/1 var(--sans);color:#cae8e9}
+.skill-core{position:absolute;inset:35%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px solid color-mix(in srgb,var(--active-skill) 65%,transparent);background:radial-gradient(circle at 35% 25%,color-mix(in srgb,var(--active-skill) 30%,#14232e),#111c26 80%);box-shadow:0 0 45px color-mix(in srgb,var(--active-skill) 12%,transparent);transition:border-color .4s,box-shadow .4s;pointer-events:none}
+.skill-core>span{font:400 clamp(22px,2.5vw,36px)/1 var(--sans);color:var(--active-skill)}
 .skill-core small{font-size:clamp(7px,.65vw,10px);letter-spacing:.16em;color:#a2c5ce}
 .skills-hint{font-size:14px;line-height:1.6;color:#b0cbd6;margin:32px 0 0;text-align:center}
 .skills-hint span{display:block;margin-top:5px;font-size:12px;color:#829faf}
 .skill-insights{min-width:0;grid-column:1/-1}
-.skills-ready .skill-insights{grid-column:auto;display:grid;border-left:1px solid #8bc9cf25}
+.skills-ready .skill-insights{grid-column:auto;display:grid;border-left:0}
 .skills-ready .skill-insights>*{grid-area:1/1}
 /* Keep the tallest panel in the grid's sizing calculation when switching skills.
    Visibility also removes inactive links from keyboard navigation and the accessibility tree. */
 .skills-ready .skill-insight[hidden]{display:block!important;visibility:hidden;pointer-events:none}
-.skill-insight{min-width:0;background:radial-gradient(ellipse at 55% 18%,color-mix(in srgb,var(--skill-color) 9%,transparent),transparent 70%),#0a1c2e}
+.skill-insight{min-width:0;background:transparent}
 .skill-insight+.skill-insight{border-top:1px solid #8bc9cf33}
 .skills-ready .skill-insight{border-top:0}
-.skill-art{position:relative;padding:26px 32px 18px;overflow:hidden;background-image:linear-gradient(#8bc9cf06 1px,transparent 1px),linear-gradient(90deg,#8bc9cf06 1px,transparent 1px);background-size:32px 32px;border-bottom:1px solid #8bc9cf20}
-.skill-art:before{content:'';position:absolute;inset:5% 12%;background:radial-gradient(ellipse,color-mix(in srgb,var(--skill-color) 13%,transparent),transparent 68%);pointer-events:none}
+.skill-art{position:relative;padding:26px 32px 18px;overflow:hidden;background:none;border-bottom:0}
+.skill-art:before{content:'';position:absolute;inset:8% 4%;background:radial-gradient(ellipse,color-mix(in srgb,var(--skill-color) 20%,transparent),transparent 68%);pointer-events:none}
 .skill-art-label,.skill-art-caption{position:relative;display:block;font:11px/1.4 var(--sans);text-transform:uppercase;letter-spacing:.13em;color:var(--skill-color)}
-.skill-art-caption{text-align:right;font-size:10px;opacity:.7}
+.skill-art-label{padding-right:150px;min-height:24px}
+.skill-motion{position:absolute;right:24px;top:14px;z-index:1;display:flex;align-items:center;gap:7px;min-height:32px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--skill-color) 30%,transparent);border-radius:20px;background:#0c172180;color:var(--skill-color);font:12px var(--sans)}
+.skill-motion:hover{background:color-mix(in srgb,var(--skill-color) 14%,#0c1721)}
+.skill-motion:focus-visible{outline:2px solid var(--skill-color);outline-offset:3px}
+.skill-art-caption{text-align:center;font-size:10px;opacity:.7}
 .skill-art svg{position:relative;display:block;width:100%;max-height:280px;overflow:visible;margin:8px auto}
 .skill-product{filter:drop-shadow(0 10px 15px #02091250)}
 .product-shadow{fill:#020b18;opacity:.6}
@@ -176,7 +183,7 @@
  .skill-core>span{font-size:28px}.skill-core small{font-size:8px}
  .skills-hint{margin-top:22px;font-size:13px}.skills-hint span{font-size:11px}
  .skills-ready .skill-insights{border-left:0;border-top:1px solid #8bc9cf25}
- .skill-art{padding:20px 22px 14px}.skill-art svg{max-height:250px}.skill-art-label{font-size:10px}.skill-art-caption{font-size:9px}
+ .skill-art{padding:20px 22px 14px}.skill-art svg{max-height:250px}.skill-art-label{font-size:10px;padding-right:120px;min-height:32px}.skill-motion{right:18px;top:14px;font-size:11px;padding-inline:8px}.skill-art-caption{font-size:9px}
  .skill-story{padding:24px 24px 0}.skill-story h4{font-size:34px}.skill-story>p{font-size:15px}.skill-project{gap:8px 12px}.skill-project-action{font-size:12px}
 }
 @media(max-width:380px){.skill-selector{padding:24px 12px}.skill-label{gap:4px;min-height:48px}.skill-label strong{font-size:11px}.skill-core{gap:7px}.skill-core>span{font-size:24px}.skill-core small{font-size:7px}.skill-story{padding-inline:20px}.skill-story h4{font-size:30px}.skill-project-action{margin-left:0}}
@@ -217,8 +224,8 @@
  .skill-core>span{font-size:28px}
  .skills-hint{margin-top:16px;font-size:13px}
  .skills-hint span{margin-top:2px;font-size:11px}
- .skill-art{padding:12px 24px 10px}
- .skill-art svg{height:clamp(100px,calc(100svh - 660px),180px);margin:4px auto}
+ .skill-art{padding:12px 24px 10px}.skill-art-label{min-height:24px}.skill-motion{top:6px}
+ .skill-art svg{height:clamp(110px,calc(100svh - 610px),210px);margin:4px auto}
  .skill-art-caption{font-size:9px}
  .skill-story{padding:16px 26px 0}
  .skill-story h4{font-size:clamp(28px,3.8svh,34px);line-height:1.08;max-width:28ch;margin-bottom:10px}
