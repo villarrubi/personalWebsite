@@ -1,18 +1,16 @@
-import {publishedProjects} from './content.mjs';
-
 // Technologies checked against repository manifests and implementation, 2026-11-21.
 const skills=[
- {id:'software',name:{es:'Software y servicios',en:'Software and services'},text:{es:'Motores en C++, aplicaciones .NET y Java, APIs y persistencia. Del protocolo UCI de ChessBot a servicios con FastAPI y Node.js.',en:'C++ engines, .NET and Java applications, APIs and persistence. From ChessBot’s UCI protocol to FastAPI and Node.js services.'},tags:['C++','C# / .NET','Python','Java / Swing','FastAPI','Node.js / Express','SQLite','PHP / MySQL'],color:'#e8b68c'},
- {id:'ai',name:{es:'IA y análisis de datos',en:'AI and data analysis'},text:{es:'Clasificación de correo con TF-IDF y MLP, entrenamiento NNUE y explicaciones con modelos locales. Cada modelo tiene una función concreta.',en:'Email classification with TF-IDF and MLP, NNUE training and explanations using local models. Each model serves a specific purpose.'},tags:['scikit-learn','PyTorch','Ollama','NumPy','pandas','Streamlit','python-chess'],color:'#b9a0f4'},
- {id:'hardware',name:{es:'Hardware y sensores',en:'Hardware and sensors'},text:{es:'Firmware e interfaz ESP32-S3 para Pipα. En otros sistemas, captura LiDAR, nubes de puntos y comunicación cliente-servidor en Linux.',en:'ESP32-S3 firmware and interface for Pipα. In separate systems, LiDAR capture, point clouds and client-server communication on Linux.'},tags:['C++ / Arduino','ESP32-S3','PlatformIO','PCL / Eigen','Open3D','USB / TCP','Linux'],color:'#85cbb0'},
- {id:'interfaces',name:{es:'Interfaces y mundos',en:'Interfaces and worlds'},text:{es:'Webs con React, editores de escritorio, visualización 3D y juegos. MapForge pinta mundos por celdas; el atlas celular usa Three.js.',en:'React websites, desktop editors, 3D visualisation and games. MapForge paints cell-based worlds; the cell atlas uses Three.js.'},tags:['JavaScript / TypeScript','React','Electron','Canvas 2D','Three.js / WebGL','MapLibre','Godot / GDScript'],color:'#80b8e7'},
+ {id:'software',name:{es:'Software y servicios',en:'Software and services'},text:{es:'Diseño de aplicaciones, algoritmos y servicios. Conecto lógica, APIs y bases de datos para construir sistemas que se puedan mantener y ampliar.',en:'Application, algorithm and service design. I connect logic, APIs and databases to build systems that can be maintained and extended.'},tags:['C++','C# / .NET','Python','Java / Swing','FastAPI','Node.js / Express','SQLite','PHP / MySQL'],color:'#e8b68c'},
+ {id:'ai',name:{es:'IA y análisis de datos',en:'AI and data analysis'},text:{es:'Preparación de datos, aprendizaje automático y modelos de lenguaje locales. Exploro cómo clasificar, predecir, generar respuestas y evaluar resultados.',en:'Data preparation, machine learning and local language models. I explore classification, prediction, response generation and evaluation.'},tags:['scikit-learn','PyTorch','Ollama','NumPy','pandas','Streamlit'],color:'#b9a0f4'},
+ {id:'hardware',name:{es:'Hardware y sensores',en:'Hardware and sensors'},text:{es:'Conecto dispositivos y software: firmware, adquisición de señales, comunicación y procesamiento de datos del entorno físico.',en:'Connecting devices and software through firmware, signal acquisition, communication and processing data from the physical world.'},tags:['C++ / Arduino','ESP32-S3','PlatformIO','PCL / Eigen','Open3D','USB / TCP','Linux'],color:'#85cbb0'},
+ {id:'interfaces',name:{es:'Interfaces y mundos',en:'Interfaces and worlds'},text:{es:'Interfaces web y de escritorio, visualización de datos y entornos 2D y 3D. Transformo la lógica de un sistema en algo que se puede explorar y utilizar.',en:'Web and desktop interfaces, data visualisation and 2D and 3D environments. I turn system logic into something people can explore and use.'},tags:['JavaScript / TypeScript','React','Electron','Canvas 2D','Three.js / WebGL','MapLibre','Godot / GDScript'],color:'#80b8e7'},
 ];
 
 const stories={
- software:{title:{es:'Del motor a la aplicación.',en:'From engine to application.'},caption:{es:'ChessBot · Motor C++ · Interfaz .NET',en:'ChessBot · C++ engine · .NET interface'},project:'chessbot'},
- ai:{title:{es:'Modelos que analizan y explican.',en:'Models that analyse and explain.'},caption:{es:'Detector de phishing · Texto y señales',en:'Phishing detector · Text and signals'},project:'phishing'},
- hardware:{title:{es:'Dispositivos y datos reales.',en:'Devices and real-world data.'},caption:{es:'Pipα / USB · LiDAR / Nubes de puntos',en:'Pipα / USB · LiDAR / Point clouds'},project:'pipa'},
- interfaces:{title:{es:'Herramientas para explorar y crear.',en:'Tools for exploring and creating.'},caption:{es:'MapForge · Editor por celdas · Electron',en:'MapForge · Cell-based editor · Electron'},project:'mapforge'},
+ software:{title:{es:'De la lógica al sistema.',en:'From logic to systems.'},caption:{es:'Código · Servicios · Datos',en:'Code · Services · Data'}},
+ ai:{title:{es:'Aprender, analizar y generar.',en:'Learn, analyse and generate.'},caption:{es:'Datos · Modelos · Resultados',en:'Data · Models · Results'}},
+ hardware:{title:{es:'Conectar el mundo físico.',en:'Connecting the physical world.'},caption:{es:'Sensores · Firmware · Comunicación',en:'Sensors · Firmware · Communication'}},
+ interfaces:{title:{es:'Dar forma a la interacción.',en:'Shaping interaction.'},caption:{es:'Web · Escritorio · Visualización',en:'Web · Desktop · Visualisation'}},
 };
 
 function skillIcon(id){
@@ -23,57 +21,62 @@ function artwork(id,lang){
  const es=lang==='es';
  const frame=body=>`<svg viewBox="0 0 600 280" aria-hidden="true" focusable="false"><g class="skill-product">${body}</g></svg>`;
  const window=(title,body)=>`<rect class="product-shadow" x="52" y="24" width="496" height="238" rx="16"/><rect class="product-window" x="44" y="16" width="512" height="240" rx="14"/><path class="product-divider" d="M44 54h512"/><circle fill="#ed8a92" cx="64" cy="35" r="4"/><circle fill="#e9c882" cx="79" cy="35" r="4"/><circle fill="#8acbb0" cx="94" cy="35" r="4"/><text class="product-muted" x="118" y="40">${title}</text>${body}`;
- if(id==='software')return frame(window('ChessBot · C++ / C#',`
-  <rect class="product-input" x="64" y="74" width="240" height="154" rx="8"/>
-  <text class="product-small" x="80" y="100">${es?'Motor · UCI':'Engine · UCI'}</text>
-  <text class="product-code" data-scene-reveal x="80" y="132">position startpos</text>
-  <text class="product-code" data-scene-reveal x="80" y="162">go depth 12</text>
-  <text class="product-code" data-scene-reveal x="80" y="201">bestmove e2e4</text>
-  <path class="product-cable" data-scene-trace pathLength="1" d="M307 148h30m-8-7 8 7-8 7"/>
-  ${Array.from({length:64},(_,i)=>`<rect x="${351+i%8*20}" y="${68+Math.floor(i/8)*20}" width="20" height="20" fill="${(i+Math.floor(i/8))%2?'#63847f':'#d1dacf'}"/>`).join('')}
-  <rect data-scene-reveal x="431" y="148" width="20" height="60" fill="#e8b68c88"/>
-  <circle class="product-chip" cx="441" cy="158" r="6"/><path class="product-control-lines" d="M441 177v-9m-4 4 4-4 4 4"/>
-  <text class="product-muted" x="386" y="246">WinForms</text>`));
- if(id==='ai')return frame(window(es?'Detector de phishing':'Phishing detector',`
-  <rect class="product-bubble" x="65" y="79" width="163" height="137" rx="10"/>
-  <path class="product-wave" d="M85 100h121v56H85Zm0 0 60 36 61-36"/>
-  <text class="product-small" x="83" y="185">${es?'Correo entrante':'Incoming email'}</text>
-  <path class="product-cable" data-scene-trace pathLength="1" d="M236 147h30m-7-6 7 6-7 6"/>
-  <rect class="product-accent-soft" x="276" y="79" width="255" height="137" rx="10"/>
-  <text class="product-code" data-scene-reveal x="295" y="112">TF-IDF → MLP</text>
-  <text class="product-small" data-scene-reveal x="295" y="145">${es?'Texto + enlaces + cabeceras':'Text + links + headers'}</text>
-  <path class="product-check" data-scene-trace pathLength="1" d="m295 177 7 7 13-15"/>
-  <text class="product-small" data-scene-reveal x="327" y="183">${es?'Análisis explicable':'Explainable analysis'}</text>
-  <text class="product-muted" x="218" y="241">scikit-learn · Streamlit</text>`));
- if(id==='hardware')return frame(`
-  <text class="product-small" x="154" y="27" text-anchor="middle">Pipα · ESP32-S3</text>
-  <circle class="product-board" cx="104" cy="122" r="65"/><circle class="product-input" cx="104" cy="122" r="53"/>
-  <text class="product-code" x="104" y="113" text-anchor="middle">Pipα</text><path class="product-wave" data-scene-trace pathLength="1" d="M69 136h9l7-13 9 23 9-31 11 28 8-15 7 8h10"/>
-  <path class="product-cable" data-scene-trace pathLength="1" d="M169 122h28v23h20"/>
-  <rect class="product-window" x="216" y="100" width="65" height="60" rx="5"/><path class="product-divider" d="M210 169h77m-47-9v9"/>
-  <text class="product-muted" x="154" y="228" text-anchor="middle">USB · ${es?'Agente Python':'Python agent'}</text>
-  <path class="product-divider" d="M310 43v197"/>
-  <text class="product-small" x="451" y="27" text-anchor="middle">LiDAR · PCL</text>
-  <path class="product-trace" d="m348 190 94 40 112-51m-112 51V60m0 170-86-75"/>
-  <g data-scene-reveal>${Array.from({length:60},(_,i)=>`<circle cx="${358+(i*37%183)}" cy="${76+(i*23%117)}" r="2.5" fill="${i%3?'#85cbb0':'#dce8ef'}"/>`).join('')}</g>
-  <path class="product-wave" data-scene-trace pathLength="1" d="m410 99 49-20 42 23v66l-49 21-42-24V99l42 20 49-17m-49 17v70"/>
-  <text class="product-muted" x="451" y="258" text-anchor="middle">${es?'Nubes de puntos · C++':'Point clouds · C++'}</text>`);
- return frame(window('MapForge · Electron',`
-  <rect class="product-sidebar" x="45" y="55" width="122" height="200" rx="8"/>
-  <text class="product-small" x="62" y="86">${es?'Pincel':'Brush'}</text>
-  <rect class="product-accent-soft" x="57" y="101" width="98" height="26" rx="6"/>
-  <text class="product-muted" x="67" y="119">${es?'Terreno':'Terrain'}</text>
-  <rect x="64" y="145" width="24" height="22" rx="3" fill="#83ad80"/><rect x="99" y="145" width="24" height="22" rx="3" fill="#d2bd8c"/>
-  <rect x="64" y="179" width="24" height="22" rx="3" fill="#6293b0"/><rect x="99" y="179" width="24" height="22" rx="3" fill="#8b969d"/>
-  ${Array.from({length:112},(_,i)=>{const x=i%14,y=Math.floor(i/14);return `<rect x="${184+x*25}" y="${64+y*22}" width="24" height="21" fill="${x===Math.floor(5+Math.sin(y)*2)||x===Math.floor(6+Math.sin(y)*2)?'#6293b0':(x+y)%7===0?'#698b65':'#83ad80'}"/>`;}).join('')}
-  <g data-scene-reveal><rect x="434" y="152" width="24" height="21" fill="#d2bd8c"/><rect x="459" y="152" width="24" height="21" fill="#d2bd8c"/><rect x="459" y="174" width="24" height="21" fill="#d2bd8c"/></g>
-  <path class="product-pointer" data-scene-cursor d="m448 166 8 29 7-10 12-2Z"/>`));
+ if(id==='software')return frame(window(es?'Desarrollo de software':'Software development',`
+  <rect class="product-input" x="64" y="74" width="242" height="158" rx="8"/>
+  <text class="product-muted" x="80" y="98">service.ts</text>
+  <text class="product-code" data-scene-reveal x="80" y="128">async function run() {</text>
+  <text class="product-code" data-scene-reveal x="80" y="158">  await process(data);</text>
+  <text class="product-code" data-scene-reveal x="80" y="188">  return result;</text>
+  <text class="product-code" x="80" y="216">}</text>
+  <path class="product-cable" data-scene-trace pathLength="1" d="M307 151h32m-7-6 7 6-7 6M435 119v40"/>
+  <rect class="product-accent-soft" x="350" y="79" width="176" height="49" rx="7"/>
+  <text class="product-small" x="438" y="109" text-anchor="middle">API / ${es?'Servicios':'Services'}</text>
+  <rect class="product-accent-soft" data-scene-reveal x="350" y="167" width="176" height="49" rx="7"/>
+  <text class="product-small" x="438" y="197" text-anchor="middle">${es?'Lógica + Datos':'Logic + Data'}</text>`));
+ if(id==='ai')return frame(window(es?'Inteligencia artificial':'Artificial intelligence',`
+  <rect class="product-input" x="64" y="87" width="113" height="126" rx="8"/>
+  <text class="product-small" x="120" y="111" text-anchor="middle">${es?'Datos':'Data'}</text>
+  ${[0,1,2,3].map(i=>`<path class="product-skeleton" data-scene-reveal d="M83 ${132+i*18}h${62-i*9}"/>`).join('')}
+  <path class="product-cable" data-scene-trace pathLength="1" d="M182 152h34m-7-6 7 6-7 6M350 152h25v-43h24m-24 43v43h24"/>
+  <circle class="product-accent-soft" cx="283" cy="148" r="56"/>
+  <path class="product-wave" data-scene-trace pathLength="1" d="m252 126 62 42m-62 0 62-42m-62 0v42m31-59v78m31-61v42M252 126l31-17 31 17m-62 42 31 19 31-19"/>
+  ${[[252,126],[252,168],[283,109],[283,148],[283,187],[314,126],[314,168]].map(([x,y])=>`<circle class="product-accent" cx="${x}" cy="${y}" r="5"/>`).join('')}
+  <rect class="product-bubble" x="401" y="79" width="132" height="61" rx="8"/>
+  <path class="product-wave" data-scene-trace pathLength="1" d="m414 125 20-14 22 7 25-24 18 10 20-13"/>
+  <rect class="product-bubble" x="401" y="166" width="132" height="61" rx="8"/>
+  <path class="product-skeleton" data-scene-reveal d="M418 184h94m-94 16h69"/>
+  <text class="product-muted" x="283" y="244" text-anchor="middle">${es?'Aprendizaje + Generación':'Learning + Generation'}</text>`));
+ if(id==='hardware')return frame(window(es?'Sistemas conectados':'Connected systems',`
+  <rect class="product-board" x="66" y="86" width="157" height="130" rx="12"/>
+  <rect class="product-chip" x="108" y="117" width="72" height="65" rx="7"/>
+  <path class="product-pin" d="M117 105v12m18-12v12m18-12v12m18-12v12m-54 65v13m18-13v13m18-13v13m18-13v13M96 129h12m-12 17h12m-12 17h12m72-34h12m-12 17h12m-12 17h12"/>
+  <path class="product-cable" data-scene-trace pathLength="1" d="M223 150h101m-9-7 9 7-9 7"/>
+  <circle class="product-accent" data-scene-reveal cx="85" cy="103" r="4"/>
+  <rect class="product-input" x="336" y="85" width="196" height="132" rx="9"/>
+  <path class="product-divider" d="M352 111h164m-164 34h164m-164 34h164"/>
+  <path class="product-wave" data-scene-trace pathLength="1" d="M350 151h17l10-20 12 42 14-65 16 78 14-40 12 18 14-35 12 22h46"/>
+  <text class="product-muted" x="144" y="240" text-anchor="middle">${es?'Firmware':'Firmware'}</text>
+  <text class="product-muted" x="435" y="240" text-anchor="middle">${es?'Captura + Procesamiento':'Capture + Processing'}</text>`));
+ return frame(window(es?'Diseño de interfaces':'Interface design',`
+  <rect class="product-sidebar" x="45" y="55" width="104" height="200" rx="8"/>
+  <circle class="product-accent" cx="70" cy="80" r="8"/>
+  <path class="product-skeleton" d="M65 112h61m-61 27h43m-43 27h52m-52 27h35"/>
+  <rect class="product-accent-soft" x="167" y="74" width="105" height="46" rx="7"/>
+  <rect class="product-accent-soft" data-scene-reveal x="285" y="74" width="105" height="46" rx="7"/>
+  <rect class="product-input" x="167" y="135" width="223" height="98" rx="7"/>
+  <path class="product-wave" data-scene-trace pathLength="1" d="m182 209 31-26 31 12 34-40 27 17 35-19 34 4"/>
+  <rect class="product-window" x="417" y="71" width="113" height="165" rx="14"/>
+  <path class="product-divider" d="M453 83h39"/>
+  <rect class="product-accent-soft" data-scene-reveal x="431" y="100" width="85" height="51" rx="6"/>
+  <path class="product-skeleton" d="M435 169h74m-74 15h53"/>
+  <rect class="product-accent" x="432" y="203" width="83" height="16" rx="6"/>
+  <path class="product-pointer" data-scene-cursor d="m352 102 8 29 7-10 12-2Z"/>`));
 }
 
 export function skillsSection(lang){
  const es=lang==='es';
  return `<section id="skills" class="about-tools skill-explorer" aria-labelledby="toolbox-title">
-  <header class="skills-heading" data-scroll-reveal><p class="skills-kicker">${es?'Competencias técnicas':'Technical skills'}</p><h3 id="toolbox-title">${es?'Del código<br>al <em>mundo real.</em>':'From code<br>to the <em>real world.</em>'}</h3><p>${es?'Software, datos, dispositivos e interfaces. Cuatro formas de construir, conectadas por proyectos reales.':'Software, data, devices and interfaces. Four ways to build, connected through real projects.'}</p></header>
+  <header class="skills-heading" data-scroll-reveal><p class="skills-kicker">${es?'Competencias técnicas':'Technical skills'}</p><h3 id="toolbox-title">${es?'Del código<br>al <em>mundo real.</em>':'From code<br>to the <em>real world.</em>'}</h3><p>${es?'Software, datos, dispositivos e interfaces. Cuatro áreas que conecto al construir.':'Software, data, devices and interfaces. Four disciplines I bring together when building.'}</p></header>
   <div class="skills-workbench">
    <div class="skill-selector" data-skills-ui hidden role="group" aria-label="${es?'Explorar competencias':'Explore skills'}">
     <div class="skill-compass">
@@ -88,11 +91,11 @@ export function skillsSection(lang){
    </div>
    <div class="skill-insights">
     ${skills.map(skill=>{
-     const story=stories[skill.id],project=publishedProjects.find(project=>project.id===story.project);
+     const story=stories[skill.id];
      return `<article class="skill-insight" id="skill-panel-${skill.id}" style="--skill-color:${skill.color}" aria-labelledby="skill-title-${skill.id}">
       <div class="skill-art skill-art-${skill.id}"><span class="skill-art-label" aria-hidden="true">${skill.name[lang]}</span>${artwork(skill.id,lang)}<span class="skill-art-caption" aria-hidden="true">${story.caption[lang]}</span></div>
       <div class="skill-story"><h4 id="skill-title-${skill.id}">${story.title[lang]}</h4><p>${skill.text[lang]}</p><ul class="skill-tags" aria-label="${es?'Tecnologías':'Technologies'}">${skill.tags.map(tag=>`<li>${tag}</li>`).join('')}</ul>
-      ${project?`<a class="skill-project" href="/${lang}/projects/${project.id}/"><span>${es?'En mis proyectos':'In my projects'}</span><strong>${lang==='en'?(project.enName||project.name):project.name}</strong><span class="skill-project-action">${es?'Explorar proyecto':'Explore project'}</span></a>`:''}</div>
+      </div>
      </article>`;
     }).join('')}
    </div>

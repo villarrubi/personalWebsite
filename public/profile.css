@@ -155,7 +155,7 @@
 .product-contour{fill:none;stroke:#b1ceac;stroke-width:1.5;stroke-opacity:.55}
 .product-map-control{fill:#e0e7e7}.product-control-lines{fill:none;stroke:#345061;stroke-width:2}
 .product-pointer{fill:#f5f2e5;stroke:#233c53;stroke-width:2;stroke-linejoin:round}
-.skill-story{padding:28px 36px 0}
+.skill-story{padding:28px 36px 24px}
 .skill-story h4{font:400 clamp(29px,2.8vw,42px)/1.12 var(--serif);letter-spacing:-.025em;color:#edf1ed;max-width:22ch;margin:0 0 16px}
 .skill-story>p{font-size:16px;line-height:1.75;color:#afc5d5;max-width:54ch;margin:0}
 .skill-story .skill-tags{margin-top:22px;gap:7px}
@@ -166,7 +166,7 @@
 .skill-project:hover strong,.skill-project:hover .skill-project-action{color:#fff}
 .skill-project:focus-visible{outline:2px solid var(--skill-color);outline-offset:4px}
 .skills-static .skill-sector path,.skills-static .skill-label{transition:none}
-@media(max-width:1100px){.skill-selector{padding:30px 16px}.skill-label{gap:6px}.skill-story{padding:24px 26px 0}.skill-art{padding-inline:24px}}
+@media(max-width:1100px){.skill-selector{padding:30px 16px}.skill-label{gap:6px}.skill-story{padding:24px 26px 24px}.skill-art{padding-inline:24px}}
 @media(max-width:760px){
  .skill-explorer{padding-top:38px;margin-top:38px}
  .skill-explorer .skills-heading{grid-template-columns:1fr;gap:20px;margin-bottom:28px}
@@ -182,7 +182,7 @@
  .skills-hint{margin-top:22px;font-size:13px}.skills-hint span{font-size:11px}
  .skills-ready .skill-insights{border-left:0;border-top:1px solid #8bc9cf25}
  .skill-art{padding:20px 22px 14px}.skill-art svg{max-height:250px}.skill-art-label{font-size:10px;min-height:14px}.skill-art-caption{font-size:9px}
- .skill-story{padding:24px 24px 0}.skill-story h4{font-size:34px}.skill-story>p{font-size:15px}.skill-project{gap:8px 12px}.skill-project-action{font-size:12px}
+ .skill-story{padding:24px 24px 24px}.skill-story h4{font-size:34px}.skill-story>p{font-size:15px}.skill-project{gap:8px 12px}.skill-project-action{font-size:12px}
 }
 @media(max-width:380px){.skill-selector{padding:24px 12px}.skill-label{gap:4px;min-height:48px}.skill-label strong{font-size:11px}.skill-core{gap:7px}.skill-core>span{font-size:24px}.skill-core small{font-size:7px}.skill-story{padding-inline:20px}.skill-story h4{font-size:30px}.skill-project-action{margin-left:0}}
 @media(prefers-reduced-motion:reduce){.skill-sector path,.skill-label{transition:none!important}}
@@ -225,7 +225,7 @@
  .skill-art{padding:12px 24px 10px}.skill-art-label{min-height:16px}
  .skill-art svg{height:clamp(110px,calc(100svh - 610px),210px);margin:4px auto}
  .skill-art-caption{font-size:9px}
- .skill-story{padding:16px 26px 0}
+ .skill-story{padding:16px 26px 24px}
  .skill-story h4{font-size:clamp(28px,3.8svh,34px);line-height:1.08;max-width:28ch;margin-bottom:10px}
  .skill-story>p{font-size:16px;line-height:1.5;max-width:60ch}
  .skill-story .skill-tags{margin-top:12px}
