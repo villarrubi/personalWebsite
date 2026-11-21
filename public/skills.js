@@ -5,48 +5,27 @@ export function initSkills(root){
  const preference=matchMedia('(prefers-reduced-motion: reduce)');
  const motionOff=new URLSearchParams(location.search).get('motion')==='off';
  const page=typeof document==='undefined'?null:document;
- let sculpture=null,studioRequested=false,studioDisposed=false;
  let active=-1,animations=[],entered=false,inView=typeof IntersectionObserver==='undefined';
  const canPlay=()=>!motionOff&&inView&&!page?.hidden;
- function syncStudio(){
-  if(studioDisposed)return;
-  if(sculpture){sculpture.set(active,{running:canPlay(),reduced:preference.matches});return;}
-  if(studioRequested||!inView||typeof window==='undefined')return;
-  studioRequested=true;
-  import('./skill-studio.js').then(({mountSkillStudio})=>{
-   if(studioDisposed)return;
-   sculpture=mountSkillStudio([...root.querySelectorAll('[data-skill-stage]')],()=>{sculpture=null;start();});
-   cancel();syncStudio();
-  }).catch(()=>{sculpture?.dispose();sculpture=null;start(); /* Retain the vector illustration if WebGL is unavailable. */ });
- }
  function cancel(){animations.forEach(animation=>animation.cancel());animations=[];}
  function animate(element,frames,options){
   const animation=element.animate?.(frames,options);
   if(animation){animations.push(animation);animation.onfinish=()=>{animations=animations.filter(item=>item!==animation);};}
  }
- function playScene(){
+ function playAmbient(){
   if(!canPlay()||active<0)return;
-  if(sculpture)return;
-  const panel=panels[active],cycle={duration:4800,iterations:Infinity,easing:'ease-in-out'};
-  panel.querySelectorAll('[data-scene-reveal]').forEach((element,i)=>animate(element,[{opacity:.2},{opacity:1,offset:.2},{opacity:1,offset:.85},{opacity:.2}],{...cycle,delay:i*160}));
-  panel.querySelectorAll('[data-scene-trace]').forEach(element=>animate(element,[{strokeDasharray:'1',strokeDashoffset:'1'},{strokeDasharray:'1',strokeDashoffset:'0',offset:.45},{strokeDasharray:'1',strokeDashoffset:'0',offset:.9},{strokeDasharray:'1',strokeDashoffset:'1'}],cycle));
-  if(!preference.matches)panel.querySelectorAll('[data-object-motion]').forEach((element,i)=>{
-   const kind=element.getAttribute?.('data-object-motion');
-   const dx=Number(element.getAttribute?.('data-dx')||0),dy=Number(element.getAttribute?.('data-dy')||0);
-   const offset=`translate(${dx}px,${dy}px)`;
-   const frames=kind==='orbit'?[{transform:'rotate(-7deg)'},{transform:'rotate(7deg)'},{transform:'rotate(-7deg)'}]:[{transform:offset},{transform:'translate(0,0)',offset:.4},{transform:'translate(0,0)',offset:.7},{transform:offset}];
-   animate(element,frames,{duration:kind==='organize'||kind==='orbit'?11000:7000,iterations:Infinity,delay:kind==='organize'?0:i*180,easing:'ease-in-out'});
-  });
+  const ambient=panels[active].querySelector('[data-skill-ambient]');
+  if(ambient)animate(ambient,[{opacity:.18},{opacity:.38},{opacity:.18}],{duration:10000,iterations:Infinity,easing:'ease-in-out'});
  }
+
  function start(){
   cancel();
-  syncStudio();
   if(!canPlay())return;
   if(!entered){
    entered=true;
    if(!preference.matches)animate(selector,[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:500,easing:'ease-out'});
   }
-  playScene();
+  playAmbient();
  }
  function select(index,motion=true){
   if(index===active)return;
@@ -54,10 +33,9 @@ export function initSkills(root){
   root.setAttribute('data-active-skill',String(index));
   choices.forEach((choice,i)=>choice.setAttribute('aria-expanded',String(i===index)));
   panels.forEach((panel,i)=>panel.hidden=i!==index);
-  syncStudio();
   if(motion&&canPlay()){
    if(!preference.matches)animate(panels[index],[{opacity:.35},{opacity:1}],{duration:250,easing:'ease-out'});
-   playScene();
+   playAmbient();
   }
  }
  choices.forEach((choice,index)=>{
@@ -78,7 +56,6 @@ export function initSkills(root){
  select(0,false);
  preference.addEventListener('change',updatePreference);
  page?.addEventListener('visibilitychange',start);
- if(typeof window!=='undefined'){window.addEventListener('pagehide',event=>{if(event.persisted)sculpture?.set(active,{running:false,reduced:preference.matches});else{studioDisposed=true;sculpture?.dispose();}});window.addEventListener('pageshow',start);}
  if(typeof IntersectionObserver!=='undefined'){
   const observer=new IntersectionObserver(entries=>{
    const visible=entries.some(entry=>entry.isIntersecting);
