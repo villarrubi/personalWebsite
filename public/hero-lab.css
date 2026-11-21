@@ -37,9 +37,9 @@
 .world-help{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:4px}.world-help .world-instructions{margin:0;font-size:9px}.world-help button{border:0;background:none;color:#93a7b6;font-size:10px;padding:10px 0;min-height:38px;white-space:nowrap}
 
 /* All phrases share one grid cell: their widest/tallest line reserves the space. */
-.experience-description.hero-typing{display:flex;align-items:center;justify-content:center;gap:8px;width:fit-content;max-width:100%;margin-top:16px;font-size:clamp(16px,1.3vw,20px);line-height:1.6}
+.about-typing.hero-typing{display:flex;align-items:center;justify-content:flex-start;gap:8px;width:100%;max-width:100%;margin:0 0 20px;text-align:left;font-size:clamp(16px,1.3vw,20px);line-height:1.6}
 .typing-summary{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.typing-line{display:flex;justify-content:center;align-items:baseline;gap:.35em;min-width:0}
+.typing-line{display:flex;justify-content:flex-start;align-items:baseline;gap:.35em;min-width:0}
 .typing-prefix{flex-shrink:0;color:#adbfce}
 .typing-words{display:inline-grid;min-width:0;padding-right:.4em;color:#a8dbe1;text-align:left}
 .typing-words>span{grid-area:1/1;overflow-wrap:anywhere;text-wrap:wrap}
@@ -52,13 +52,12 @@
 .typing-toggle>span{width:9px;height:11px;border-inline:2px solid currentColor}
 .is-paused .typing-toggle>span{width:0;height:0;border:5px solid transparent;border-right:0;border-left:8px solid currentColor}
 @keyframes typing-cursor{50%{opacity:0}}
-@media(max-width:680px){.typing-line{display:block}.typing-prefix{display:block;margin-bottom:2px}.typing-words{text-align:center}.experience-description.hero-typing{width:100%;gap:0}.typing-toggle{flex-basis:36px;width:36px}}
+@media(max-width:680px){.typing-line{display:block}.typing-prefix{display:block;margin-bottom:2px}.typing-words{text-align:left}.about-typing.hero-typing{width:100%;gap:0}.typing-toggle{flex-basis:36px;width:36px}}
 @media(prefers-reduced-motion:reduce){.is-typing [data-typed-text]:after{animation:none;opacity:0}}
 
-/* A quiet reading area follows both phrases, including wrapped mobile text.
-   Its opaque centre hides the code; soft edges blend into the midnight sky. */
+/* Keep the centered tagline legible over the decorative code. */
 .experience-intro{position:relative;isolation:isolate;width:fit-content;max-width:100%;margin-inline:auto;color:#f2f0e9}
 .hero-typing{position:relative;isolation:isolate}
-.experience-intro:before,.hero-typing:before{content:'';position:absolute;inset:-3px -8px;z-index:-1;pointer-events:none;border-radius:12px;background:#061327;box-shadow:0 0 24px 16px #061327}
+.experience-intro:before{content:'';position:absolute;inset:-3px -8px;z-index:-1;pointer-events:none;border-radius:12px;background:#061327;box-shadow:0 0 24px 16px #061327}
 .hero-typing .typing-prefix{color:#c1d1dc}
 .hero-typing .typing-words{color:#b4e1e6}

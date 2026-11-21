@@ -7,6 +7,7 @@ import {skillsSection} from './skills.mjs';
 
 export function homeContent(lang){
  const c=copy[lang],es=lang==='es';
+ const phrases=es?['software que resuelve problemas.','herramientas con IA local.','sistemas que conectan código y sensores.','motores de ajedrez en C++.']:['software that solves problems.','tools powered by local AI.','systems that connect code and sensors.','chess engines in C++.'];
  return `
  ${experienceHero(lang)}
  ${projectExplorer(lang)}
@@ -15,7 +16,13 @@ export function homeContent(lang){
  <section id="about" class="about-section about-journal" aria-labelledby="about-title"><div class="container">
   <header class="profile-section-heading" data-scroll-reveal><p class="eyebrow">03 / ${es?'PERFIL':'PROFILE'}</p><h2 id="about-title">${es?'Sobre mí':'About me'}</h2></header>
   <div class="about-note">
-   <div class="about-profile"><p class="about-lead" data-scroll-reveal data-reveal-from="left">${c.aboutP1}</p>
+   <div class="about-profile">
+    <div class="about-typing hero-typing" data-hero-typing>
+     <p class="typing-summary">${es?'Construyo software, herramientas con IA local, sistemas con sensores y motores de ajedrez.':'I build software, local AI tools, sensor systems, and chess engines.'}</p>
+     <p class="typing-line" aria-hidden="true"><span class="typing-prefix">${es?'Construyo':'I build'}</span> <span class="typing-words"><span data-typed-text>${phrases[0]}</span>${phrases.map(phrase=>`<span class="typing-measure" data-typing-phrase>${phrase}</span>`).join('')}</span></p>
+     <button class="typing-toggle" type="button" data-typing-toggle data-pause="${es?'Pausar texto':'Pause text'}" data-resume="${es?'Animar texto':'Animate text'}" aria-label="${es?'Pausar texto':'Pause text'}" title="${es?'Pausar texto':'Pause text'}" hidden><span aria-hidden="true"></span></button>
+    </div>
+    <p class="about-lead" data-scroll-reveal data-reveal-from="left">${c.aboutP1}</p>
     <div class="about-personal" data-scroll-reveal data-reveal-from="left" data-reveal-delay="30"><h3>${es?'Fuera del código':'Beyond software'}</h3><p>${es?'Juego, enseño y arbitro ajedrez. También soy secretario del':'I play, teach, and referee chess. I’m also secretary of the'} Club Palentino de Ajedrez.</p></div>
    </div>
    <aside class="about-practical" aria-labelledby="cv-title" data-scroll-reveal data-reveal-from="right" data-reveal-delay="65">
