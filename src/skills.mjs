@@ -59,8 +59,15 @@ export function skillsSection(lang){
   <header class="skills-heading" data-scroll-reveal><p class="skills-kicker">${es?'Competencias técnicas':'Technical skills'}</p><h3 id="toolbox-title">${es?'Del código<br>al <em>mundo real.</em>':'From code<br>to the <em>real world.</em>'}</h3><p>${es?'Software, inteligencia artificial y hardware. Me interesa lo que ocurre cuando los conectas.':'Software, artificial intelligence, and hardware. I’m interested in what happens when you connect them.'}</p></header>
   <div class="skills-workbench">
    <div class="skill-selector" data-skills-ui hidden role="group" aria-label="${es?'Explorar competencias':'Explore skills'}">
-    ${skills.map(skill=>`<button type="button" class="skill-choice" style="--skill-color:${skill.color}" data-skill="${skill.id}" aria-controls="skill-panel-${skill.id}" aria-expanded="false"><span class="skill-choice-icon" aria-hidden="true">${stories[skill.id].symbol}</span><span class="skill-choice-copy"><strong>${skill.name[lang]}</strong><small>${stories[skill.id].caption[lang]}</small></span><span class="skill-choice-mark" aria-hidden="true">+</span></button>`).join('')}
-    <p class="skills-hint">${es?'Explora las conexiones.':'Explore the connections.'}</p>
+    <div class="skill-compass">
+     <div class="skill-compass-rings" aria-hidden="true"></div>
+     ${skills.map((skill,index)=>`<button type="button" class="skill-choice skill-choice-${skill.id}" style="--skill-color:${skill.color}" data-skill="${skill.id}" aria-controls="skill-panel-${skill.id}" aria-expanded="false">
+      <svg class="skill-sector" viewBox="0 0 400 400" aria-hidden="true" focusable="false"><g transform="rotate(${index*90} 200 200)"><path d="M77.3 68.4 A180 180 0 0 1 322.7 68.4 L252.5 143.7 A77 77 0 0 0 147.5 143.7 Z"/><path class="skill-sector-edge" d="M85.4 77.1 A168 168 0 0 1 314.6 77.1"/></g></svg>
+      <span class="skill-label"><span class="skill-choice-icon" aria-hidden="true">${stories[skill.id].symbol}</span><strong>${skill.name[lang]}</strong></span>
+     </button>`).join('')}
+     <div class="skill-core" aria-hidden="true"><span>&lt;/&gt;</span><small>${es?'CONECTA':'CONNECT'}</small></div>
+    </div>
+    <p class="skills-hint">${es?'Cuatro áreas. Un mismo punto de partida.':'Four disciplines. One starting point.'}<span>${es?'Pasa el ratón o toca un sector.':'Hover or tap a sector.'}</span></p>
    </div>
    <div class="skill-insights">
     ${skills.map(skill=>{

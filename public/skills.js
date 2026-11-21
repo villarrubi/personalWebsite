@@ -15,7 +15,7 @@ export function initSkills(root){
   if(entered)return;
   entered=true;
   if(!canMove())return;
-  choices.forEach((choice,index)=>animate(choice,[{opacity:0,transform:'translateY(24px) scale(.94)'},{opacity:1,transform:'none'}],{duration:750,delay:index*90,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'}));
+  animate(selector,[{opacity:0,transform:'translateY(18px) scale(.97)'},{opacity:1,transform:'none'}],{duration:650,easing:'cubic-bezier(.22,1,.36,1)'});
  }
  function select(index,motion=true){
   if(index===active)return;
