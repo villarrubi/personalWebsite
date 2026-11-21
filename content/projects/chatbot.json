@@ -10,6 +10,7 @@
   "tags": [
     "Python",
     "FastAPI",
+    "SQLAlchemy",
     "SQLite"
   ],
   "category": {

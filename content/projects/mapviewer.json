@@ -7,9 +7,10 @@
   "status": "development",
   "visual": "map",
   "tags": [
-    "Cartografía",
-    "APIs",
-    "Desktop"
+    "JavaScript",
+    "Electron",
+    "MapLibre",
+    "APIs"
   ],
   "category": {
     "es": "Visualización / Datos abiertos",

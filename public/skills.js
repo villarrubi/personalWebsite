@@ -2,40 +2,41 @@ export function initSkills(root){
  const choices=[...root.querySelectorAll('[data-skill]')];
  const panels=[...root.querySelectorAll('.skill-insight')];
  const selector=root.querySelector('.skill-selector');
- const sceneButtons=[...root.querySelectorAll('[data-skill-motion]')];
  const preference=matchMedia('(prefers-reduced-motion: reduce)');
  const motionOff=new URLSearchParams(location.search).get('motion')==='off';
- let active=-1,animations=[],entered=false;
- const canMove=()=>!preference.matches&&!motionOff;
+ const page=typeof document==='undefined'?null:document;
+ let active=-1,animations=[],entered=false,inView=typeof IntersectionObserver==='undefined';
+ const canPlay=()=>!motionOff&&inView&&!page?.hidden;
  function cancel(){animations.forEach(animation=>animation.cancel());animations=[];}
  function animate(element,frames,options){
   const animation=element.animate?.(frames,options);
   if(animation){animations.push(animation);animation.onfinish=()=>{animations=animations.filter(item=>item!==animation);};}
  }
- function playScene(index){
-  if(motionOff||index<0)return;
-  const panel=panels[index];
-  panel.querySelectorAll('[data-scene-reveal]').forEach((element,i)=>animate(element,[{opacity:.12,transform:'translateY(5px)'},{opacity:1,transform:'none'}],{duration:650,delay:i*220,easing:'ease-out',fill:'backwards'}));
-  panel.querySelectorAll('[data-scene-trace]').forEach(element=>animate(element,[{strokeDasharray:'1',strokeDashoffset:'1'},{strokeDasharray:'1',strokeDashoffset:'0'}],{duration:2200,easing:'ease-in-out'}));
-  panel.querySelectorAll('[data-scene-cursor]').forEach(element=>animate(element,[{transform:'translate(-45px,12px)'},{transform:'translate(0,0)',offset:.65},{transform:'translate(0,0)'}],{duration:1800,easing:'ease-in-out'}));
+ function playScene(){
+  if(!canPlay()||active<0)return;
+  const panel=panels[active],cycle={duration:4800,iterations:Infinity,easing:'ease-in-out'};
+  panel.querySelectorAll('[data-scene-reveal]').forEach((element,i)=>animate(element,[{opacity:.2},{opacity:1,offset:.2},{opacity:1,offset:.85},{opacity:.2}],{...cycle,delay:i*160}));
+  panel.querySelectorAll('[data-scene-trace]').forEach(element=>animate(element,[{strokeDasharray:'1',strokeDashoffset:'1'},{strokeDasharray:'1',strokeDashoffset:'0',offset:.45},{strokeDasharray:'1',strokeDashoffset:'0',offset:.9},{strokeDasharray:'1',strokeDashoffset:'1'}],cycle));
+  if(!preference.matches)panel.querySelectorAll('[data-scene-cursor]').forEach(element=>animate(element,[{transform:'translate(-40px,12px)'},{transform:'translate(0,0)',offset:.4},{transform:'translate(0,0)',offset:.85},{transform:'translate(-40px,12px)'}],cycle));
  }
- function enter(){
-  if(entered)return;
-  entered=true;
-  if(!canMove())return;
-  animate(selector,[{opacity:0,transform:'translateY(18px) scale(.97)'},{opacity:1,transform:'none'}],{duration:650,easing:'cubic-bezier(.22,1,.36,1)'});
-  playScene(active);
+ function start(){
+  cancel();
+  if(!canPlay())return;
+  if(!entered){
+   entered=true;
+   if(!preference.matches)animate(selector,[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:500,easing:'ease-out'});
+  }
+  playScene();
  }
  function select(index,motion=true){
   if(index===active)return;
-  cancel();if(motion)entered=true;
-  active=index;
+  cancel();active=index;
   root.setAttribute('data-active-skill',String(index));
   choices.forEach((choice,i)=>choice.setAttribute('aria-expanded',String(i===index)));
   panels.forEach((panel,i)=>panel.hidden=i!==index);
-  if(motion&&index>=0&&canMove()){
-   animate(panels[index],[{opacity:.35},{opacity:1}],{duration:320,easing:'ease-out'});
-   playScene(index);
+  if(motion&&canPlay()){
+   if(!preference.matches)animate(panels[index],[{opacity:.35},{opacity:1}],{duration:250,easing:'ease-out'});
+   playScene();
   }
  }
  choices.forEach((choice,index)=>{
@@ -48,19 +49,21 @@ export function initSkills(root){
    if(target!==null){event.preventDefault();choices[target].focus({preventScroll:true});}
   });
  });
- root.addEventListener('keydown',event=>{if(event.key==='Escape'){cancel();select(0);}});
+ root.addEventListener('keydown',event=>{if(event.key==='Escape')select(0);});
  root.classList.add('skills-ready');
- root.classList.toggle('skills-static',!canMove());
+ const updatePreference=()=>{root.classList.toggle('skills-static',preference.matches||motionOff);start();};
+ root.classList.toggle('skills-static',preference.matches||motionOff);
  root.querySelectorAll('[data-skills-ui]').forEach(element=>element.hidden=false);
- sceneButtons.forEach((button,index)=>{
-  button.hidden=motionOff;
-  button.addEventListener('click',()=>{cancel();playScene(index);});
- });
  select(0,false);
- preference.addEventListener('change',()=>{cancel();root.classList.toggle('skills-static',!canMove());});
+ preference.addEventListener('change',updatePreference);
+ page?.addEventListener('visibilitychange',start);
  if(typeof IntersectionObserver!=='undefined'){
-  const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){enter();observer.disconnect();}},{threshold:.25});
-  observer.observe(selector);
- }
+  const observer=new IntersectionObserver(entries=>{
+   const visible=entries.some(entry=>entry.isIntersecting);
+   if(visible===inView)return;
+   inView=visible;start();
+  },{threshold:.1});
+  observer.observe(root.querySelector('.skills-workbench'));
+ }else start();
 }
 if(typeof document!=='undefined')document.querySelectorAll('.skill-explorer').forEach(initSkills);

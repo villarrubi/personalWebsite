@@ -45,30 +45,27 @@ export function createProjectModel(T,id,{mobile=false}={}){
   }
   for(const[x,y]of [[-.4,.48],[.28,.56],[.34,-.57],[-.72,-.2]])sphere(.035,ivory,x,y,.15);
  }
- function temple(){
-  box(1.95,.11,.85,ivory,0,-.76);box(1.78,.12,.72,ivory,0,-.64);
-  for(const x of [-.63,-.21,.21,.63]){add(new T.CylinderGeometry(.105,.13,1.03,segments),ivory,x,-.05);box(.28,.09,.42,gold,x,.48);box(.28,.07,.42,ivory,x,-.54);}
-  box(1.87,.14,.66,ivory,0,.58);
-  const roof=new T.Shape();roof.moveTo(-1,.05);roof.lineTo(0,.58);roof.lineTo(1,.05);roof.closePath();solid(roof,.58,ivory,0,.62,0,root,.025);
-  const inset=new T.Shape();inset.moveTo(-.68,0);inset.lineTo(0,.34);inset.lineTo(.68,0);inset.closePath();solid(inset,.03,gold,0,.73,.32,root,.01);
+ function territoryBoard(){
+  plate(1.8,1.55,.15,.09,ivory);
+  const tiles=[[-.57,.45],[-.03,.45],[.51,.45],[-.57,-.05],[-.03,-.05],[.51,-.05],[-.57,-.55],[-.03,-.55],[.51,-.55]];
+  tiles.forEach(([x,y],i)=>plate(.48,.43,.05,.055,i%3?silver:blue,x,y,.12));
+  for(const [x,y] of [[-.57,.45],[.51,-.55]]){sphere(.12,blue,x,y+.06,.28);plate(.25,.08,.12,.02,dark,x,y-.09,.24);}
  }
- function robot(){
-  plate(1.52,1.2,.49,.22,ivory,0,-.02,0);plate(1.22,.73,.09,.2,dark,0,-.02,.3);
-  const glow=material(theme.accent,{emissive:theme.detail,emissiveIntensity:.35,metalness:0});
-  for(const x of [-.32,.32])plate(.11,.25,.04,.045,glow,x,.03,.37);
-  line([[-.13,-.2,.37],[0,-.26,.37],[.13,-.2,.37]],.023,glow);
-  line([[0,.6,0],[0,.89,0]],.045,silver);sphere(.1,blue,0,.93);
-  for(const x of [-.87,.87])plate(.17,.43,.3,.08,silver,x,-.02);
-  box(.7,.1,.35,silver,0,-.72);
+ function device(){
+  const bezel=add(new T.CylinderGeometry(.65,.65,.23,segments),ivory,-.3,.18);bezel.rotation.x=Math.PI/2;
+  const screen=add(new T.CylinderGeometry(.55,.55,.04,segments),dark,-.3,.18,.15);screen.rotation.x=Math.PI/2;
+  line([[-.73,.18,.2],[-.56,.18,.2],[-.46,.38,.2],[-.3,-.08,.2],[-.14,.33,.2],[-.04,.18,.2],[.12,.18,.2]],.026,blue);
+  line([[-.3,-.47,0],[-.3,-.75,0],[.76,-.75,0],[.76,-.28,0]],.035,silver);
+  plate(.58,.67,.14,.05,ivory,.76,.12);plate(.45,.46,.05,.03,dark,.76,.16,.11);box(.7,.07,.3,silver,.76,-.28,.04);
  }
- function map(){
-  const paper=ivory,crease=blue;
-  for(let i=0;i<3;i++){
-   const panel=new T.Group();panel.position.x=(i-1)*.57;panel.rotation.y=i%2?-.28:.24;root.add(panel);
-   plate(.56,1.48,.07,.025,paper,0,0,0,panel);
-   for(let j=0;j<3;j++)line([[-.24,.36-j*.27,.07],[-.1,.46-j*.27,.07],[.09,.31-j*.27,.07],[.24,.43-j*.27,.07]],.013,crease,panel);
+ function worldEditor(){
+  plate(1.9,1.5,.14,.1,ivory);plate(1.9,.25,.06,.04,dark,0,.63,.12);
+  plate(.27,1.12,.04,.025,silver,-.74,-.08,.12);
+  for(let y=0;y<5;y++)for(let x=0;x<6;x++){
+   const land=(x-2.5)**2+(y-2)**2<5;
+   box(.22,.2,.04,land?blue:silver,-.43+x*.235,.37-y*.225,.14);
   }
-  const pin=new T.Group();pin.position.set(.51,.38,.14);root.add(pin);ring(.13,.036,blue,0,.14,0,pin);line([[0,.02,0],[0,-.2,0]],.027,gold,pin);
+  line([[.24,-.46,.26],[.62,-.05,.26]],.045,dark);sphere(.075,ivory,.19,-.52,.26);
  }
  function shield(){
   plate(1.65,1.15,.12,.07,ivory,0,.04,-.18);
@@ -112,7 +109,7 @@ export function createProjectModel(T,id,{mobile=false}={}){
   [blue,gold,green].forEach((m,i)=>sphere(.04,m,-.7+i*.16,.6,.2));
   line([[-.31,.23,.14],[-.58,-.08,.14],[-.31,-.37,.14]],.045,blue);line([[.31,.23,.14],[.58,-.08,.14],[.31,-.37,.14]],.045,blue);line([[.13,.32,.14],[-.1,-.44,.14]],.036,blue);
  }
- const builders={chessbot:()=>chess(),chessprep:()=>{const board=new T.Group();board.position.set(0,-.36,-.14);board.rotation.x=-.25;root.add(board);plate(1.73,1.65,.1,.035,silver,0,0,0,board);for(let y=0;y<4;y++)for(let x=0;x<4;x++)box(.395,.375,.035,(x+y)%2?blue:ivory,(x-1.5)*.405,(y-1.5)*.385,.08,board);const piece=new T.Group();piece.scale.setScalar(.69);piece.position.set(.12,.25,.25);root.add(piece);chess(true,piece);},'club-palentino':()=>{chess(false);for(const sign of [-1,1]){line([[sign*.4,-.77,0],[sign*.84,-.12,0],[sign*.67,.63,0]],.018,gold);for(let i=0;i<6;i++){const leaf=sphere(.08,green,sign*(.67+Math.sin(i*.5)*.1),-.55+i*.2,.02);leaf.scale.set(.5,1.3,.4);leaf.rotation.z=sign*.6;}}},pipa:robot,mapforge:map,phishing:shield,deriva:plant,aquilae:temple,acuadros:calendar,'atlas-celular':cell,mapviewer:globe,trader:chart,chatbot:bubble,lidar:radar,'practica-web':browser};
+ const builders={chessbot:()=>chess(),chessprep:()=>{const board=new T.Group();board.position.set(0,-.36,-.14);board.rotation.x=-.25;root.add(board);plate(1.73,1.65,.1,.035,silver,0,0,0,board);for(let y=0;y<4;y++)for(let x=0;x<4;x++)box(.395,.375,.035,(x+y)%2?blue:ivory,(x-1.5)*.405,(y-1.5)*.385,.08,board);const piece=new T.Group();piece.scale.setScalar(.69);piece.position.set(.12,.25,.25);root.add(piece);chess(true,piece);},'club-palentino':()=>{chess(false);for(const sign of [-1,1]){line([[sign*.4,-.77,0],[sign*.84,-.12,0],[sign*.67,.63,0]],.018,gold);for(let i=0;i<6;i++){const leaf=sphere(.08,green,sign*(.67+Math.sin(i*.5)*.1),-.55+i*.2,.02);leaf.scale.set(.5,1.3,.4);leaf.rotation.z=sign*.6;}}},pipa:device,mapforge:worldEditor,phishing:shield,deriva:plant,aquilae:territoryBoard,acuadros:calendar,'atlas-celular':cell,mapviewer:globe,trader:chart,chatbot:bubble,lidar:radar,'practica-web':browser};
  (builders[id]||browser)();
  // Centre every glyph in the same optical box and use a shallow, consistent relief.
  const glyph=new T.Group();glyph.add(...root.children.slice());root.add(glyph);

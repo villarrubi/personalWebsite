@@ -8,9 +8,10 @@
   "status": "built",
   "visual": "science",
   "tags": [
+    "React",
     "TypeScript",
-    "WebGL",
-    "3D"
+    "Three.js",
+    "WebGL"
   ],
   "category": {
     "es": "Educación / Visualización",

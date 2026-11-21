@@ -10,8 +10,9 @@
   "repo": "https://github.com/villarrubi/ChessBot",
   "tags": [
     "C++20",
+    "C# / .NET",
     "Python",
-    "C#",
+    "PyTorch",
     "UCI",
     "Ollama"
   ],

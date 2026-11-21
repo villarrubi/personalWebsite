@@ -9,10 +9,11 @@
   "visual": "pipa",
   "repo": "https://github.com/villarrubi/Pipa-Personal-Assistant",
   "tags": [
-    "Python",
+    "Python / FastAPI",
     "ESP32-S3",
-    "C++",
-    "Swift"
+    "C++ / Arduino",
+    "PlatformIO",
+    "Swift / SwiftUI"
   ],
   "category": {
     "es": "Hardware / Asistente local",

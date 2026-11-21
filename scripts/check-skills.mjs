@@ -4,49 +4,54 @@ import {initSkills} from '../public/skills.js';
 
 for(const lang of ['es','en']){
  const html=await readFile(new URL(`../dist/${lang}/index.html`,import.meta.url),'utf8');
+ assert(!html.includes('data-skill-motion'),'Scenes have no playback button');
  assert.equal((html.match(/data-skill="/g)||[]).length,4);
  for(const id of ['software','ai','hardware','interfaces']){
   assert(html.includes(`aria-controls="skill-panel-${id}"`));
   assert(html.includes(`id="skill-panel-${id}" style=`),'All descriptions are available before JS enhancement');
  }
- for(const tag of ['Python','C++','Java','C#','TypeScript','Canvas 2D','Ollama','ESP32-S3','LiDAR'])assert(html.includes(`<li>${tag}</li>`));
+ for(const tag of ['Python','C++','Java / Swing','C# / .NET','Canvas 2D','Ollama','ESP32-S3','PCL / Eigen','React','Godot / GDScript'])assert(html.includes(`<li>${tag}</li>`));
 }
-for(const reduced of [true,false])for(const off of [true,false]){
- let animationCount=0,cancelled=0,observe;
- const media={matches:reduced,addEventListener(_,fn){this.change=fn;}};
+for(const reduced of [true,false])for(const off of [true,false])for(const observerAvailable of [true,false]){
+ const animations=[],media={matches:reduced,addEventListener(_,fn){this.change=fn;}};
+ let observe,focused=-1;
  globalThis.matchMedia=()=>media;globalThis.location={search:off?'?motion=off':''};
- globalThis.IntersectionObserver=class{constructor(fn){observe=fn;}observe(){}disconnect(){}};
- const element=()=>({hidden:false,attrs:{},events:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(k,v){this.events[k]=v;},animate(){animationCount++;return {cancel(){cancelled++;}};}});
- const choices=Array.from({length:4},element),panels=Array.from({length:4},element),selector=element(),sceneButtons=Array.from({length:4},element);
+ globalThis.document={hidden:false,addEventListener(_,fn){this.visibility=fn;}};
+ if(observerAvailable)globalThis.IntersectionObserver=class{constructor(fn){observe=fn;}observe(){}};
+ else delete globalThis.IntersectionObserver;
+ const element=()=>({hidden:false,attrs:{},events:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(k,v){this.events[k]=v;},animate(frames,options){const animation={frames,options,cancelled:false,cancel(){this.cancelled=true;}};animations.push(animation);return animation;}});
+ const choices=Array.from({length:4},element),panels=Array.from({length:4},element),selector=element();
  panels.forEach(panel=>panel.querySelectorAll=()=>[element()]);
- let focused=-1;
- choices.forEach((choice,index)=>choice.focus=options=>{assert.equal(options?.preventScroll,true,'Keyboard selection must not scroll the page');focused=index;choice.events.focus();});
- const root={...element(),classList:{add(){},toggle(){}},querySelector:()=>selector,querySelectorAll:s=>s==='[data-skill]'?choices:s==='.skill-insight'?panels:s==='[data-skill-motion]'?sceneButtons:[selector]};
+ choices.forEach((choice,index)=>choice.focus=options=>{assert.equal(options?.preventScroll,true,'Keyboard selection must not scroll');focused=index;choice.events.focus();});
+ const root={...element(),classList:{add(){},toggle(){}},querySelector:()=>selector,querySelectorAll:s=>s==='[data-skill]'?choices:s==='.skill-insight'?panels:[selector]};
+ const activeAnimations=()=>animations.filter(a=>!a.cancelled);
  initSkills(root);
- assert(!panels[0].hidden);assert.equal(panels.filter(panel=>!panel.hidden).length,1,'A complete first discipline is visible immediately');
- observe([{isIntersecting:true}]);const entered=animationCount;
- observe([{isIntersecting:true}]);assert.equal(animationCount,entered,'The entrance runs once');
- choices[1].events.pointerenter({pointerType:'touch'});assert(!panels[0].hidden,'Touch does not select before tapping');
+ assert.equal(panels.filter(panel=>!panel.hidden).length,1);assert(!panels[0].hidden);
+ if(observe){assert.equal(animations.length,0,'Offscreen scenes wait until visible');observe([{isIntersecting:true}]);}
+ if(off)assert.equal(animations.length,0);
+ else{
+  assert(activeAnimations().some(a=>a.options.iterations===Infinity),'Scenes automatically loop, including reduced motion');
+  assert.equal(animations.some(a=>a.frames.some(f=>f.transform)),!reduced,'Reduced motion removes spatial animation');
+ }
+ const entered=animations.length;
+ observe?.([{isIntersecting:true}]);assert.equal(animations.length,entered,'Repeated intersection does not restart');
+ choices[1].events.pointerenter({pointerType:'touch'});assert(!panels[0].hidden);
  choices[1].events.pointerenter({pointerType:'mouse'});assert(!panels[1].hidden);
- assert.equal(panels.filter(panel=>!panel.hidden).length,1);
- const repeated=animationCount;
- choices[1].events.click();assert.equal(animationCount,repeated,'Hover then click does not restart the information');
+ const repeated=animations.length;choices[1].events.click();assert.equal(animations.length,repeated);
  choices[3].events.click();assert(!panels[3].hidden);
- choices[3].events.keydown({key:'ArrowRight',preventDefault(){}});assert.equal(focused,0);assert(!panels[0].hidden);
+ choices[3].events.keydown({key:'ArrowRight',preventDefault(){}});assert.equal(focused,0);
  choices[0].events.keydown({key:'End',preventDefault(){}});assert.equal(focused,3);
- root.events.keydown({key:'Escape'});assert(!panels[0].hidden);assert.equal(panels.filter(panel=>!panel.hidden).length,1,'A complete first discipline is visible immediately');
+ root.events.keydown({key:'Escape'});assert(!panels[0].hidden);
+ assert.equal(panels.filter(panel=>!panel.hidden).length,1);
  assert.equal(choices[0].attrs['aria-expanded'],'true');assert(choices.slice(1).every(choice=>choice.attrs['aria-expanded']==='false'));
- if(reduced||off)assert.equal(animationCount,0,'Motion opt-outs preserve interaction without animation');
- else assert(animationCount>0&&cancelled>0,'Switching rapidly cancels obsolete animation');
- media.matches=true;media.change();const before=animationCount;
- choices[2].events.click();assert.equal(animationCount,before);assert(!panels[2].hidden);
- assert.equal(root.attrs['data-active-skill'],'2','The shared palette follows the active skill');
- sceneButtons[2].events.click();
- if(off){assert.equal(animationCount,before);assert(sceneButtons.every(button=>button.hidden));}
- else assert(animationCount>before,'Reduced motion permits a scene explicitly requested with its button');
- const playing=cancelled;
- choices[0].events.click();
- if(!off)assert(cancelled>playing,'Changing skill cancels the previous scene, including manually requested motion');
+ if(!off)assert(animations.some(a=>a.cancelled),'Switching cancels old scene loops');
+ document.hidden=true;document.visibility();assert.equal(activeAnimations().length,0,'Hidden tabs stop all animation');
+ choices[2].events.click();assert.equal(activeAnimations().length,0);
+ assert.equal(root.attrs['data-active-skill'],'2');
+ document.hidden=false;document.visibility();assert.equal(activeAnimations().length>0,!off,'Returning resumes the selected scene');
+ if(observe){observe([{isIntersecting:false}]);assert.equal(activeAnimations().length,0);observe([{isIntersecting:true}]);assert.equal(activeAnimations().length>0,!off);}
+ media.matches=true;media.change();assert(activeAnimations().every(a=>a.frames.every(f=>!f.transform)));
+ if(off)assert.equal(animations.length,0);
 }
-delete globalThis.IntersectionObserver;
-console.log('PASS: bilingual skill workbench, static fallback, hover/tap/focus, keyboard wrap, Escape, rapid changes and live reduced-motion preference.');
+delete globalThis.IntersectionObserver;delete globalThis.document;
+console.log('PASS: bilingual skills, automatic scene loops, offscreen/tab suspension, reduced motion, explicit motion opt-out and stable keyboard navigation.');

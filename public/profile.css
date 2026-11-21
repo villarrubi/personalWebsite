@@ -93,6 +93,7 @@
 .skill-label{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:34%;min-height:60px;transform:translate(-50%,-50%);pointer-events:auto;color:#a2b8c8;text-align:center;transition:color .3s}
 .skill-label strong{max-width:12ch;font-size:clamp(12px,1.15vw,17px);font-weight:500;line-height:1.25;letter-spacing:-.02em}
 .skill-choice-icon{font:400 clamp(20px,2.1vw,30px)/1 var(--serif);color:var(--skill-color)}
+.skill-choice-icon svg{display:block;width:1em;height:1em}
 .skill-choice-software .skill-label{left:50%;top:18%}
 .skill-choice-ai .skill-label{left:82%;top:50%;width:28%}
 .skill-choice-hardware .skill-label{left:50%;top:82%}
@@ -119,10 +120,7 @@
 .skill-art{position:relative;padding:26px 32px 18px;overflow:hidden;background:none;border-bottom:0}
 .skill-art:before{content:'';position:absolute;inset:8% 4%;background:radial-gradient(ellipse,color-mix(in srgb,var(--skill-color) 20%,transparent),transparent 68%);pointer-events:none}
 .skill-art-label,.skill-art-caption{position:relative;display:block;font:11px/1.4 var(--sans);text-transform:uppercase;letter-spacing:.13em;color:var(--skill-color)}
-.skill-art-label{padding-right:150px;min-height:24px}
-.skill-motion{position:absolute;right:24px;top:14px;z-index:1;display:flex;align-items:center;gap:7px;min-height:32px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--skill-color) 30%,transparent);border-radius:20px;background:#0c172180;color:var(--skill-color);font:12px var(--sans)}
-.skill-motion:hover{background:color-mix(in srgb,var(--skill-color) 14%,#0c1721)}
-.skill-motion:focus-visible{outline:2px solid var(--skill-color);outline-offset:3px}
+.skill-art-label{min-height:16px}
 .skill-art-caption{text-align:center;font-size:10px;opacity:.7}
 .skill-art svg{position:relative;display:block;width:100%;max-height:280px;overflow:visible;margin:8px auto}
 .skill-product{filter:drop-shadow(0 10px 15px #02091250)}
@@ -183,7 +181,7 @@
  .skill-core>span{font-size:28px}.skill-core small{font-size:8px}
  .skills-hint{margin-top:22px;font-size:13px}.skills-hint span{font-size:11px}
  .skills-ready .skill-insights{border-left:0;border-top:1px solid #8bc9cf25}
- .skill-art{padding:20px 22px 14px}.skill-art svg{max-height:250px}.skill-art-label{font-size:10px;padding-right:120px;min-height:32px}.skill-motion{right:18px;top:14px;font-size:11px;padding-inline:8px}.skill-art-caption{font-size:9px}
+ .skill-art{padding:20px 22px 14px}.skill-art svg{max-height:250px}.skill-art-label{font-size:10px;min-height:14px}.skill-art-caption{font-size:9px}
  .skill-story{padding:24px 24px 0}.skill-story h4{font-size:34px}.skill-story>p{font-size:15px}.skill-project{gap:8px 12px}.skill-project-action{font-size:12px}
 }
 @media(max-width:380px){.skill-selector{padding:24px 12px}.skill-label{gap:4px;min-height:48px}.skill-label strong{font-size:11px}.skill-core{gap:7px}.skill-core>span{font-size:24px}.skill-core small{font-size:7px}.skill-story{padding-inline:20px}.skill-story h4{font-size:30px}.skill-project-action{margin-left:0}}
@@ -224,14 +222,14 @@
  .skill-core>span{font-size:28px}
  .skills-hint{margin-top:16px;font-size:13px}
  .skills-hint span{margin-top:2px;font-size:11px}
- .skill-art{padding:12px 24px 10px}.skill-art-label{min-height:24px}.skill-motion{top:6px}
+ .skill-art{padding:12px 24px 10px}.skill-art-label{min-height:16px}
  .skill-art svg{height:clamp(110px,calc(100svh - 610px),210px);margin:4px auto}
  .skill-art-caption{font-size:9px}
  .skill-story{padding:16px 26px 0}
  .skill-story h4{font-size:clamp(28px,3.8svh,34px);line-height:1.08;max-width:28ch;margin-bottom:10px}
  .skill-story>p{font-size:16px;line-height:1.5;max-width:60ch}
  .skill-story .skill-tags{margin-top:12px}
- .skill-story .skill-tags li{padding:5px 9px}
+ .skill-story .skill-tags li{font-size:11.5px;padding:4px 8px}
  .skill-project{min-height:44px;padding-block:12px;margin-top:14px;gap:8px 12px}
  /* Put the project description beside the orbit to retain the objects' scale. */
  .orbit-carousel{grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr);grid-template-rows:auto auto auto;column-gap:4%;row-gap:12px;padding-block:20px 16px}
