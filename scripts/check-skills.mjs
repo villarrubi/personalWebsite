@@ -55,3 +55,24 @@ for(const reduced of [true,false])for(const off of [true,false])for(const observ
 }
 delete globalThis.IntersectionObserver;delete globalThis.document;
 console.log('PASS: bilingual skills, automatic scene loops, offscreen/tab suspension, reduced motion, explicit motion opt-out and stable keyboard navigation.');
+
+// Check the real mesh geometry and motion bounds independently of a GPU.
+const {createSkillModel}=await import('../public/skill-studio.js');
+const T=await import('../public/assets/vendor/three.module.js');
+for(const kind of ['software','ai','hardware','interfaces']){
+ const model=createSkillModel(kind);
+ const meshes=[];model.root.traverse(o=>{if(o.isMesh)meshes.push(o);});
+ assert(meshes.length>20,`${kind}: detailed model`);
+ for(const mesh of meshes)assert([...mesh.geometry.attributes.position.array].every(Number.isFinite));
+ const bounds=new T.Box3();
+ for(const reduced of [false,true])for(const time of [0,3,10,120]){
+  model.update(time,reduced);bounds.setFromObject(model.root);
+  assert(bounds.min.y>-.05&&bounds.max.y<3,'Models stay above the ground and inside the camera framing');
+  assert(bounds.max.x-bounds.min.x<4&&bounds.max.z-bounds.min.z<4);
+ }
+ model.update(2,true);model.root.updateMatrixWorld(true);const structural=meshes.filter(o=>!o.material.emissive?.getHex());const reducedPose=structural.map(o=>o.matrixWorld.elements.slice());
+ model.update(9,true);model.root.updateMatrixWorld(true);
+ assert.deepEqual(structural.map(o=>o.matrixWorld.elements.slice()),reducedPose,'Reduced motion preserves the object pose');
+ const geometry=new Set(meshes.map(m=>m.geometry)),materials=new Set(meshes.map(m=>m.material));geometry.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());
+}
+console.log('PASS: four physical skill models, finite geometry, bounded motion and reduced-motion poses.');

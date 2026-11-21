@@ -93,7 +93,7 @@ export function skillsSection(lang){
     ${skills.map(skill=>{
      const story=stories[skill.id];
      return `<article class="skill-insight" id="skill-panel-${skill.id}" style="--skill-color:${skill.color}" aria-labelledby="skill-title-${skill.id}">
-      <div class="skill-art skill-art-${skill.id}"><span class="skill-art-label" aria-hidden="true">${skill.name[lang]}</span>${artwork(skill.id)}<span class="skill-art-caption" aria-hidden="true">${story.caption[lang]}</span></div>
+      <div class="skill-art skill-art-${skill.id}"><span class="skill-art-label" aria-hidden="true">${skill.name[lang]}</span><div class="skill-object-stage" data-skill-stage="${skill.id}">${artwork(skill.id)}</div><span class="skill-art-caption" aria-hidden="true">${story.caption[lang]}</span></div>
       <div class="skill-story"><h4 id="skill-title-${skill.id}">${story.title[lang]}</h4><p>${skill.text[lang]}</p><ul class="skill-tags" aria-label="${es?'Tecnologías':'Technologies'}">${skill.tags.map(tag=>`<li>${tag}</li>`).join('')}</ul>
       </div>
      </article>`;

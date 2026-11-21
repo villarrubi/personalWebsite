@@ -207,3 +207,11 @@
  .skill-story .skill-tags li{font-size:11.5px;padding:4px 8px}
  .skill-project{min-height:44px;padding-block:12px;margin-top:14px;gap:8px 12px}
 }
+
+/* One shared 3D canvas; the vector object remains available without WebGL. */
+.skill-object-stage{position:relative;width:100%;height:260px;margin:8px auto;isolation:isolate}
+.skill-art .skill-object-stage svg{height:100%;max-height:none;margin:0}
+.skill-object-stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+.skill-object-stage.is-rendered>svg{visibility:hidden}
+@media(min-width:901px){.skill-object-stage{height:clamp(150px,calc(100svh - 560px),260px);margin:4px auto}}
+@media(max-width:760px){.skill-object-stage{height:220px}}
