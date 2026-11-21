@@ -7,7 +7,7 @@ import {skillsSection} from './skills.mjs';
 
 export function homeContent(lang){
  const c=copy[lang],es=lang==='es';
- const phrases=es?['software que resuelve problemas.','herramientas con IA local.','sistemas que conectan código y sensores.','motores de ajedrez en C++.']:['software that solves problems.','tools powered by local AI.','systems that connect code and sensors.','chess engines in C++.'];
+ const phrases=es?['entender el porqué de las cosas.','aprender algo nuevo cada día.','cuidar los pequeños detalles.','compartir lo que voy aprendiendo.']:['understanding why things are the way they are.','learning something new every day.','paying attention to the little details.','sharing what I learn along the way.'];
  return `
  ${experienceHero(lang)}
  ${projectExplorer(lang)}
@@ -18,8 +18,8 @@ export function homeContent(lang){
   <div class="about-note">
    <div class="about-profile">
     <div class="about-typing hero-typing" data-hero-typing>
-     <p class="typing-summary">${es?'Construyo software, herramientas con IA local, sistemas con sensores y motores de ajedrez.':'I build software, local AI tools, sensor systems, and chess engines.'}</p>
-     <p class="typing-line" aria-hidden="true"><span class="typing-prefix">${es?'Construyo':'I build'}</span> <span class="typing-words"><span data-typed-text>${phrases[0]}</span>${phrases.map(phrase=>`<span class="typing-measure" data-typing-phrase>${phrase}</span>`).join('')}</span></p>
+     <p class="typing-summary">${es?'Me gusta entender el porqué de las cosas, aprender algo nuevo cada día, cuidar los pequeños detalles y compartir lo que voy aprendiendo.':'I enjoy understanding why things are the way they are, learning something new every day, paying attention to the little details, and sharing what I learn along the way.'}</p>
+     <p class="typing-line" aria-hidden="true"><span class="typing-prefix">${es?'Me gusta':'I enjoy'}</span> <span class="typing-words"><span data-typed-text>${phrases[0]}</span>${phrases.map(phrase=>`<span class="typing-measure" data-typing-phrase>${phrase}</span>`).join('')}</span></p>
      <button class="typing-toggle" type="button" data-typing-toggle data-pause="${es?'Pausar texto':'Pause text'}" data-resume="${es?'Animar texto':'Animate text'}" aria-label="${es?'Pausar texto':'Pause text'}" title="${es?'Pausar texto':'Pause text'}" hidden><span aria-hidden="true"></span></button>
     </div>
     <p class="about-lead" data-scroll-reveal data-reveal-from="left">${c.aboutP1}</p>
